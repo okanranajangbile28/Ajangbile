@@ -117,9 +117,9 @@ app.get('/', (req, res) => {
 
 // ==================== ROUTES ====================
 
-app.use('/api/product', productRouter);
+app.use('/api/products', productRouter);
 app.use('/api/user', userRouter);
-app.use('/api/blog', blogRouter);
+app.use('/api/blogs', blogRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/ogboni', ogboniRouter); // <-- ADD THIS
 
