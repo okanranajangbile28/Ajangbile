@@ -1,104 +1,113 @@
-import styled from 'styled-components';
-import { getUniqueValues } from '../../../utils/helpers';
-import { priceFormat } from '../../../utils/constants';
-import { updateFilters, clearFilters } from '../filterSlice';
-import { useAppDispatch, useAppSelector } from '../../../App/hooks';
-import { ChangeEvent } from 'react';
+import styled from "styled-components";
+import { getUniqueValues } from "../../../utils/helpers";
+import { priceFormat } from "../../../utils/constants";
+import { updateFilters, clearFilters } from "../filterSlice";
+import { useAppDispatch, useAppSelector } from "../../../App/hooks";
+import { ChangeEvent } from "react";
 
 const Filters = () => {
   const dispatch = useAppDispatch();
+
   const {
     filters: { text, category, min_price, max_price, price, shipping },
     all_products,
   } = useAppSelector((state) => state.filter);
 
-  const categories = getUniqueValues(all_products, 'category');
+  // ✅ FIX: force string type
+  const categories: string[] = getUniqueValues(
+    all_products,
+    "category",
+  ) as string[];
 
   const handleFilter = (
-    e: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>
+    e: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>,
   ) => {
-    if (
-      e.target instanceof HTMLInputElement ||
-      e.target instanceof HTMLSelectElement
-    ) {
-      const name = e.target.name;
-      let value;
-      value = e.target.value as string;
+    const name = e.target.name;
 
-      if (name === 'color') {
-        value = e.target.dataset.color as string;
-      }
-      if (name === 'shipping' && e.target instanceof HTMLInputElement) {
-        value = e.target.checked as boolean;
-      }
-      dispatch(updateFilters({ name, value }));
+    let value: string | boolean = e.target.value;
+
+    if (name === "color") {
+      value = (e.target as HTMLInputElement).dataset.color || "";
     }
+
+    if (name === "shipping") {
+      value = (e.target as HTMLInputElement).checked;
+    }
+
+    dispatch(updateFilters({ name, value }));
   };
 
   return (
-    <Wrapper className='w-full'>
-      <div className='bg-baz-white'>
+    <Wrapper className="w-full">
+      <div className="bg-baz-white">
         <form onSubmit={(e) => e.preventDefault()}>
-          <div className='form-control'>
+          <div className="form-control">
             <input
-              type='text'
-              name='text'
-              className='search-input bg-white'
+              type="text"
+              name="text"
+              className="search-input bg-white"
               value={text}
               onChange={handleFilter}
-              placeholder='search'
+              placeholder="search"
             />
           </div>
-          <div className='form-control sub-control'>
-            <span className='label'>Category:</span>
+
+          <div className="form-control sub-control">
+            <span className="label">Category:</span>
             <select
-              name='category'
+              name="category"
               onChange={handleFilter}
-              className='bg-white p-2 outline-none cursor-pointer'>
-              <option value={'all'}>all</option>
-              {categories.map((c, index) => (
+              className="bg-white p-2 outline-none cursor-pointer"
+            >
+              <option value="all">all</option>
+
+              {/* ✅ FIXED TYPES HERE */}
+              {categories.map((c: string, index: number) => (
                 <option
                   key={index}
                   value={c}
-                  className={`${
-                    category.toLowerCase() === c.toLowerCase() ? 'active' : null
-                  }`}>
+                  className={category === c ? "active" : ""}
+                >
                   {c}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className='form-control sub-control'>
-            <div className='label'>Price:</div>
-            <div className='price'>{priceFormat(min_price ? price : 0)}</div>
+          <div className="form-control sub-control">
+            <div className="label">Price:</div>
+            <div className="price">{priceFormat(min_price ? price : 0)}</div>
+
             <input
-              type='range'
-              name='price'
-              className='cursor-pointer '
+              type="range"
+              name="price"
+              className="cursor-pointer"
               onChange={handleFilter}
               min={min_price ? min_price : 0}
-              max={min_price ? max_price : 100}
+              max={max_price ? max_price : 100}
               value={min_price ? price : 0}
             />
           </div>
-          <div className='form-control shipping hidden'>
-            <label htmlFor='shipping' className='label'>
+
+          <div className="form-control shipping hidden">
+            <label htmlFor="shipping" className="label">
               free shipping
             </label>
             <input
-              type='checkbox'
-              name='shipping'
-              id='shipping'
-              className='cursor-pointer'
+              type="checkbox"
+              name="shipping"
+              id="shipping"
+              className="cursor-pointer"
               onChange={handleFilter}
               checked={shipping}
             />
           </div>
+
           <button
-            type='button'
-            className='clear-btn'
-            onClick={() => dispatch(clearFilters())}>
+            type="button"
+            className="clear-btn"
+            onClick={() => dispatch(clearFilters())}
+          >
             clearFilters
           </button>
         </form>
@@ -121,23 +130,15 @@ const Wrapper = styled.section`
   form {
     display: flex;
     justify-content: center;
-
     align-items: center;
     flex-wrap: wrap;
     gap: 1.5em;
-
-    // @media (max-width: 900px) {
-    //   display: flex;
-    //   flex-direction: column;
-    //   align-items: flex-start;
-    //   width: 100%;
-    //   gap: 1em;
-    // }
   }
 
   input {
     margin-block: 0;
   }
+
   .search-input {
     padding: 0.5rem;
     background: var(--clr-grey-10);
@@ -146,6 +147,7 @@ const Wrapper = styled.section`
     letter-spacing: 0.1em;
     font-family: poppins;
   }
+
   .search-input::placeholder {
     text-transform: capitalize;
   }
@@ -162,27 +164,9 @@ const Wrapper = styled.section`
     color: var(--clr-grey-5);
     cursor: pointer;
   }
+
   .active {
     border-color: var(--clr-grey-5);
-  }
-  .company {
-    background: var(--clr-grey-10);
-    border-radius: var(--radius);
-    border-color: transparent;
-    padding: 0.25rem;
-  }
-  .all-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
-    opacity: 0.5;
-  }
-  .active {
-    opacity: 1;
-  }
-  .all-btn .active {
-    text-decoration: underline;
   }
 
   .shipping {
@@ -193,25 +177,22 @@ const Wrapper = styled.section`
     column-gap: 0.5rem;
     font-size: 1rem;
   }
+
   .clear-btn {
     background: var(--clr-red-dark);
     color: var(--clr-white);
     padding: 0.25rem 0.5rem;
     border-radius: var(--radius);
   }
+
   .sub-control {
     display: flex;
     gap: 0.5em;
     align-items: center;
   }
+
   .label {
     font-family: poppins;
-  }
-  @media (min-width: 768px) {
-    .content {
-      position: sticky;
-      top: 1rem;
-    }
   }
 `;
 
