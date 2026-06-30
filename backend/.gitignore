@@ -1,0 +1,8 @@
+node_modules
+dist
+dist/*
+*.env
+dev-data/
+public/
+newrelic.js
+newrelic_agent.log

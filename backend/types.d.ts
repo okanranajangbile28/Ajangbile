@@ -1,0 +1,195 @@
+import { Request } from 'express';
+import { IUser } from './models/userModel';
+import mongoose, {
+  // Date,
+  Document,
+  Model,
+  ObjectId,
+  Query,
+  Types,
+} from 'mongoose';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUser;
+      requestTime?: string;
+    }
+  }
+}
+
+export interface PopOptions {
+  path: string;
+  select?: string;
+  // Add other properties as needed based on your usage of populate
+}
+
+export interface NewField {
+  field: string;
+  acc: string | number;
+}
+
+export type Period = Record<
+  'daily' | 'weekly' | 'monthly' | 'yearly',
+  'day' | 'week' | 'month' | 'year'
+>;
+
+export type PeriodKey = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+
+export type PaypalCartType = {
+  name: string;
+  unit_amount: { currency_code: string; value: string };
+  description: string;
+  quantity: string;
+  category: 'PHYSICAL_GOODS';
+};
+
+export type IBaseObject = {
+  productID: string;
+  productName: string;
+  price: number;
+  image: string;
+  totalQuantity: number;
+  sizes: IOrderItemSize[];
+};
+
+export interface IShippingInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  postCode?: number;
+  country: string;
+  countryCode: string;
+  shippingFee: number;
+  shippingMethod?: string;
+  additionalInfo?: string;
+}
+
+export interface IOrderItemSize {
+  size: string;
+  quantity: number;
+}
+
+export interface IOrderItem {
+  productName: string;
+  price: number;
+  image: string;
+  sizes: IOrderItemSize[];
+  productID: string;
+}
+
+export interface CartItem {
+  productName: string;
+  amount: number;
+  size: string;
+  image: string;
+  price: number;
+  max: number;
+  productID: string;
+}
+
+interface IPaymentInfo {
+  reference: string;
+  gateway: string;
+  channel?: string;
+  status?: string;
+}
+
+interface IOrder extends Document {
+  shippingInfo: IShippingInfo;
+  additionalInfo?: string;
+  orderItems: IOrderItem[];
+  paymentInfo: IPaymentInfo;
+  createdAt?: Date;
+  paidAt?: Date;
+  taxPrice: number;
+  total_items: number;
+  subtotal: number;
+  total_amount: number;
+  orderStatus: 'pending' | 'shipped' | 'completed' | 'failed';
+  deliveredAt?: Date;
+}
+
+//product
+
+export interface ISize {
+  size: string;
+  quantity: number;
+  custom: boolean;
+}
+
+export interface IProduct extends Document {
+  productName: string;
+  description: string;
+  price: number;
+  priceID: string;
+  featured: boolean;
+  discount: number;
+  totalQuantity: number;
+  category: string;
+  images: string[];
+  unit: string;
+  active: boolean;
+}
+
+//review
+
+export interface IReviewModel extends Model<IReview>, IReviewStatics {}
+
+export interface IReview extends Document {
+  review: string;
+  rating: number;
+  createdAt: Date;
+  product: Types.ObjectId;
+  user: Types.ObjectId;
+}
+
+export interface IReviewQuery extends Query<any, IReview> {
+  r?: IReview | null;
+}
+export interface IReviewStatics {
+  calcAverageRatings: (productId: Types.ObjectId) => void;
+}
+
+//user
+export interface IUser extends Document {
+  username: string;
+  email: string;
+  role: 'admin';
+  password: string;
+  passwordConfirm: string | undefined;
+  passwordChangedAt?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: number;
+  active: boolean;
+}
+
+interface IUserMethods {
+  createPasswordResetToken(): string;
+  changedPasswordAfter(JWTTimestamp: number): boolean;
+  correctPassword(
+    candidatePassword: string,
+    userPassword: string,
+  ): Promise<boolean>;
+}
+
+interface ITestimonial extends Document {
+  fullName: string;
+  quote: string;
+  authorImage: string;
+}
+
+interface IBlog extends Document {
+  title: string;
+  author: string;
+  summary: string;
+  thumbnail: string;
+  content: string;
+  active: Boolean;
+  featured: Boolean;
+  keywords: string;
+}

@@ -1,0 +1,11 @@
+#root {
+	margin: 0 auto;
+	text-align: center;
+}
+
+ol,
+ul {
+	list-style-type: decimal;
+	margin-left: 1em;
+	padding-left: 20px;
+}
