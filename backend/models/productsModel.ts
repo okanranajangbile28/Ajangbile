@@ -3,19 +3,63 @@ import { IProduct } from '../types';
 
 const productSchema = new Schema<IProduct>(
   {
-    productName: { type: String, required: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true },
-    priceID: { type: String, required: true },
-    totalQuantity: { type: Number, required: true },
-    unit: { type: String },
-    discount: { type: Number, default: 0, min: 0, max: 100 },
+    productName: {
+      type: String,
+      required: [true, 'Product name is required'],
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      required: [true, 'Product description is required'],
+      trim: true,
+    },
+
+    price: {
+      type: Number,
+      required: [true, 'Price is required'],
+    },
+
+    priceID: {
+      type: String,
+      required: [true, 'Price ID is required'],
+      unique: true,
+    },
+
+    totalQuantity: {
+      type: Number,
+      required: [true, 'Total quantity is required'],
+      default: 0,
+    },
+
+    unit: {
+      type: String,
+      default: 'piece',
+    },
+
+    discount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+
     category: {
       type: String,
-      required: true,
+      required: [true, 'Category is required'],
+      trim: true,
     },
-    images: [{ type: String, required: true }],
-    featured: { type: Boolean, default: false },
+
+    images: {
+      type: [String],
+      required: [true, 'At least one image is required'],
+    },
+
+    featured: {
+      type: Boolean,
+      default: false,
+    },
+
     active: {
       type: Boolean,
       default: true,
@@ -29,14 +73,11 @@ const productSchema = new Schema<IProduct>(
   },
 );
 
+// Hide inactive products
 productSchema.pre<Query<any, IProduct>>(/^find/, function (next) {
   this.find({ active: { $ne: false } });
   next();
 });
-
-// productSchema.virtual('totalQuantity').get(function () {
-//   return [...this.sizes].reduce((total, size) => total + size.quantity, 0);
-// });
 
 const Product: Model<IProduct> =
   models.Product || model<IProduct>('Product', productSchema);

@@ -32,7 +32,7 @@ const app = express();
 // Implement CORS
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://okanran-ajangbile.vercel.app'],
+    origin: ['https://ajangbile-frontend.onrender.com'],
     methods: 'GET,POST,PATCH,DELETE,PUT',
     credentials: true,
   }),
