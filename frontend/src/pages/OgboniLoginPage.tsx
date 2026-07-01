@@ -10,38 +10,41 @@ const OgboniLoginPage = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/api/ogboni/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/api/ogboni/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         alert("Login successful");
 
-        // Save user details locally
+        // Save member information
         localStorage.setItem("ogboniMember", JSON.stringify(data.user));
 
         navigate("/ogboni-dashboard");
       } else {
-        alert(data.message);
+        alert(data.message || "Login failed");
       }
     } catch (error) {
-      console.log(error);
+      console.error("LOGIN ERROR:", error);
       alert("Server error");
     }
   };
@@ -64,6 +67,7 @@ const OgboniLoginPage = () => {
             type="email"
             name="email"
             placeholder="Email Address"
+            value={formData.email}
             onChange={handleChange}
             className="w-full border rounded-xl p-4"
             required
@@ -73,6 +77,7 @@ const OgboniLoginPage = () => {
             type="password"
             name="password"
             placeholder="Password"
+            value={formData.password}
             onChange={handleChange}
             className="w-full border rounded-xl p-4"
             required
@@ -80,7 +85,7 @@ const OgboniLoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-purple-900 text-white py-4 rounded-xl font-bold"
+            className="w-full bg-purple-900 text-white py-4 rounded-xl font-bold hover:bg-purple-800 transition"
           >
             Login
           </button>
