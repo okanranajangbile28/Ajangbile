@@ -41,7 +41,7 @@ const Navbar = () => {
         {!isAdmin && (
           <>
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center ml-8 xl:ml-12 gap-8 lg:gap-10 xl:gap-12">
+            <nav className="hidden md:flex items-center ml-6 xl:ml-10 gap-8 lg:gap-10 xl:gap-12">
               {navlinks}
 
               <Link
