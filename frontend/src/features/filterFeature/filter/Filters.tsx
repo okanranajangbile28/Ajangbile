@@ -10,14 +10,13 @@ const Filters = () => {
 
   const {
     filters: { text, category, min_price, max_price, price, shipping },
-    all_products,
+    all_products = [],
   } = useAppSelector((state) => state.filter);
 
-  // ✅ FIX: force string type
-  const categories: string[] = getUniqueValues(
-    all_products,
-    "category",
-  ) as string[];
+  // ✅ SAFE: prevent crash when data is empty
+  const categories: string[] = Array.isArray(all_products)
+    ? (getUniqueValues(all_products, "category") as string[])
+    : [];
 
   const handleFilter = (
     e: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>,
@@ -61,8 +60,7 @@ const Filters = () => {
             >
               <option value="all">all</option>
 
-              {/* ✅ FIXED TYPES HERE */}
-              {categories.map((c: string, index: number) => (
+              {categories.map((c, index) => (
                 <option
                   key={index}
                   value={c}
@@ -83,9 +81,9 @@ const Filters = () => {
               name="price"
               className="cursor-pointer"
               onChange={handleFilter}
-              min={min_price ? min_price : 0}
-              max={max_price ? max_price : 100}
-              value={min_price ? price : 0}
+              min={min_price || 0}
+              max={max_price || 100}
+              value={price || 0}
             />
           </div>
 
@@ -120,23 +118,12 @@ const Wrapper = styled.section`
   display: flex;
   width: 100%;
 
-  .content {
-    width: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-around;
-  }
-
   form {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     gap: 1.5em;
-  }
-
-  input {
-    margin-block: 0;
   }
 
   .search-input {
@@ -148,34 +135,8 @@ const Wrapper = styled.section`
     font-family: poppins;
   }
 
-  .search-input::placeholder {
-    text-transform: capitalize;
-  }
-
-  button {
-    display: block;
-    margin: 0.25em 0;
-    padding: 0.25rem 0;
-    text-transform: capitalize;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid transparent;
-    letter-spacing: var(--spacing);
-    color: var(--clr-grey-5);
-    cursor: pointer;
-  }
-
   .active {
     border-color: var(--clr-grey-5);
-  }
-
-  .shipping {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    text-transform: capitalize;
-    column-gap: 0.5rem;
-    font-size: 1rem;
   }
 
   .clear-btn {
@@ -183,16 +144,6 @@ const Wrapper = styled.section`
     color: var(--clr-white);
     padding: 0.25rem 0.5rem;
     border-radius: var(--radius);
-  }
-
-  .sub-control {
-    display: flex;
-    gap: 0.5em;
-    align-items: center;
-  }
-
-  .label {
-    font-family: poppins;
   }
 `;
 

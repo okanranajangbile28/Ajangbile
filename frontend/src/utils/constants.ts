@@ -12,7 +12,6 @@ export const initialSingleProduct = {
   category: "all",
   images: [],
   totalQuantity: 0,
-
   unit: "",
 } as SingleProductType;
 
@@ -109,10 +108,15 @@ export const priceFormat = (price: number) =>
     style: "currency",
     currency: "EUR",
   }).format(price);
-export const products_url = `${import.meta.env.VITE_SERVER_URL}/product`;
 
-export const single_product_url = `${import.meta.env.VITE_SERVER_URL}/product`;
+/* ===========================
+   API ENDPOINTS
+   =========================== */
 
-export const auth_url = `${import.meta.env.VITE_SERVER_URL}/auth/google`;
+export const products_url = `${import.meta.env.VITE_SERVER_URL}/api/products`;
 
-export const blog_url = `${import.meta.env.VITE_SERVER_URL}/blog`;
+export const single_product_url = `${import.meta.env.VITE_SERVER_URL}/api/products`;
+
+export const blog_url = `${import.meta.env.VITE_SERVER_URL}/api/blogs`;
+
+export const auth_url = `${import.meta.env.VITE_SERVER_URL}/api/user/login`;
