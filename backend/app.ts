@@ -18,8 +18,10 @@ import productRouter from './routes/productRoutes';
 import userRouter from './routes/userRoutes';
 import blogRouter from './routes/blogRoute';
 import orderRouter from './routes/orderRoute';
-import ogboniRouter from './routes/ogboniRoutes'; // <-- ADD THIS
+import ogboniRouter from './routes/ogboniRoutes';
+
 console.log('Ogboni router imported');
+
 // Create a DOMPurify instance
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
@@ -27,13 +29,20 @@ const DOMPurify = createDOMPurify(window);
 // Start express app
 const app = express();
 
-// ==================== GLOBAL MIDDLEWARES ====================
+// ======================================================
+// GLOBAL MIDDLEWARES
+// ======================================================
 
-// Implement CORS
+// CORS
 app.use(
   cors({
-    origin: ['https://ajangbile-frontend.onrender.com'],
-    methods: 'GET,POST,PATCH,DELETE,PUT',
+    origin: [
+      'https://ajangbileheritage.com',
+      'https://www.ajangbileheritage.com',
+      'https://ajangbile-frontend.onrender.com',
+      'http://localhost:5173',
+    ],
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     credentials: true,
   }),
 );
@@ -55,17 +64,17 @@ app.use(
   }),
 );
 
-// Serving static files
+// Serve static files
 app.use(
   express.static(path.join(__dirname, 'public'), {
     maxAge: 31557600000,
   }),
 );
 
-// Set security HTTP headers
+// Security headers
 app.use(helmet());
 
-// Development logging
+// Development logger
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -77,10 +86,10 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 // Cookie parser
 app.use(cookieParser());
 
-// Data sanitization against NoSQL query injection
+// Prevent Mongo injection
 app.use(mongoSanitize());
 
-// Prevent parameter pollution
+// Prevent HTTP Parameter Pollution
 app.use(
   hpp({
     whitelist: [],
@@ -90,7 +99,7 @@ app.use(
 // Compression
 app.use(compression());
 
-// Global DOMPurify Middleware
+// Sanitize HTML input
 app.use((req, res, next) => {
   if (req.body) {
     Object.keys(req.body).forEach((key) => {
@@ -103,27 +112,32 @@ app.use((req, res, next) => {
   next();
 });
 
-// Test middleware
+// Request timestamp
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
 
-// Test route
+// Root test route
 app.get('/', (req, res) => {
   console.log('Root route hit');
   res.status(200).send('Backend server is running successfully!');
 });
 
-// ==================== ROUTES ====================
+// ======================================================
+// ROUTES
+// ======================================================
 
 app.use('/api/products', productRouter);
 app.use('/api/user', userRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/order', orderRouter);
-app.use('/api/ogboni', ogboniRouter); // <-- ADD THIS
+app.use('/api/ogboni', ogboniRouter);
 
-// Handle undefined routes
+// ======================================================
+// UNKNOWN ROUTES
+// ======================================================
+
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });

@@ -9,7 +9,8 @@ export const registerMember = async (
   res: Response,
 ): Promise<void> => {
   try {
-    console.log('REGISTER BODY:', req.body);
+    console.log('================ REGISTER REQUEST ================');
+    console.log(req.body);
 
     const {
       username,
@@ -28,7 +29,7 @@ export const registerMember = async (
       reason,
     } = req.body;
 
-    // validate required fields
+    // Required fields
     if (!username || !email || !password) {
       res.status(400).json({
         success: false,
@@ -39,7 +40,7 @@ export const registerMember = async (
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // check existing user
+    // Existing user
     const existingUser = await OgboniMember.findOne({
       email: cleanEmail,
     });
@@ -52,10 +53,10 @@ export const registerMember = async (
       return;
     }
 
-    // hash password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
-    // create user
+    // Create member
     const user = await OgboniMember.create({
       username: username.trim(),
       email: cleanEmail,
@@ -64,7 +65,7 @@ export const registerMember = async (
       fullName,
       phoneNumber,
       gender,
-      dateOfBirth, // ✅ fixed here
+      dateOfBirth,
       occupation,
       chiefTitle,
       state,
@@ -76,17 +77,22 @@ export const registerMember = async (
       approved: false,
     });
 
+    console.log('REGISTER SUCCESS:', user._id);
+
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
       user,
     });
-  } catch (error) {
-    console.log('REGISTER ERROR:', error);
+  } catch (error: any) {
+    console.error('================ REGISTER ERROR ================');
+    console.error(error);
+    console.error('Message:', error?.message);
+    console.error('Stack:', error?.stack);
 
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: error?.message || 'Server error',
     });
   }
 };
@@ -144,12 +150,12 @@ export const loginMember = async (
       message: 'Login successful',
       user,
     });
-  } catch (error) {
-    console.log('LOGIN ERROR:', error);
+  } catch (error: any) {
+    console.error('LOGIN ERROR:', error);
 
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: error?.message || 'Server error',
     });
   }
 };
@@ -166,12 +172,12 @@ export const getAllMembers = async (
       success: true,
       members,
     });
-  } catch (error) {
-    console.log('FETCH ERROR:', error);
+  } catch (error: any) {
+    console.error('FETCH ERROR:', error);
 
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: error?.message || 'Server error',
     });
   }
 };
@@ -200,7 +206,7 @@ export const approveMember = async (
 
       console.log('EMAIL SENT SUCCESSFULLY ✔');
     } catch (err) {
-      console.log('EMAIL ERROR:', err);
+      console.error('EMAIL ERROR:', err);
     }
 
     res.status(200).json({
@@ -208,12 +214,12 @@ export const approveMember = async (
       message: 'Member approved successfully',
       member,
     });
-  } catch (error) {
-    console.log('APPROVAL ERROR:', error);
+  } catch (error: any) {
+    console.error('APPROVAL ERROR:', error);
 
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: error?.message || 'Server error',
     });
   }
 };
