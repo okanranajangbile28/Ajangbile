@@ -38,7 +38,7 @@ const OgboniSignupPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("FORM DATA SENT:", formData); // 👈 DEBUG
+    console.log("FORM DATA SENT:", formData);
 
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
@@ -46,13 +46,16 @@ const OgboniSignupPage = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/ogboni/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/api/ogboni/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       const data = await response.json();
 
@@ -63,7 +66,7 @@ const OgboniSignupPage = () => {
         alert(data.message || "Something went wrong");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       alert("Server error");
     }
   };
