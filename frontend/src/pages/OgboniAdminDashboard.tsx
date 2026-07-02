@@ -6,7 +6,6 @@ interface Member {
   fullName: string;
   email: string;
   phoneNumber: string;
-  chiefTitle?: string;
   occupation: string;
   approved: boolean;
 }
@@ -17,25 +16,15 @@ const OgboniAdminDashboard = () => {
 
   const fetchMembers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/ogboni/members");
+      const res = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/api/ogboni/members`,
+      );
 
-      setMembers(res.data.members);
-    } catch (error) {
-      console.log(error);
+      setMembers(res.data.members || []);
+    } catch (err) {
+      console.log(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const approveMember = async (id: string) => {
-    try {
-      await axios.patch(`http://localhost:3000/api/ogboni/approve/${id}`);
-
-      fetchMembers();
-      alert("Member approved successfully");
-    } catch (error) {
-      console.log(error);
-      alert("Approval failed");
     }
   };
 
@@ -43,54 +32,87 @@ const OgboniAdminDashboard = () => {
     fetchMembers();
   }, []);
 
+  const approveMember = async (id: string) => {
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_SERVER_URL}/api/ogboni/approve/${id}`,
+      );
+
+      fetchMembers();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const pending = members.filter((m) => !m.approved);
+  const approved = members.filter((m) => m.approved);
+
   return (
-    <div className="min-h-screen bg-purple-950 p-8 text-white">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-yellow-400 mb-10">
-          Ogboni Admin Dashboard
-        </h1>
+    <div className="min-h-screen bg-purple-950 text-white p-8">
+      <h1 className="text-4xl font-bold text-yellow-400 mb-10">
+        Ogboni Admin Dashboard
+      </h1>
 
-        {loading ? (
-          <h2>Loading members...</h2>
-        ) : (
-          <div className="grid gap-6">
-            {members.map((member) => (
-              <div
-                key={member._id}
-                className="bg-purple-900 p-6 rounded-2xl shadow"
-              >
-                <h2 className="text-2xl font-bold text-yellow-400">
-                  Chief {member.fullName}
-                </h2>
+      {loading ? (
+        <h2>Loading...</h2>
+      ) : (
+        <>
+          {/* Statistics */}
+          <div className="grid md:grid-cols-3 gap-6 mb-10">
+            <div className="bg-purple-900 rounded-xl p-6">
+              <h2 className="text-xl">Total Members</h2>
 
-                <p>Email: {member.email}</p>
-                <p>Phone: {member.phoneNumber}</p>
-                <p>Occupation: {member.occupation}</p>
+              <p className="text-4xl font-bold text-yellow-400">
+                {members.length}
+              </p>
+            </div>
 
-                <p className="mt-2">
-                  Status:
-                  <span
-                    className={`ml-2 font-bold ${
-                      member.approved ? "text-green-400" : "text-red-400"
-                    }`}
-                  >
-                    {member.approved ? "Approved" : "Pending"}
-                  </span>
-                </p>
+            <div className="bg-purple-900 rounded-xl p-6">
+              <h2 className="text-xl">Pending Approval</h2>
 
-                {!member.approved && (
+              <p className="text-4xl font-bold text-red-400">
+                {pending.length}
+              </p>
+            </div>
+
+            <div className="bg-purple-900 rounded-xl p-6">
+              <h2 className="text-xl">Approved Members</h2>
+
+              <p className="text-4xl font-bold text-green-400">
+                {approved.length}
+              </p>
+            </div>
+          </div>
+
+          {/* Pending Applications */}
+          <div className="bg-white rounded-xl p-6 text-black">
+            <h2 className="text-2xl font-bold mb-6">Pending Applications</h2>
+
+            {pending.length === 0 ? (
+              <p>No pending applications.</p>
+            ) : (
+              pending.map((member) => (
+                <div key={member._id} className="border rounded-xl p-5 mb-5">
+                  <h3 className="text-xl font-bold">{member.fullName}</h3>
+
+                  <p>{member.email}</p>
+
+                  <p>{member.phoneNumber}</p>
+
+                  <p>{member.occupation}</p>
+
                   <button
                     onClick={() => approveMember(member._id)}
-                    className="mt-4 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-xl"
+                    className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
                   >
                     Approve Member
                   </button>
-                )}
-              </div>
-            ))}
+                </div>
+              ))
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };
