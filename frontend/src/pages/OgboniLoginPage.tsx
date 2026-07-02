@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const OgboniLoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -34,12 +35,11 @@ const OgboniLoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Login successful");
-
         // Save member information
         localStorage.setItem("ogboniMember", JSON.stringify(data.user));
 
-        navigate("/ogboni-dashboard");
+        // Go directly to dashboard
+        navigate("/ogboni-dashboard", { replace: true });
       } else {
         alert(data.message || "Login failed");
       }
@@ -61,6 +61,12 @@ const OgboniLoginPage = () => {
             Iledi Ajangbile.
           </p>
         </div>
+
+        {location.state?.message && (
+          <div className="mb-6 rounded-xl border border-green-400 bg-green-100 p-4 text-green-800">
+            {location.state.message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <input
