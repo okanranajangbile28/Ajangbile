@@ -3,57 +3,82 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendApprovalEmail = async (email: string, fullName: string) => {
-  try {
-    console.log('📧 ABOUT TO SEND EMAIL TO:', email);
+  console.log('========================================');
+  console.log('📨 STARTING EMAIL FUNCTION');
+  console.log('Recipient:', email);
+  console.log('Name:', fullName);
+  console.log('API KEY EXISTS:', !!process.env.RESEND_API_KEY);
+  console.log('========================================');
 
-    const { data, error } = await resend.emails.send({
-      from: 'Okanran <onboarding@resend.dev>',
-      to: 'ajangbileheritage007@gmail.com', // ⚠️ change later when going production
-      subject: 'Membership Application Approved 🎉',
+  try {
+    const response = await resend.emails.send({
+      from: 'Ajangbile Heritage <admin@ajangbileheritage.com>',
+      to: [email],
+
+      subject: '🎉 Your Ogboni Membership Has Been Approved',
 
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="color: purple;">
-            Congratulations Chief ${fullName}
-          </h2>
+      <div style="background:#f5f5f5;padding:40px;font-family:Arial,sans-serif;">
+        <div style="max-width:650px;margin:auto;background:white;padding:40px;border-radius:12px;">
 
-          <p>
-            Your membership has been approved successfully.
+          <h1 style="color:#5B0B73;">
+            Congratulations ${fullName}!
+          </h1>
+
+          <p style="font-size:16px;line-height:1.8;">
+            Your application to join
+            <strong>Ajangbile Heritage</strong>
+            has been approved.
           </p>
 
-          <p>
-            You can now log in to your dashboard.
+          <p style="font-size:16px;line-height:1.8;">
+            You may now login using your email address and password.
           </p>
 
-          <a href="http://localhost:5173/login"
-             style="display:inline-block;
-             background:purple;
-             color:white;
-             padding:12px 20px;
-             text-decoration:none;
-             border-radius:6px;">
-            Login Now
-          </a>
+          <div style="margin:40px 0;text-align:center;">
+            <a
+              href="http://localhost:5173/ogboni-login"
+              style="
+                background:#5B0B73;
+                color:white;
+                padding:15px 28px;
+                text-decoration:none;
+                border-radius:8px;
+                font-weight:bold;
+                display:inline-block;
+              ">
+              Login Now
+            </a>
+          </div>
 
-          <br/><br/>
+          <hr>
 
-          <p>Regards,<br/>Okanran System</p>
+          <p>
+            Regards,<br>
+            <strong>Ajangbile Heritage</strong>
+          </p>
+
         </div>
+      </div>
       `,
     });
 
-    // 🚨 HANDLE RESEND ERROR PROPERLY
-    if (error) {
-      console.log('❌ RESEND ERROR:', error);
-      return { success: false, error };
-    }
+    console.log('==============================');
+    console.log('📬 RESEND RESPONSE');
+    console.log(response);
+    console.log('==============================');
 
-    console.log('✅ RESEND RESPONSE:', data);
-    console.log('EMAIL SENT SUCCESSFULLY ✔');
+    return response;
+  } catch (err: any) {
+    console.log('==============================');
+    console.log('❌ EMAIL FAILED');
+    console.log(err);
+    console.log(err?.message);
+    console.log(err?.name);
+    console.log(err?.statusCode);
+    console.log(err?.response);
+    console.log('==============================');
 
-    return { success: true, data };
-  } catch (error) {
-    console.log('❌ EMAIL EXCEPTION:', error);
-    return { success: false, error };
+    throw err;
   }
 };

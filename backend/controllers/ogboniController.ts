@@ -29,7 +29,6 @@ export const registerMember = async (
       reason,
     } = req.body;
 
-    // Required fields
     if (!username || !email || !password) {
       res.status(400).json({
         success: false,
@@ -40,7 +39,6 @@ export const registerMember = async (
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Existing user
     const existingUser = await OgboniMember.findOne({
       email: cleanEmail,
     });
@@ -53,10 +51,8 @@ export const registerMember = async (
       return;
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
-    // Create member
     const user = await OgboniMember.create({
       username: username.trim(),
       email: cleanEmail,
@@ -85,10 +81,7 @@ export const registerMember = async (
       user,
     });
   } catch (error: any) {
-    console.error('================ REGISTER ERROR ================');
-    console.error(error);
-    console.error('Message:', error?.message);
-    console.error('Stack:', error?.stack);
+    console.error('REGISTER ERROR:', error);
 
     res.status(500).json({
       success: false,
@@ -160,7 +153,7 @@ export const loginMember = async (
   }
 };
 
-// ================= GET ALL MEMBERS =================
+// ================= GET MEMBERS =================
 export const getAllMembers = async (
   req: Request,
   res: Response,
@@ -188,9 +181,13 @@ export const approveMember = async (
   res: Response,
 ): Promise<void> => {
   try {
+    console.log('🚀 APPROVE MEMBER ROUTE HIT');
+
     const member = await OgboniMember.findById(req.params.id);
 
     if (!member) {
+      console.log('❌ Member not found');
+
       res.status(404).json({
         success: false,
         message: 'Member not found',
@@ -198,16 +195,24 @@ export const approveMember = async (
       return;
     }
 
+    console.log('✅ Member Found');
+    console.log('ID:', member._id);
+    console.log('Name:', member.fullName);
+    console.log('Email:', member.email);
+
     member.approved = true;
     await member.save();
 
-    try {
-      await sendApprovalEmail(member.email, member.fullName || member.username);
+    console.log('✅ Member approved in database');
 
-      console.log('EMAIL SENT SUCCESSFULLY ✔');
-    } catch (err) {
-      console.error('EMAIL ERROR:', err);
-    }
+    console.log('📧 Calling sendApprovalEmail...');
+
+    const emailResult = await sendApprovalEmail(
+      member.email,
+      member.fullName || member.username,
+    );
+
+    console.log('📨 Email Result:', emailResult);
 
     res.status(200).json({
       success: true,
@@ -215,7 +220,7 @@ export const approveMember = async (
       member,
     });
   } catch (error: any) {
-    console.error('APPROVAL ERROR:', error);
+    console.error('❌ APPROVAL ERROR:', error);
 
     res.status(500).json({
       success: false,
