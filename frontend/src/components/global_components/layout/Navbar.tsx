@@ -26,16 +26,28 @@ const Navbar = () => {
   ));
 
   return (
-    <header className="w-full z-[7]">
+    <header className="w-full z-[7] bg-white">
       <div className="flex items-center justify-between w-full px-6 md:px-12 xl:px-24 py-5">
         {/* Logo */}
         <Link
           to={isAdmin ? "/admin" : "/"}
-          className="font-Manrope font-bold text-[#4b0082] text-[22px] sm:text-[30px] md:text-[38px] xl:text-[44px] leading-[0.9] flex-shrink-0"
+          className="flex items-center gap-1 flex-shrink-0"
         >
-          Okanran
-          <br />
-          Ajangbile
+          <img
+            src="/images/ajangbile-logo.png"
+            alt="Ajangbile Heritage Logo"
+            className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 xl:w-24 xl:h-24 object-contain drop-shadow-sm"
+          />
+
+          <div className="font-Manrope font-bold text-[#4b0082] leading-[0.9]">
+            <div className="text-[22px] sm:text-[30px] md:text-[38px] xl:text-[44px]">
+              Okanran
+            </div>
+
+            <div className="text-[20px] sm:text-[28px] md:text-[34px] xl:text-[40px]">
+              Ajangbile
+            </div>
+          </div>
         </Link>
 
         {!isAdmin && (
