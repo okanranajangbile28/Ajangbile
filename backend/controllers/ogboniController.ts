@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+
 import OgboniMember from '../models/OgboniMember';
-import { sendApprovalEmail } from '../utils/sendEmail';
+
+import { sendApprovalEmail, sendPasswordResetEmail } from '../utils/sendEmail';
 
 // ================= REGISTER =================
 export const registerMember = async (
@@ -186,8 +189,6 @@ export const approveMember = async (
     const member = await OgboniMember.findById(req.params.id);
 
     if (!member) {
-      console.log('❌ Member not found');
-
       res.status(404).json({
         success: false,
         message: 'Member not found',
@@ -195,24 +196,10 @@ export const approveMember = async (
       return;
     }
 
-    console.log('✅ Member Found');
-    console.log('ID:', member._id);
-    console.log('Name:', member.fullName);
-    console.log('Email:', member.email);
-
     member.approved = true;
     await member.save();
 
-    console.log('✅ Member approved in database');
-
-    console.log('📧 Calling sendApprovalEmail...');
-
-    const emailResult = await sendApprovalEmail(
-      member.email,
-      member.fullName || member.username,
-    );
-
-    console.log('📨 Email Result:', emailResult);
+    await sendApprovalEmail(member.email, member.fullName || member.username);
 
     res.status(200).json({
       success: true,
@@ -220,7 +207,132 @@ export const approveMember = async (
       member,
     });
   } catch (error: any) {
-    console.error('❌ APPROVAL ERROR:', error);
+    console.error('APPROVAL ERROR:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error?.message || 'Server error',
+    });
+  }
+};
+
+// ================= FORGOT PASSWORD =================
+export const forgotPassword = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
+      return;
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    const member = await OgboniMember.findOne({
+      email: cleanEmail,
+      approved: true,
+    });
+
+    // Always return same message for security
+    if (!member) {
+      res.status(200).json({
+        success: true,
+        message:
+          'If an account exists for this email, a reset link has been sent.',
+      });
+      return;
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // Store hashed token
+    member.passwordResetToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Token expires in 30 minutes
+    member.passwordResetExpires = new Date(Date.now() + 30 * 60 * 1000);
+
+    await member.save();
+
+    await sendPasswordResetEmail(
+      member.email,
+      member.fullName || member.username,
+      resetToken,
+    );
+
+    res.status(200).json({
+      success: true,
+      message:
+        'If an account exists for this email, a reset link has been sent.',
+    });
+  } catch (error: any) {
+    console.error('FORGOT PASSWORD ERROR:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error?.message || 'Server error',
+    });
+  }
+};
+// ================= RESET PASSWORD =================
+export const resetPassword = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      res.status(400).json({
+        success: false,
+        message: 'New password is required',
+      });
+      return;
+    }
+
+    // Hash incoming token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const member = await OgboniMember.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() },
+    });
+
+    if (!member) {
+      res.status(400).json({
+        success: false,
+        message: 'Password reset link is invalid or has expired.',
+      });
+      return;
+    }
+
+    // Update password
+    member.password = await bcrypt.hash(password.trim(), 10);
+
+    // Remove reset token
+    member.set({
+      passwordResetToken: undefined,
+      passwordResetExpires: undefined,
+    });
+
+    await member.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully.',
+    });
+  } catch (error: any) {
+    console.error('RESET PASSWORD ERROR:', error);
 
     res.status(500).json({
       success: false,
