@@ -19,6 +19,10 @@ const ConsultationPage = lazy(() => import("../pages/ConsultationPage"));
 
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
+const OgboniForgotPassword = lazy(
+  () => import("../pages/OgboniForgotPassword"),
+);
+const OgboniResetPassword = lazy(() => import("../pages/OgboniResetPassword"));
 const OgboniDashboard = lazy(() => import("../pages/OgboniDashboard"));
 const OgboniAdminDashboard = lazy(
   () => import("../pages/OgboniAdminDashboard"),
@@ -81,6 +85,17 @@ const App = () => {
             <Route path="/ogboni/signup" element={<OgboniSignupPage />} />
 
             <Route path="/ogboni-login" element={<OgboniLoginPage />} />
+
+            <Route
+              path="/ogboni-forgot-password"
+              element={<OgboniForgotPassword />}
+            />
+
+            {/* NEW RESET PASSWORD PAGE */}
+            <Route
+              path="/ogboni-reset-password/:token"
+              element={<OgboniResetPassword />}
+            />
 
             <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 

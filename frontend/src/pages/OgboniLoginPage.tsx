@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const OgboniLoginPage = () => {
   const navigate = useNavigate();
@@ -35,16 +35,16 @@ const OgboniLoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Save member information
         localStorage.setItem("ogboniMember", JSON.stringify(data.user));
 
-        // Go directly to dashboard
-        navigate("/ogboni-dashboard", { replace: true });
+        navigate("/ogboni-dashboard", {
+          replace: true,
+        });
       } else {
         alert(data.message || "Login failed");
       }
     } catch (error) {
-      console.error("LOGIN ERROR:", error);
+      console.error(error);
       alert("Server error");
     }
   };
@@ -88,6 +88,15 @@ const OgboniLoginPage = () => {
             className="w-full border rounded-xl p-4"
             required
           />
+
+          <div className="text-right -mt-3">
+            <Link
+              to="/ogboni-forgot-password"
+              className="text-sm text-purple-900 font-semibold hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <button
             type="submit"
