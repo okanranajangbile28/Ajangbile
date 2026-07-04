@@ -31,7 +31,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link
           to={isAdmin ? "/admin" : "/"}
-          className="flex items-center gap-1 flex-shrink-0"
+          className="flex items-center gap-0 flex-shrink-0"
         >
           <img
             src="/images/ajangbile-logo.png"
