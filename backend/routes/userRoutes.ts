@@ -1,4 +1,5 @@
 import express from 'express';
+
 import {
   getMe,
   getUser,
@@ -9,6 +10,7 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/userController';
+
 import {
   signup,
   login,
@@ -20,24 +22,47 @@ import {
   restrictTo,
 } from '../controllers/authControllers';
 
+import { uploadPhoto, cloudUpload } from '../controllers/imageHandler';
+
 const router = express.Router();
 
-const { uploadPhoto } = require('../controllers/imageHandler');
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
 
-router.post('/signup', signup);
+router.post('/signup', uploadPhoto(), cloudUpload('users'), signup);
+
 router.post('/login', login);
+
 router.get('/logout', logout);
 
 router.post('/forgotPassword', forgotPassword);
+
 router.patch('/resetPassword/:token', resetPassword);
 
-// Protect all routes after this middleware
+/*
+|--------------------------------------------------------------------------
+| Protected Routes
+|--------------------------------------------------------------------------
+*/
 
 router.use(protect);
+
 router.get('/me', getMe, getUser);
+
 router.patch('/updateMyPassword', updatePassword);
-router.patch('/updateMe', uploadPhoto([], 'user'), updateMe);
+
+router.patch('/updateMe', uploadPhoto(), cloudUpload('users'), updateMe);
+
 router.delete('/deleteMe', deleteMe);
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
 
 router.use(restrictTo('admin'));
 

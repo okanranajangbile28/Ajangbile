@@ -9,18 +9,31 @@ import {
   resetPassword,
 } from '../controllers/ogboniController';
 
+import { uploadPhoto, cloudUpload } from '../controllers/imageHandler';
+
 const router = express.Router();
 
-// Authentication
-router.post('/signup', registerMember);
+// ================= Authentication =================
+
+router.post(
+  '/signup',
+  uploadPhoto(),
+  cloudUpload('ogboni-members'),
+  registerMember,
+);
+
 router.post('/login', loginMember);
 
-// Password Reset
+// ================= Password Reset =================
+
 router.post('/forgot-password', forgotPassword);
+
 router.patch('/reset-password/:token', resetPassword);
 
-// Admin
+// ================= Admin =================
+
 router.get('/members', getAllMembers);
+
 router.patch('/approve/:id', approveMember);
 
 export default router;

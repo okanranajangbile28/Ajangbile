@@ -47,6 +47,10 @@ export const signup = catchAsync(async (req, res, next) => {
     lastname: req.body.lastname,
     username: req.body.username,
     email: req.body.email,
+
+    // Save profile picture URL from Cloudinary
+    photo: req.body.images?.[0] || '',
+
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     role: req.body.role,
@@ -190,7 +194,7 @@ export const isLoggedIn = catchAsync(async (req, res, next) => {
   next();
 });
 
-export const restrictTo = (...roles: ['admin']) =>
+export const restrictTo = (...roles: Array<'admin' | 'developer'>) =>
   catchAsync<'auth'>(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(

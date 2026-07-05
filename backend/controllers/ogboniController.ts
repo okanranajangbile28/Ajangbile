@@ -73,6 +73,9 @@ export const registerMember = async (
       address,
       reason,
 
+      // Cloudinary image URL
+      photo: req.body.images?.[0] || '',
+
       approved: false,
     });
 
@@ -80,8 +83,7 @@ export const registerMember = async (
 
     res.status(201).json({
       success: true,
-      message: 'Application submitted successfully',
-      user,
+      message: 'Application submitted successfully. Please wait for approval.',
     });
   } catch (error: any) {
     console.error('REGISTER ERROR:', error);
@@ -126,7 +128,7 @@ export const loginMember = async (
     if (!user.approved) {
       res.status(403).json({
         success: false,
-        message: 'Not approved yet',
+        message: 'Your membership has not yet been approved.',
       });
       return;
     }
@@ -147,11 +149,11 @@ export const loginMember = async (
       user,
     });
   } catch (error: any) {
-    console.error('LOGIN ERROR:', error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error?.message || 'Server error',
+      message: error.message,
     });
   }
 };
@@ -162,18 +164,18 @@ export const getAllMembers = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const members = await OgboniMember.find().sort({ createdAt: -1 });
+    const members = await OgboniMember.find().sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       success: true,
       members,
     });
   } catch (error: any) {
-    console.error('FETCH ERROR:', error);
-
     res.status(500).json({
       success: false,
-      message: error?.message || 'Server error',
+      message: error.message,
     });
   }
 };
@@ -184,8 +186,6 @@ export const approveMember = async (
   res: Response,
 ): Promise<void> => {
   try {
-    console.log('🚀 APPROVE MEMBER ROUTE HIT');
-
     const member = await OgboniMember.findById(req.params.id);
 
     if (!member) {
@@ -197,6 +197,7 @@ export const approveMember = async (
     }
 
     member.approved = true;
+
     await member.save();
 
     await sendApprovalEmail(member.email, member.fullName || member.username);
@@ -207,11 +208,9 @@ export const approveMember = async (
       member,
     });
   } catch (error: any) {
-    console.error('APPROVAL ERROR:', error);
-
     res.status(500).json({
       success: false,
-      message: error?.message || 'Server error',
+      message: error.message,
     });
   }
 };

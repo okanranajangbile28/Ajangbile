@@ -5,11 +5,13 @@ import { deleteOne, getAll, getOne, updateOne } from './handlerFactory';
 
 const filterObj = (obj: { [x: string]: any }, ...allowedFields: string[]) => {
   const newObj: { [key: string]: any } = {};
+
   Object.keys(obj).forEach((el) => {
     if (allowedFields.includes(el)) {
       newObj[el] = obj[el];
     }
   });
+
   return newObj;
 };
 
@@ -19,7 +21,7 @@ export const getMe = catchAsync<'auth'>(async (req, res, next) => {
 });
 
 export const updateMe = catchAsync<'auth'>(async (req, res, next) => {
-  // 1) Create error if user POSTs password data
+  // Password updates are not allowed here
   if (req.body.password || req.body.passwordConfirm) {
     return next(
       new AppError(
@@ -29,11 +31,22 @@ export const updateMe = catchAsync<'auth'>(async (req, res, next) => {
     );
   }
 
-  // 2) Filtered out unwanted fields names that are not allowed to be updated
-  const filteredBody = filterObj(req.body, 'name', 'email');
-  if (req.file) filteredBody.photo = req.file.filename;
+  // Allow users to update these fields
+  const filteredBody = filterObj(
+    req.body,
+    'firstname',
+    'lastname',
+    'username',
+    'email',
+    'photo',
+  );
 
-  // 3) Update user document
+  // If Cloudinary uploaded a new profile picture,
+  // save its URL.
+  if (req.body.images?.length) {
+    filteredBody.photo = req.body.images[0];
+  }
+
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true,
@@ -47,8 +60,10 @@ export const updateMe = catchAsync<'auth'>(async (req, res, next) => {
   });
 });
 
-export const deleteMe = catchAsync<'auth'>(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user.id, { active: false });
+export const deleteMe = catchAsync<'auth'>(async (req, res) => {
+  await User.findByIdAndUpdate(req.user.id, {
+    active: false,
+  });
 
   res.status(204).json({
     status: 'success',
@@ -64,8 +79,10 @@ export const createUser = catchAsync(async (req, res) => {
 });
 
 export const getUser = getOne(User);
+
 export const getAllUsers = getAll(User);
 
-// Do NOT update passwords with this!
+// Do NOT update passwords with this route
 export const updateUser = updateOne(User);
+
 export const deleteUser = deleteOne(User);

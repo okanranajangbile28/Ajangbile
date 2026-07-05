@@ -1,13 +1,6 @@
 import { Request } from 'express';
 import { IUser } from './models/userModel';
-import mongoose, {
-  // Date,
-  Document,
-  Model,
-  ObjectId,
-  Query,
-  Types,
-} from 'mongoose';
+import { Document, Model, Query, Types } from 'mongoose';
 
 declare global {
   namespace Express {
@@ -21,7 +14,6 @@ declare global {
 export interface PopOptions {
   path: string;
   select?: string;
-  // Add other properties as needed based on your usage of populate
 }
 
 export interface NewField {
@@ -38,7 +30,10 @@ export type PeriodKey = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
 
 export type PaypalCartType = {
   name: string;
-  unit_amount: { currency_code: string; value: string };
+  unit_amount: {
+    currency_code: string;
+    value: string;
+  };
   description: string;
   quantity: string;
   category: 'PHYSICAL_GOODS';
@@ -114,7 +109,7 @@ interface IOrder extends Document {
   deliveredAt?: Date;
 }
 
-//product
+// ================= PRODUCT =================
 
 export interface ISize {
   size: string;
@@ -136,7 +131,7 @@ export interface IProduct extends Document {
   active: boolean;
 }
 
-//review
+// ================= REVIEW =================
 
 export interface IReviewModel extends Model<IReview>, IReviewStatics {}
 
@@ -151,31 +146,46 @@ export interface IReview extends Document {
 export interface IReviewQuery extends Query<any, IReview> {
   r?: IReview | null;
 }
+
 export interface IReviewStatics {
   calcAverageRatings: (productId: Types.ObjectId) => void;
 }
 
-//user
+// ================= USER =================
+
 export interface IUser extends Document {
+  firstname: string;
+  lastname: string;
   username: string;
   email: string;
-  role: 'admin';
+
+  // Cloudinary profile picture URL
+  photo?: string;
+
+  role: 'admin' | 'developer';
+
   password: string;
   passwordConfirm: string | undefined;
+
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: number;
+
   active: boolean;
 }
 
-interface IUserMethods {
+export interface IUserMethods {
   createPasswordResetToken(): string;
+
   changedPasswordAfter(JWTTimestamp: number): boolean;
+
   correctPassword(
     candidatePassword: string,
     userPassword: string,
   ): Promise<boolean>;
 }
+
+// ================= TESTIMONIAL =================
 
 interface ITestimonial extends Document {
   fullName: string;
@@ -183,13 +193,15 @@ interface ITestimonial extends Document {
   authorImage: string;
 }
 
+// ================= BLOG =================
+
 interface IBlog extends Document {
   title: string;
   author: string;
   summary: string;
   thumbnail: string;
   content: string;
-  active: Boolean;
-  featured: Boolean;
+  active: boolean;
+  featured: boolean;
   keywords: string;
 }
