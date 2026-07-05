@@ -15,9 +15,9 @@ const Navbar = () => {
     <Link
       key={data.id}
       to={data.url}
-      className={`font-semibold font-Open text-[14px] lg:text-[16px] leading-[28px] flex items-center transition-all duration-200 ${
+      className={`font-semibold font-Open text-[14px] lg:text-[15px] leading-[28px] transition-all duration-200 whitespace-nowrap ${
         data.text.toLowerCase() === "contact"
-          ? "py-[8px] px-[28px] lg:px-[40px] rounded-full border-2 border-[#4b0082] hover:bg-[#4b0082] hover:text-white"
+          ? "py-2 px-6 lg:px-8 rounded-full border-2 border-[#4b0082] text-[#4b0082] hover:bg-[#4b0082] hover:text-white"
           : "text-[#4b0082] hover:border-b-2 hover:border-[#4b0082]"
       }`}
     >
@@ -26,8 +26,8 @@ const Navbar = () => {
   ));
 
   return (
-    <header className="w-full z-[7] bg-white">
-      <div className="flex items-center justify-between w-full px-6 md:px-12 xl:px-24 py-5">
+    <header className="w-full bg-white z-[100]">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
         {/* Logo */}
         <Link
           to={isAdmin ? "/admin" : "/"}
@@ -36,15 +36,15 @@ const Navbar = () => {
           <img
             src="/images/ajangbile-logo.png"
             alt="Ajangbile Heritage Logo"
-            className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 xl:w-24 xl:h-24 object-contain drop-shadow-sm"
+            className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain"
           />
 
-          <div className="font-Manrope font-bold text-[#4b0082] leading-[0.9]">
-            <div className="text-[22px] sm:text-[30px] md:text-[38px] xl:text-[44px]">
+          <div className="font-Manrope font-bold text-[#4b0082] leading-none">
+            <div className="text-[20px] sm:text-[26px] lg:text-[32px]">
               Okanran
             </div>
 
-            <div className="text-[20px] sm:text-[28px] md:text-[34px] xl:text-[40px]">
+            <div className="text-[18px] sm:text-[24px] lg:text-[30px]">
               Ajangbile
             </div>
           </div>
@@ -53,23 +53,23 @@ const Navbar = () => {
         {!isAdmin && (
           <>
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center ml-6 xl:ml-10 gap-8 lg:gap-10 xl:gap-12">
+            <nav className="hidden md:flex flex-1 justify-end items-center gap-5 lg:gap-7 xl:gap-8 min-w-0">
               {navlinks}
 
               <Link
                 to="/cart"
-                className="relative text-[#4b0082] text-[20px] hover:scale-110 transition-transform"
+                className="relative text-[#4b0082] text-[22px] hover:scale-110 transition-transform flex-shrink-0"
               >
                 <FaCartShopping />
 
-                <span className="absolute -right-3 -top-3 flex items-center justify-center w-5 h-5 rounded-full bg-[#4b0082] text-white text-[11px] font-semibold">
+                <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-[#4b0082] text-white text-[10px] font-semibold">
                   {total_items}
                 </span>
               </Link>
             </nav>
 
             {/* Mobile Menu */}
-            <div className="md:hidden text-[#4b0082] text-[30px]">
+            <div className="md:hidden text-[#4b0082] text-3xl">
               <button onClick={() => dispatch(openSidebar())}>
                 <FaBars />
               </button>

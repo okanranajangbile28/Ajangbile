@@ -54,11 +54,11 @@ const Hero = () => {
       </div>
 
       {/* Right */}
-      <div className="hidden md:flex justify-center items-center">
+      <div className="hidden md:flex justify-center items-center w-full overflow-hidden">
         <ImageWithSkeleton
           src="https://res.cloudinary.com/dlk2a6ppp/image/upload/v1731056794/OA/culturalWoman.webp"
           alt="Yoruba Culture"
-          customStyle="object-contain max-h-[650px] w-full"
+          customStyle="object-contain w-full max-w-[520px] max-h-[650px]"
           customPlaceholder="rounded-full"
         />
       </div>

@@ -1,32 +1,27 @@
-import { SingleProductType } from '../../../types/product';
-import Product from './Product';
+import { SingleProductType } from "../../../types/product";
+import Product from "./Product";
 
 const GridView = ({
-	products,
-	customStyle,
-	productStyle,
+  products,
+  customStyle,
+  productStyle,
 }: {
-	products: SingleProductType[];
-	customStyle?: string;
-	productStyle?: string;
+  products: SingleProductType[];
+  customStyle?: string;
+  productStyle?: string;
 }) => {
-	return (
-		<div
-			className={`grid grid-cols-4 py-[24px] md:px-[42px] gap-x-[24px] gap-y-[48px] justify-items-start ${customStyle}`}
-		>
-			{products.map((product) => {
-				const { _id: id } = product;
-
-				return (
-					<Product
-						key={id}
-						{...product}
-						customStyle={productStyle}
-					/>
-				);
-			})}
-		</div>
-	);
+  return (
+    <div
+      className={
+        customStyle ??
+        "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 w-full"
+      }
+    >
+      {products.map((product) => (
+        <Product key={product._id} {...product} customStyle={productStyle} />
+      ))}
+    </div>
+  );
 };
 
 export default GridView;
