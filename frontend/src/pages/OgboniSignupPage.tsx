@@ -24,6 +24,8 @@ const OgboniSignupPage = () => {
     reason: "",
   });
 
+  const [image, setImage] = useState<File | null>(null);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -37,6 +39,12 @@ const OgboniSignupPage = () => {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setImage(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -47,15 +55,22 @@ const OgboniSignupPage = () => {
 
     setError("");
 
+    const body = new FormData();
+
+    Object.entries(formData).forEach(([key, value]) => {
+      body.append(key, value);
+    });
+
+    if (image) {
+      body.append("image", image);
+    }
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/api/ogboni/signup`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+          body,
         },
       );
 
@@ -72,8 +87,8 @@ const OgboniSignupPage = () => {
       } else {
         setError(data.message || "Something went wrong.");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       setError("Unable to connect to the server. Please try again.");
     }
   };
@@ -95,6 +110,17 @@ const OgboniSignupPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-10">
           <div className="grid md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="block mb-2 font-semibold">Profile Photo</label>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full border rounded-xl p-4"
+              />
+            </div>
+
             <input
               type="text"
               name="username"
