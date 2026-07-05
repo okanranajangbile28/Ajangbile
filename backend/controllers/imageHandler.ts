@@ -1,9 +1,11 @@
-import multer, { FileFilterCallback, Multer } from 'multer';
+import multer, { FileFilterCallback } from 'multer';
 import crypto from 'crypto';
 import { v2 as cloudinary } from 'cloudinary';
 import AppError from '../utils/appError';
 import catchAsync from '../utils/catchAsync';
 import { Request } from 'express';
+
+// ===================== CLOUDINARY =====================
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -14,6 +16,8 @@ cloudinary.config({
 console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
 console.log('API Key:', process.env.CLOUDINARY_API_KEY);
 console.log('API Secret exists:', !!process.env.CLOUDINARY_API_SECRET);
+
+// ===================== MULTER =====================
 
 const multerStorage = multer.memoryStorage();
 
@@ -29,46 +33,27 @@ const multerFilter = (
   }
 };
 
-const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
 
 export const noUpload = () => upload.none();
 
 export const uploadPhoto = () => upload.single('image');
 
 export const multiplePhotos = (entries: { name: string; maxCount: number }[]) =>
-  upload.fields([...entries]);
+  upload.fields(entries);
 
 export const multipleSinglePhotos = (entry: {
   name: string;
   maxCount: number;
-}) => {
-  return upload.array(entry.name, entry.maxCount);
-};
+}) => upload.array(entry.name, entry.maxCount);
 
-export const cloudUpload = (type: string) =>
+// ===================== CLOUDINARY UPLOAD =====================
+
+export const cloudUpload = (folder: string) =>
   catchAsync(async (req, res, next) => {
-    const cloudinaryUpload = (buffer: Buffer, fileName: string) =>
-      new Promise<string>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: type,
-            format: 'webp',
-            allowed_formats: ['webp'],
-            transformation: [{ width: 2500, height: 2500, crop: 'limit' }],
-            public_id: `OA_${Date.now()}-${crypto.randomBytes(8).toString('hex')}-${fileName}`,
-          },
-          (error, result) => {
-            if (error)
-              reject(
-                new AppError(`Cloudinary upload error: ${error.message}`, 500),
-              );
-            else resolve(result!.secure_url);
-          },
-        );
-
-        uploadStream.end(buffer);
-      });
-
     let files: Express.Multer.File[] = [];
 
     if (req.file) {
@@ -79,32 +64,69 @@ export const cloudUpload = (type: string) =>
       files = Object.values(req.files).flat() as Express.Multer.File[];
     }
 
-    if (files.length === 0) {
-      return next(new AppError('No file detected', 500));
+    if (!files.length) {
+      return next(new AppError('No file detected', 400));
     }
 
-    const uploadResults = await Promise.all(
-      files.map((file) => cloudinaryUpload(file.buffer, file.originalname)),
+    const uploadImage = (file: Express.Multer.File) =>
+      new Promise<string>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder,
+            resource_type: 'image',
+            format: 'webp',
+            transformation: [
+              {
+                width: 2500,
+                height: 2500,
+                crop: 'limit',
+              },
+            ],
+            public_id: `OA-${Date.now()}-${crypto
+              .randomBytes(8)
+              .toString('hex')}`,
+          },
+          (error, result) => {
+            if (error) {
+              return reject(
+                new AppError(`Cloudinary upload error: ${error.message}`, 500),
+              );
+            }
+
+            resolve(result!.secure_url);
+          },
+        );
+
+        stream.end(file.buffer);
+      });
+
+    const uploadedImages = await Promise.all(
+      files.map((file) => uploadImage(file)),
     );
 
-    req.body.images = uploadResults; // Store URLs directly
+    req.body.images = uploadedImages;
 
     next();
   });
+
+// ===================== PROCESS MULTIPLE =====================
 
 export const processMultipleImages = catchAsync(async (req, res, next) => {
   if (req.files && Array.isArray(req.files)) {
     const fileImages = req.files.map(
       (image: Express.Multer.File) => image.path,
     );
+
     if (req.body.images) {
       if (!Array.isArray(req.body.images)) {
         req.body.images = [req.body.images];
       }
+
       req.body.images = [...req.body.images, ...fileImages];
     } else {
       req.body.images = fileImages;
     }
   }
+
   next();
 });
