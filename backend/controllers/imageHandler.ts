@@ -64,8 +64,10 @@ export const cloudUpload = (folder: string) =>
       files = Object.values(req.files).flat() as Express.Multer.File[];
     }
 
+    // No image uploaded? Continue without uploading.
     if (!files.length) {
-      return next(new AppError('No file detected', 400));
+      req.body.images = [];
+      return next();
     }
 
     const uploadImage = (file: Express.Multer.File) =>

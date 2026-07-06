@@ -49,14 +49,14 @@ const OgboniEditProfile = () => {
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setMember({
-      ...member,
+    setMember((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handlePhoto = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) {
+    if (e.target.files && e.target.files.length > 0) {
       setPhoto(e.target.files[0]);
     }
   };
@@ -79,23 +79,34 @@ const OgboniEditProfile = () => {
       formData.append("city", member.city || "");
       formData.append("address", member.address || "");
 
+      // Backend expects "image"
       if (photo) {
-        formData.append("images", photo);
+        formData.append("image", photo);
       }
 
-      const res = await axios.patch(
+      const { data } = await axios.patch(
         `${import.meta.env.VITE_SERVER_URL}/api/ogboni/update-profile/${member._id}`,
         formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
       );
 
-      localStorage.setItem("ogboniMember", JSON.stringify(res.data.user));
+      localStorage.setItem("ogboniMember", JSON.stringify(data.user));
 
       alert("Profile updated successfully.");
 
       navigate("/ogboni-dashboard");
-    } catch (err) {
-      console.log(err);
-      alert("Unable to update profile.");
+    } catch (err: unknown) {
+      console.error(err);
+
+      if (axios.isAxiosError(err)) {
+        alert(err.response?.data?.message || "Unable to update profile.");
+      } else {
+        alert("Unable to update profile.");
+      }
     } finally {
       setSaving(false);
     }
@@ -110,48 +121,54 @@ const OgboniEditProfile = () => {
         <h1 className="text-4xl font-bold text-yellow-400">Edit Profile</h1>
 
         <input
+          type="text"
           name="fullName"
-          value={member.fullName}
+          value={member.fullName || ""}
           onChange={handleChange}
           placeholder="Full Name"
           className="w-full p-3 rounded-lg"
         />
 
         <input
+          type="text"
           name="phoneNumber"
-          value={member.phoneNumber}
+          value={member.phoneNumber || ""}
           onChange={handleChange}
           placeholder="Phone Number"
           className="w-full p-3 rounded-lg"
         />
 
         <input
+          type="text"
           name="occupation"
-          value={member.occupation}
+          value={member.occupation || ""}
           onChange={handleChange}
           placeholder="Occupation"
           className="w-full p-3 rounded-lg"
         />
 
         <input
+          type="text"
           name="state"
-          value={member.state}
+          value={member.state || ""}
           onChange={handleChange}
           placeholder="State"
           className="w-full p-3 rounded-lg"
         />
 
         <input
+          type="text"
           name="lga"
-          value={member.lga}
+          value={member.lga || ""}
           onChange={handleChange}
-          placeholder="LGA"
+          placeholder="L.G.A"
           className="w-full p-3 rounded-lg"
         />
 
         <input
+          type="text"
           name="city"
-          value={member.city}
+          value={member.city || ""}
           onChange={handleChange}
           placeholder="City"
           className="w-full p-3 rounded-lg"
@@ -159,22 +176,24 @@ const OgboniEditProfile = () => {
 
         <textarea
           name="address"
-          value={member.address}
+          value={member.address || ""}
           onChange={handleChange}
           placeholder="Address"
           className="w-full p-3 rounded-lg"
+          rows={4}
         />
 
         <input
           type="file"
-          onChange={handlePhoto}
           accept="image/*"
+          onChange={handlePhoto}
           className="text-white"
         />
 
         <button
+          type="submit"
           disabled={saving}
-          className="bg-yellow-500 hover:bg-yellow-600 w-full py-4 rounded-xl text-black font-bold"
+          className="w-full bg-yellow-500 hover:bg-yellow-600 py-4 rounded-xl text-black font-bold disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
