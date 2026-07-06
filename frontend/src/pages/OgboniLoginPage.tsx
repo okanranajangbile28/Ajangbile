@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const OgboniLoginPage = () => {
   const navigate = useNavigate();
@@ -10,6 +10,8 @@ const OgboniLoginPage = () => {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -19,6 +21,8 @@ const OgboniLoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setLoading(true);
 
     try {
       const response = await fetch(
@@ -34,18 +38,28 @@ const OgboniLoginPage = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem("ogboniMember", JSON.stringify(data.user));
-
-        navigate("/ogboni-dashboard", {
-          replace: true,
-        });
-      } else {
+      if (!response.ok) {
         alert(data.message || "Login failed");
+        setLoading(false);
+        return;
       }
+
+      // Save token if backend returns one
+      if (data.token) {
+        localStorage.setItem("ogboniToken", data.token);
+      }
+
+      // Save logged-in member
+      localStorage.setItem("ogboniMember", JSON.stringify(data.user));
+
+      navigate("/ogboni-dashboard", {
+        replace: true,
+      });
     } catch (error) {
       console.error(error);
-      alert("Server error");
+      alert("Unable to connect to the server.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,9 +70,9 @@ const OgboniLoginPage = () => {
           <h1 className="text-3xl font-bold text-purple-900">Member Login</h1>
 
           <p className="mt-4 text-gray-700 text-lg leading-relaxed">
-            Confederation of Ogboni Aborigine Fraternity,
+            Confederation of Ogboni Aborigine Fraternity
             <br />
-            Iledi Ajangbile.
+            Iledi Ajangbile
           </p>
         </div>
 
@@ -75,7 +89,7 @@ const OgboniLoginPage = () => {
             placeholder="Email Address"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border rounded-xl p-4"
+            className="w-full rounded-xl border p-4 focus:outline-none focus:ring-2 focus:ring-purple-700"
             required
           />
 
@@ -85,14 +99,14 @@ const OgboniLoginPage = () => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border rounded-xl p-4"
+            className="w-full rounded-xl border p-4 focus:outline-none focus:ring-2 focus:ring-purple-700"
             required
           />
 
-          <div className="text-right -mt-3">
+          <div className="text-right">
             <Link
               to="/ogboni-forgot-password"
-              className="text-sm text-purple-900 font-semibold hover:underline"
+              className="text-sm font-semibold text-purple-900 hover:underline"
             >
               Forgot Password?
             </Link>
@@ -100,9 +114,10 @@ const OgboniLoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-purple-900 text-white py-4 rounded-xl font-bold hover:bg-purple-800 transition"
+            disabled={loading}
+            className="w-full rounded-xl bg-purple-900 py-4 font-bold text-white transition hover:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

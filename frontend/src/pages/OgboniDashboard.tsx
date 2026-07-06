@@ -16,6 +16,7 @@ interface Member {
   lga?: string;
   city?: string;
   address?: string;
+  photo?: string;
 }
 
 const OgboniDashboard = () => {
@@ -34,15 +35,13 @@ const OgboniDashboard = () => {
     const parsedMember = JSON.parse(storedMember);
 
     console.log("MEMBER DATA:", parsedMember);
-    console.log("chiefTitle:", parsedMember.chiefTitle);
-    console.log("ChiefTitle:", parsedMember.ChiefTitle);
-    console.log("chieftaincyTitle:", parsedMember.chieftaincyTitle);
-    console.log("All keys:", Object.keys(parsedMember));
+
     setMember(parsedMember);
   }, [navigate]);
 
   const logout = () => {
     localStorage.removeItem("ogboniMember");
+    localStorage.removeItem("ogboniToken");
     navigate("/ogboni-login");
   };
 
@@ -57,8 +56,20 @@ const OgboniDashboard = () => {
       <div className="max-w-6xl mx-auto">
         <div className="bg-purple-900 rounded-3xl shadow-xl p-10">
           {/* Header */}
-          <div className="flex justify-between items-center mb-10">
-            <div>
+
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-10">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <img
+                src={
+                  member?.photo ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    member?.fullName || member?.username || "Member",
+                  )}`
+                }
+                alt={member?.fullName}
+                className="w-40 h-40 rounded-full border-4 border-yellow-400 object-cover shadow-lg"
+              />
+
               <div>
                 <h1 className="text-4xl font-bold text-yellow-400">
                   Welcome, Chief {member?.fullName || member?.username}
@@ -81,6 +92,7 @@ const OgboniDashboard = () => {
           </div>
 
           {/* Summary Cards */}
+
           <div className="grid md:grid-cols-4 gap-8">
             <div className="bg-purple-800 rounded-2xl p-6">
               <h2 className="text-yellow-400 text-2xl font-bold mb-4">
@@ -115,7 +127,8 @@ const OgboniDashboard = () => {
             </div>
           </div>
 
-          {/* Profile Section */}
+          {/* Member Profile */}
+
           <div className="mt-10 bg-purple-800 rounded-2xl p-8">
             <h2 className="text-3xl text-yellow-400 font-bold mb-6">
               Member Profile
@@ -124,6 +137,18 @@ const OgboniDashboard = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <p>
                 <strong>Full Name:</strong> {member?.fullName}
+              </p>
+
+              <p>
+                <strong>Username:</strong> {member?.username}
+              </p>
+
+              <p>
+                <strong>Email:</strong> {member?.email}
+              </p>
+
+              <p>
+                <strong>Phone Number:</strong> {member?.phoneNumber}
               </p>
 
               <p>
@@ -139,11 +164,15 @@ const OgboniDashboard = () => {
               </p>
 
               <p>
-                <strong>LGA:</strong> {member?.lga}
+                <strong>L.G.A:</strong> {member?.lga}
               </p>
 
               <p>
                 <strong>City:</strong> {member?.city}
+              </p>
+
+              <p>
+                <strong>Chief Title:</strong> {memberTitle}
               </p>
 
               <p className="md:col-span-2">

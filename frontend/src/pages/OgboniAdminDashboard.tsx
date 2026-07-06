@@ -8,6 +8,7 @@ interface Member {
   phoneNumber: string;
   occupation: string;
   approved: boolean;
+  photo?: string;
 }
 
 const OgboniAdminDashboard = () => {
@@ -61,7 +62,6 @@ const OgboniAdminDashboard = () => {
           <div className="grid md:grid-cols-3 gap-6 mb-10">
             <div className="bg-purple-900 rounded-xl p-6">
               <h2 className="text-xl">Total Members</h2>
-
               <p className="text-4xl font-bold text-yellow-400">
                 {members.length}
               </p>
@@ -69,7 +69,6 @@ const OgboniAdminDashboard = () => {
 
             <div className="bg-purple-900 rounded-xl p-6">
               <h2 className="text-xl">Pending Approval</h2>
-
               <p className="text-4xl font-bold text-red-400">
                 {pending.length}
               </p>
@@ -77,7 +76,6 @@ const OgboniAdminDashboard = () => {
 
             <div className="bg-purple-900 rounded-xl p-6">
               <h2 className="text-xl">Approved Members</h2>
-
               <p className="text-4xl font-bold text-green-400">
                 {approved.length}
               </p>
@@ -92,21 +90,48 @@ const OgboniAdminDashboard = () => {
               <p>No pending applications.</p>
             ) : (
               pending.map((member) => (
-                <div key={member._id} className="border rounded-xl p-5 mb-5">
-                  <h3 className="text-xl font-bold">{member.fullName}</h3>
+                <div
+                  key={member._id}
+                  className="border rounded-xl p-6 mb-6 flex flex-col md:flex-row gap-6 items-center"
+                >
+                  {/* Passport Photo */}
+                  <div>
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.fullName}
+                        className="w-36 h-36 rounded-xl object-cover border-4 border-purple-700"
+                      />
+                    ) : (
+                      <div className="w-36 h-36 rounded-xl bg-gray-300 flex items-center justify-center text-gray-600">
+                        No Photo
+                      </div>
+                    )}
+                  </div>
 
-                  <p>{member.email}</p>
+                  {/* Member Details */}
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold">{member.fullName}</h3>
 
-                  <p>{member.phoneNumber}</p>
+                    <p>
+                      <strong>Email:</strong> {member.email}
+                    </p>
 
-                  <p>{member.occupation}</p>
+                    <p>
+                      <strong>Phone:</strong> {member.phoneNumber}
+                    </p>
 
-                  <button
-                    onClick={() => approveMember(member._id)}
-                    className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
-                  >
-                    Approve Member
-                  </button>
+                    <p>
+                      <strong>Occupation:</strong> {member.occupation}
+                    </p>
+
+                    <button
+                      onClick={() => approveMember(member._id)}
+                      className="mt-5 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold"
+                    >
+                      Approve Member
+                    </button>
+                  </div>
                 </div>
               ))
             )}
