@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 import OgboniMember from '../models/OgboniMember';
-
 import { sendApprovalEmail, sendPasswordResetEmail } from '../utils/sendEmail';
 
 // ================= REGISTER =================
@@ -12,9 +11,6 @@ export const registerMember = async (
   res: Response,
 ): Promise<void> => {
   try {
-    console.log('================ REGISTER REQUEST ================');
-    console.log(req.body);
-
     const {
       username,
       email,
@@ -56,7 +52,7 @@ export const registerMember = async (
 
     const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
-    const user = await OgboniMember.create({
+    await OgboniMember.create({
       username: username.trim(),
       email: cleanEmail,
       password: hashedPassword,
@@ -73,24 +69,21 @@ export const registerMember = async (
       address,
       reason,
 
-      // Cloudinary image URL
       photo: req.body.images?.[0] || '',
 
       approved: false,
     });
-
-    console.log('REGISTER SUCCESS:', user._id);
 
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully. Please wait for approval.',
     });
   } catch (error: any) {
-    console.error('REGISTER ERROR:', error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error?.message || 'Server error',
+      message: error.message,
     });
   }
 };
@@ -143,10 +136,15 @@ export const loginMember = async (
       return;
     }
 
+    // Convert mongoose document to plain object
+    const member = user.toObject();
+
+    delete (member as any).password;
+
     res.status(200).json({
       success: true,
       message: 'Login successful',
-      user,
+      user: member,
     });
   } catch (error: any) {
     console.error(error);
@@ -158,7 +156,7 @@ export const loginMember = async (
   }
 };
 
-// ================= GET MEMBERS =================
+// ================= GET ALL MEMBERS =================
 export const getAllMembers = async (
   req: Request,
   res: Response,
@@ -238,7 +236,6 @@ export const forgotPassword = async (
       approved: true,
     });
 
-    // Always return same message for security
     if (!member) {
       res.status(200).json({
         success: true,
@@ -248,16 +245,13 @@ export const forgotPassword = async (
       return;
     }
 
-    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
 
-    // Store hashed token
     member.passwordResetToken = crypto
       .createHash('sha256')
       .update(resetToken)
       .digest('hex');
 
-    // Token expires in 30 minutes
     member.passwordResetExpires = new Date(Date.now() + 30 * 60 * 1000);
 
     await member.save();
@@ -274,14 +268,15 @@ export const forgotPassword = async (
         'If an account exists for this email, a reset link has been sent.',
     });
   } catch (error: any) {
-    console.error('FORGOT PASSWORD ERROR:', error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error?.message || 'Server error',
+      message: error.message,
     });
   }
 };
+
 // ================= RESET PASSWORD =================
 export const resetPassword = async (
   req: Request,
@@ -299,7 +294,6 @@ export const resetPassword = async (
       return;
     }
 
-    // Hash incoming token
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const member = await OgboniMember.findOne({
@@ -315,13 +309,11 @@ export const resetPassword = async (
       return;
     }
 
-    // Update password
     member.password = await bcrypt.hash(password.trim(), 10);
 
-    // Remove reset token
     member.set({
-      passwordResetToken: undefined,
-      passwordResetExpires: undefined,
+      passwordResetToken: '',
+      passwordResetExpires: new Date(0),
     });
 
     await member.save();
@@ -331,11 +323,11 @@ export const resetPassword = async (
       message: 'Password updated successfully.',
     });
   } catch (error: any) {
-    console.error('RESET PASSWORD ERROR:', error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error?.message || 'Server error',
+      message: error.message,
     });
   }
 };

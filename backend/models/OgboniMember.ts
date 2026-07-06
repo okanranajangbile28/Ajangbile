@@ -22,6 +22,12 @@ const ogboniMemberSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Profile Photo (Cloudinary URL)
+    photo: {
+      type: String,
+      default: '',
+    },
+
     fullName: {
       type: String,
       default: '',
@@ -82,10 +88,7 @@ const ogboniMemberSchema = new mongoose.Schema(
       default: false,
     },
 
-    // ==========================
     // Password Reset
-    // ==========================
-
     passwordResetToken: {
       type: String,
       default: null,
