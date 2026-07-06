@@ -27,6 +27,7 @@ const OgboniDashboard = lazy(() => import("../pages/OgboniDashboard"));
 const OgboniAdminDashboard = lazy(
   () => import("../pages/OgboniAdminDashboard"),
 );
+const OgboniEditProfile = lazy(() => import("../pages/OgboniEditProfile"));
 
 const AdminBlogForm = lazy(
   () => import("../features/adminFeature/admin/AdminBlog/BlogForm"),
@@ -51,7 +52,6 @@ const App = () => {
           <Route element={<UserRoutes />}>
             <Route path="/" element={<HomePage />} />
 
-            {/* BLOG COMING SOON */}
             <Route
               path="/blog"
               element={
@@ -91,7 +91,6 @@ const App = () => {
               element={<OgboniForgotPassword />}
             />
 
-            {/* NEW RESET PASSWORD PAGE */}
             <Route
               path="/ogboni-reset-password/:token"
               element={<OgboniResetPassword />}
@@ -99,11 +98,15 @@ const App = () => {
 
             <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 
+            <Route
+              path="/ogboni-edit-profile"
+              element={<OgboniEditProfile />}
+            />
+
             <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
 
             <Route path="/cart" element={<CartPage />} />
 
-            {/* SHOP COMING SOON */}
             <Route
               path="/shop"
               element={

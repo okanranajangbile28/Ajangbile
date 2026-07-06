@@ -213,6 +213,58 @@ export const approveMember = async (
   }
 };
 
+// ================= UPDATE MEMBER PROFILE =================
+export const updateMemberProfile = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const member = await OgboniMember.findById(req.params.id);
+
+    if (!member) {
+      res.status(404).json({
+        success: false,
+        message: 'Member not found',
+      });
+      return;
+    }
+
+    const { fullName, phoneNumber, occupation, state, lga, city, address } =
+      req.body;
+
+    if (fullName !== undefined) member.fullName = fullName;
+    if (phoneNumber !== undefined) member.phoneNumber = phoneNumber;
+    if (occupation !== undefined) member.occupation = occupation;
+    if (state !== undefined) member.state = state;
+    if (lga !== undefined) member.lga = lga;
+    if (city !== undefined) member.city = city;
+    if (address !== undefined) member.address = address;
+
+    // Update passport photo if a new one was uploaded
+    if (req.body.images?.length) {
+      member.photo = req.body.images[0];
+    }
+
+    await member.save();
+
+    const updatedMember = member.toObject();
+    delete (updatedMember as any).password;
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully.',
+      user: updatedMember,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // ================= FORGOT PASSWORD =================
 export const forgotPassword = async (
   req: Request,

@@ -7,6 +7,7 @@ import {
   approveMember,
   forgotPassword,
   resetPassword,
+  updateMemberProfile,
 } from '../controllers/ogboniController';
 
 import { uploadPhoto, cloudUpload } from '../controllers/imageHandler';
@@ -23,6 +24,15 @@ router.post(
 );
 
 router.post('/login', loginMember);
+
+// ================= Member Profile =================
+
+router.patch(
+  '/update-profile/:id',
+  uploadPhoto(),
+  cloudUpload('ogboni-members'),
+  updateMemberProfile,
+);
 
 // ================= Password Reset =================
 

@@ -32,11 +32,7 @@ const OgboniDashboard = () => {
       return;
     }
 
-    const parsedMember = JSON.parse(storedMember);
-
-    console.log("MEMBER DATA:", parsedMember);
-
-    setMember(parsedMember);
+    setMember(JSON.parse(storedMember));
   }, [navigate]);
 
   const logout = () => {
@@ -52,30 +48,41 @@ const OgboniDashboard = () => {
     "Not Assigned";
 
   return (
-    <div className="min-h-screen bg-purple-950 text-white p-8">
+    <div className="min-h-screen bg-purple-950 text-white p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="bg-purple-900 rounded-3xl shadow-xl p-10">
+        <div className="bg-purple-900 rounded-3xl shadow-xl p-8">
           {/* Header */}
 
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-10">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <img
-                src={
-                  member?.photo ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    member?.fullName || member?.username || "Member",
-                  )}`
-                }
-                alt={member?.fullName}
-                className="w-40 h-40 rounded-full border-4 border-yellow-400 object-cover shadow-lg"
-              />
+          <div className="flex flex-col lg:flex-row justify-between gap-8">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              <div className="flex flex-col items-center">
+                <img
+                  src={
+                    member?.photo ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      member?.fullName || member?.username || "Member",
+                    )}`
+                  }
+                  alt={member?.fullName}
+                  className="w-40 h-40 rounded-full border-4 border-yellow-400 object-cover"
+                />
 
-              <div>
+                {/* Mobile Edit Button */}
+
+                <button
+                  onClick={() => navigate("/ogboni-edit-profile")}
+                  className="md:hidden mt-5 bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-xl font-bold w-full"
+                >
+                  Edit Profile
+                </button>
+              </div>
+
+              <div className="text-center md:text-left">
                 <h1 className="text-4xl font-bold text-yellow-400">
                   Welcome, Chief {member?.fullName || member?.username}
                 </h1>
 
-                <p className="mt-3 text-gray-300 text-lg leading-relaxed">
+                <p className="mt-3 text-gray-300 text-lg">
                   Confederation of Ogboni Aborigine Fraternity,
                   <br />
                   Iledi Ajangbile.
@@ -83,33 +90,37 @@ const OgboniDashboard = () => {
               </div>
             </div>
 
-            <button
-              onClick={logout}
-              className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl font-bold"
-            >
-              Logout
-            </button>
+            {/* Desktop Logout */}
+
+            <div className="hidden md:flex">
+              <button
+                onClick={logout}
+                className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl font-bold h-fit"
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
-          {/* Summary Cards */}
+          {/* Summary */}
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-6 mt-10">
             <div className="bg-purple-800 rounded-2xl p-6">
-              <h2 className="text-yellow-400 text-2xl font-bold mb-4">
+              <h2 className="text-yellow-400 text-2xl font-bold mb-3">
                 Membership Status
               </h2>
 
-              <p className="text-xl">Active Member</p>
+              <p>Active Member</p>
             </div>
 
             <div className="bg-purple-800 rounded-2xl p-6">
-              <h2 className="text-yellow-400 text-2xl font-bold mb-4">Email</h2>
+              <h2 className="text-yellow-400 text-2xl font-bold mb-3">Email</h2>
 
               <p>{member?.email}</p>
             </div>
 
             <div className="bg-purple-800 rounded-2xl p-6">
-              <h2 className="text-yellow-400 text-2xl font-bold mb-4">
+              <h2 className="text-yellow-400 text-2xl font-bold mb-3">
                 Phone Number
               </h2>
 
@@ -117,24 +128,33 @@ const OgboniDashboard = () => {
             </div>
 
             <div className="bg-purple-800 rounded-2xl p-6">
-              <h2 className="text-yellow-400 text-2xl font-bold mb-4">
+              <h2 className="text-yellow-400 text-2xl font-bold mb-3">
                 Chieftaincy Title
               </h2>
 
-              <p className="text-xl font-semibold text-yellow-300">
-                {memberTitle}
-              </p>
+              <p>{memberTitle}</p>
             </div>
           </div>
 
-          {/* Member Profile */}
+          {/* Profile */}
 
           <div className="mt-10 bg-purple-800 rounded-2xl p-8">
-            <h2 className="text-3xl text-yellow-400 font-bold mb-6">
-              Member Profile
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl text-yellow-400 font-bold">
+                Member Profile
+              </h2>
 
-            <div className="grid md:grid-cols-2 gap-6">
+              {/* Desktop Edit */}
+
+              <button
+                onClick={() => navigate("/ogboni-edit-profile")}
+                className="hidden md:block bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-2 rounded-lg font-bold"
+              >
+                Edit Profile
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-5">
               <p>
                 <strong>Full Name:</strong> {member?.fullName}
               </p>
@@ -179,6 +199,17 @@ const OgboniDashboard = () => {
                 <strong>Address:</strong> {member?.address}
               </p>
             </div>
+          </div>
+
+          {/* Mobile Logout */}
+
+          <div className="md:hidden mt-10">
+            <button
+              onClick={logout}
+              className="w-full bg-red-600 hover:bg-red-700 py-3 rounded-xl font-bold"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>
