@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import slugify from 'slugify';
 import BlogV2 from '../models/BlogV2';
 
 // ================= CREATE BLOG =================
@@ -8,14 +9,24 @@ export const createBlog = async (
   res: Response,
 ): Promise<void> => {
   try {
+    const readingTime = Math.max(
+      1,
+      Math.ceil((req.body.content || '').split(/\s+/).length / 200),
+    );
+
     const blog = await BlogV2.create({
       title: req.body.title,
+      slug: slugify(req.body.title, {
+        lower: true,
+        strict: true,
+      }),
       excerpt: req.body.excerpt,
       content: req.body.content,
       category: req.body.category,
       featured: req.body.featured === 'true',
-      published: req.body.published === 'true',
+      status: req.body.published === 'true' ? 'published' : 'draft',
       coverImage: req.body.images?.[0] || '',
+      readingTime,
     });
 
     res.status(201).json({
@@ -37,7 +48,7 @@ export const createBlog = async (
 export const getBlogs = async (req: Request, res: Response): Promise<void> => {
   try {
     const blogs = await BlogV2.find({
-      published: true,
+      status: 'published',
     }).sort({
       createdAt: -1,
     });
@@ -54,7 +65,7 @@ export const getBlogs = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// ================= GET ONE =================
+// ================= GET ONE BLOG =================
 
 export const getBlog = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -69,7 +80,6 @@ export const getBlog = async (req: Request, res: Response): Promise<void> => {
     }
 
     blog.views += 1;
-
     await blog.save();
 
     res.status(200).json({
@@ -84,7 +94,7 @@ export const getBlog = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// ================= UPDATE =================
+// ================= UPDATE BLOG =================
 
 export const updateBlog = async (
   req: Request,
@@ -93,11 +103,19 @@ export const updateBlog = async (
   try {
     const updateData: any = {
       title: req.body.title,
+      slug: slugify(req.body.title, {
+        lower: true,
+        strict: true,
+      }),
       excerpt: req.body.excerpt,
       content: req.body.content,
       category: req.body.category,
       featured: req.body.featured === 'true',
-      published: req.body.published === 'true',
+      status: req.body.published === 'true' ? 'published' : 'draft',
+      readingTime: Math.max(
+        1,
+        Math.ceil((req.body.content || '').split(/\s+/).length / 200),
+      ),
     };
 
     if (req.body.images?.length) {
@@ -128,7 +146,7 @@ export const updateBlog = async (
   }
 };
 
-// ================= DELETE =================
+// ================= DELETE BLOG =================
 
 export const deleteBlog = async (
   req: Request,
@@ -149,7 +167,7 @@ export const deleteBlog = async (
   }
 };
 
-// ================= FEATURED =================
+// ================= FEATURED BLOGS =================
 
 export const featuredBlogs = async (
   req: Request,
@@ -158,7 +176,7 @@ export const featuredBlogs = async (
   try {
     const blogs = await BlogV2.find({
       featured: true,
-      published: true,
+      status: 'published',
     }).sort({
       createdAt: -1,
     });
@@ -175,7 +193,7 @@ export const featuredBlogs = async (
   }
 };
 
-// ================= SEARCH =================
+// ================= SEARCH BLOGS =================
 
 export const searchBlogs = async (
   req: Request,
@@ -189,7 +207,7 @@ export const searchBlogs = async (
         $regex: keyword,
         $options: 'i',
       },
-      published: true,
+      status: 'published',
     });
 
     res.status(200).json({
