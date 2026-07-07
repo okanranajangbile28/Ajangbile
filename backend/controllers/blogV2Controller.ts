@@ -70,7 +70,7 @@ export const getBlog = async (req: Request, res: Response): Promise<void> => {
   try {
     const blog = await BlogV2.findOne({
       slug: req.params.slug,
-      published: true,
+      status: 'published',
     });
 
     if (!blog) {
@@ -83,6 +83,35 @@ export const getBlog = async (req: Request, res: Response): Promise<void> => {
 
     blog.views += 1;
     await blog.save();
+
+    res.status(200).json({
+      success: true,
+      blog,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ================= GET BLOG BY ID (ADMIN) =================
+
+export const getBlogById = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const blog = await BlogV2.findById(req.params.id);
+
+    if (!blog) {
+      res.status(404).json({
+        success: false,
+        message: 'Blog not found',
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,

@@ -6,6 +6,7 @@ interface Blog {
   title: string;
   category: string;
   excerpt: string;
+  content: string;
   coverImage: string;
   featured: boolean;
   published: boolean;
@@ -14,6 +15,8 @@ interface Blog {
 
 const BlogCMS = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
+
+  const [editingId, setEditingId] = useState("");
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Culture");
@@ -41,6 +44,17 @@ const BlogCMS = () => {
     loadBlogs();
   }, []);
 
+  const clearForm = () => {
+    setEditingId("");
+    setTitle("");
+    setCategory("Culture");
+    setExcerpt("");
+    setContent("");
+    setFeatured(false);
+    setPublished(true);
+    setImage(null);
+  };
+
   const submitBlog = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,26 +72,44 @@ const BlogCMS = () => {
         formData.append("image", image);
       }
 
-      await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/api/blog-v2`,
-        formData,
-      );
+      if (editingId) {
+        await axios.patch(
+          `${import.meta.env.VITE_SERVER_URL}/api/blog-v2/${editingId}`,
+          formData,
+        );
 
-      alert("Blog created successfully.");
+        alert("Blog updated successfully.");
+      } else {
+        await axios.post(
+          `${import.meta.env.VITE_SERVER_URL}/api/blog-v2`,
+          formData,
+        );
 
-      setTitle("");
-      setExcerpt("");
-      setContent("");
-      setCategory("Culture");
-      setImage(null);
-      setFeatured(false);
-      setPublished(true);
+        alert("Blog created successfully.");
+      }
 
+      clearForm();
       loadBlogs();
     } catch (err) {
       console.log(err);
-      alert("Unable to create blog.");
+      alert("Unable to save blog.");
     }
+  };
+
+  const editBlog = (blog: Blog) => {
+    setEditingId(blog._id);
+
+    setTitle(blog.title);
+    setCategory(blog.category);
+    setExcerpt(blog.excerpt);
+    setContent(blog.content);
+    setFeatured(blog.featured);
+    setPublished(blog.published);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const deleteBlog = async (id: string) => {
@@ -167,9 +199,21 @@ const BlogCMS = () => {
           </label>
         </div>
 
-        <button className="bg-purple-700 text-white px-8 py-3 rounded">
-          Publish Blog
-        </button>
+        <div className="flex gap-4">
+          <button className="bg-purple-700 text-white px-8 py-3 rounded">
+            {editingId ? "Update Blog" : "Publish Blog"}
+          </button>
+
+          {editingId && (
+            <button
+              type="button"
+              onClick={clearForm}
+              className="bg-gray-500 text-white px-8 py-3 rounded"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       <h2 className="text-3xl font-bold mt-12 mb-6">Existing Articles</h2>
@@ -204,12 +248,21 @@ const BlogCMS = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => deleteBlog(blog._id)}
-              className="bg-red-600 text-white px-5 py-2 rounded"
-            >
-              Delete
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => editBlog(blog)}
+                className="bg-blue-600 text-white px-5 py-2 rounded"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() => deleteBlog(blog._id)}
+                className="bg-red-600 text-white px-5 py-2 rounded"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         ))}
       </div>
