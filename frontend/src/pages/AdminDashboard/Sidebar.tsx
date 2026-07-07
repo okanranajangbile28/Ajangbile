@@ -22,10 +22,7 @@ const menu = [
   { name: "Pending Applications", icon: Clock3 },
   { name: "Approved Members", icon: UserCheck },
   { name: "Rejected Members", icon: UserX },
-
-  // NEW
   { name: "Blog CMS", icon: BookOpen },
-
   { name: "Email Center", icon: Mail },
   { name: "Announcements", icon: Megaphone },
   { name: "Settings", icon: Settings },
@@ -33,14 +30,15 @@ const menu = [
 
 const Sidebar = ({ active, setActive }: SidebarProps) => {
   return (
-    <aside className="w-72 bg-purple-950 text-white flex flex-col">
+    <aside className="w-72 h-screen bg-purple-950 text-white flex flex-col">
+      {/* Header */}
       <div className="p-6 border-b border-purple-800">
         <h1 className="text-2xl font-bold text-yellow-400">AJANGBILE</h1>
-
         <p className="text-gray-300 mt-1">Heritage Admin</p>
       </div>
 
-      <nav className="flex-1 p-4">
+      {/* Scrollable Navigation */}
+      <nav className="flex-1 overflow-y-auto p-4">
         {menu.map((item) => {
           const Icon = item.icon;
 
@@ -62,6 +60,7 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
         })}
       </nav>
 
+      {/* Logout */}
       <div className="p-4 border-t border-purple-800">
         <button className="w-full flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-red-600 transition">
           <LogOut size={20} />
