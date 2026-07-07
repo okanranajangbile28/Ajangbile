@@ -1,14 +1,17 @@
 import { Link } from "react-router-dom";
 
+interface Blog {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string;
+  category: string;
+  createdAt: string;
+}
+
 interface Props {
-  blog: {
-    _id: string;
-    title: string;
-    excerpt: string;
-    coverImage: string;
-    category: string;
-    createdAt: string;
-  };
+  blog: Blog;
 }
 
 const BlogCard = ({ blog }: Props) => {
@@ -37,7 +40,7 @@ const BlogCard = ({ blog }: Props) => {
           </span>
 
           <Link
-            to={`/blog/${blog._id}`}
+            to={`/blog/${blog.slug}`}
             className="text-yellow-600 font-semibold hover:underline"
           >
             Read More →

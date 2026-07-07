@@ -14,13 +14,15 @@ import { uploadPhoto, cloudUpload } from '../controllers/imageHandler';
 
 const router = express.Router();
 
-// Public Routes
+// Public
 router.get('/', getBlogs);
 router.get('/featured', featuredBlogs);
 router.get('/search', searchBlogs);
-router.get('/:id', getBlog);
 
-// Admin Routes
+// Uses the slug now
+router.get('/:slug', getBlog);
+
+// Admin
 router.post('/', uploadPhoto(), cloudUpload('blog'), createBlog);
 
 router.patch('/:id', uploadPhoto(), cloudUpload('blog'), updateBlog);

@@ -64,12 +64,14 @@ export const getBlogs = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
-
 // ================= GET ONE BLOG =================
 
 export const getBlog = async (req: Request, res: Response): Promise<void> => {
   try {
-    const blog = await BlogV2.findById(req.params.id);
+    const blog = await BlogV2.findOne({
+      slug: req.params.slug,
+      published: true,
+    });
 
     if (!blog) {
       res.status(404).json({

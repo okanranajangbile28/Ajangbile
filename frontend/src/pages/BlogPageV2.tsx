@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import BlogCard from "../components/blog/BlogCard";
 
 interface Blog {
   _id: string;
+  slug: string;
   title: string;
   excerpt: string;
   coverImage: string;
@@ -15,68 +15,57 @@ const BlogPageV2 = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadBlogs = async () => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/api/blog-v2`,
-      );
-
-      setBlogs(res.data.blogs);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    document.title = "Ajangbile Heritage | Blog";
+    document.title = "Blog | Ajangbile Heritage";
+
+    const loadBlogs = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/api/blog-v2`,
+        );
+
+        const data = await res.json();
+
+        setBlogs(data.blogs || []);
+      } catch (error) {
+        console.error("Failed to load blogs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadBlogs();
   }, []);
 
+  if (loading) {
+    return <div className="py-24 text-center text-xl">Loading articles...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* HERO */}
+    <section className="max-w-7xl mx-auto px-6 py-16">
+      <div className="text-center mb-14">
+        <h1 className="text-5xl font-bold text-[#4b0082] mb-4">
+          Ajangbile Heritage Blog
+        </h1>
 
-      <section className="bg-purple-950 text-white py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <p className="uppercase tracking-widest text-yellow-400 mb-3">
-            Ajangbile Heritage
-          </p>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Discover articles on Ifa, Ogboni, Yoruba history, African
+          spirituality, culture, and traditional wisdom.
+        </p>
+      </div>
 
-          <h1 className="text-5xl font-bold mb-5">Blog & Articles</h1>
-
-          <p className="text-xl text-gray-300 max-w-2xl">
-            Explore Yoruba culture, Ifa wisdom, Ogboni traditions, spirituality,
-            history and community news.
-          </p>
+      {blogs.length === 0 ? (
+        <div className="text-center py-20 text-gray-500 text-lg">
+          No articles have been published yet.
         </div>
-      </section>
-
-      {/* ARTICLES */}
-
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        {loading ? (
-          <h2 className="text-center text-2xl">Loading articles...</h2>
-        ) : blogs.length === 0 ? (
-          <div className="text-center py-20">
-            <h2 className="text-3xl font-bold text-purple-900">
-              No Articles Yet
-            </h2>
-
-            <p className="mt-4 text-gray-600">
-              Articles published from the Blog CMS will appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {blogs.map((blog) => (
-              <BlogCard key={blog._id} blog={blog} />
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
+      ) : (
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {blogs.map((blog) => (
+            <BlogCard key={blog._id} blog={blog} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 };
 
