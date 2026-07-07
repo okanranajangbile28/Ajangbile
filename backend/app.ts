@@ -17,6 +17,7 @@ import globalErrorHandler from './controllers/errorController';
 import productRouter from './routes/productRoutes';
 import userRouter from './routes/userRoutes';
 import blogRouter from './routes/blogRoute';
+import blogV2Router from './routes/blogV2Routes';
 import orderRouter from './routes/orderRoute';
 import ogboniRouter from './routes/ogboniRoutes';
 
@@ -128,11 +129,15 @@ app.get('/', (req, res) => {
 // ROUTES
 // ======================================================
 
+// Existing APIs
 app.use('/api/products', productRouter);
 app.use('/api/user', userRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/ogboni', ogboniRouter);
+
+// New Blog CMS (completely independent of the old blog)
+app.use('/api/blog-v2', blogV2Router);
 
 // ======================================================
 // UNKNOWN ROUTES

@@ -8,6 +8,7 @@ import {
   Megaphone,
   Settings,
   LogOut,
+  BookOpen,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -21,6 +22,10 @@ const menu = [
   { name: "Pending Applications", icon: Clock3 },
   { name: "Approved Members", icon: UserCheck },
   { name: "Rejected Members", icon: UserX },
+
+  // NEW
+  { name: "Blog CMS", icon: BookOpen },
+
   { name: "Email Center", icon: Mail },
   { name: "Announcements", icon: Megaphone },
   { name: "Settings", icon: Settings },
@@ -44,14 +49,13 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
               key={item.name}
               onClick={() => setActive(item.name)}
               className={`w-full flex items-center gap-3 px-4 py-4 rounded-xl mb-2 transition
-              ${
-                active === item.name
-                  ? "bg-yellow-500 text-purple-950 font-bold"
-                  : "hover:bg-purple-900"
-              }`}
+                ${
+                  active === item.name
+                    ? "bg-yellow-500 text-purple-950 font-bold"
+                    : "hover:bg-purple-900"
+                }`}
             >
               <Icon size={20} />
-
               {item.name}
             </button>
           );
@@ -59,7 +63,7 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
       </nav>
 
       <div className="p-4 border-t border-purple-800">
-        <button className="w-full flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-red-600">
+        <button className="w-full flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-red-600 transition">
           <LogOut size={20} />
           Logout
         </button>

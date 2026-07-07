@@ -6,6 +6,8 @@ import { HomePage, LoginPage, Privacy, TermsAndCondition } from "../pages";
 
 import ComingSoon from "../pages/ComingSoon";
 
+import AdminDashboard from "../pages/AdminDashboard";
+
 const ThesisPage = lazy(() => import("../pages/About"));
 const CartPage = lazy(() => import("../pages/CartPage"));
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
@@ -18,16 +20,31 @@ const OgboniPage = lazy(() => import("../pages/OgboniPage"));
 const ConsultationPage = lazy(() => import("../pages/ConsultationPage"));
 
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
+
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
+
 const OgboniForgotPassword = lazy(
   () => import("../pages/OgboniForgotPassword"),
 );
+
 const OgboniResetPassword = lazy(() => import("../pages/OgboniResetPassword"));
+
 const OgboniDashboard = lazy(() => import("../pages/OgboniDashboard"));
+
 const OgboniAdminDashboard = lazy(
   () => import("../pages/OgboniAdminDashboard"),
 );
+
 const OgboniEditProfile = lazy(() => import("../pages/OgboniEditProfile"));
+
+// =======================
+// NEW BLOG V2
+// =======================
+
+const BlogPageV2 = lazy(() => import("../pages/BlogPageV2"));
+const BlogDetails = lazy(() => import("../pages/BlogDetails"));
+
+// =======================
 
 const AdminBlogForm = lazy(
   () => import("../features/adminFeature/admin/AdminBlog/BlogForm"),
@@ -38,7 +55,7 @@ const AdminProductForm = lazy(
 );
 
 import UserRoutes from "../features/userFeature/user/UserRoutes";
-import { AdminOverview, AdminRoutes } from "../features/adminFeature/admin";
+import AdminRoutes from "../features/adminFeature/admin/AdminRoutes";
 
 import ScrollToTop from "../components/global_components/ScrollToTop";
 
@@ -52,29 +69,39 @@ const App = () => {
           <Route element={<UserRoutes />}>
             <Route path="/" element={<HomePage />} />
 
+            {/* ================= BLOG V2 ================= */}
+
+            <Route path="/blog" element={<BlogPageV2 />} />
+
+            <Route path="/blog/:id" element={<BlogDetails />} />
+
+            {/* ================= SHOP ================= */}
+
             <Route
-              path="/blog"
+              path="/shop"
               element={
                 <ComingSoon
-                  title="Blog"
-                  message="We're preparing inspiring articles, spiritual teachings, and cultural insights. Please check back soon."
+                  title="Online Shop"
+                  message="Our spiritual products are coming soon."
                 />
               }
             />
 
             <Route
-              path="/blog/:id"
+              path="/shop/:id"
               element={
                 <ComingSoon
-                  title="Article"
-                  message="This article will be published soon."
+                  title="Product"
+                  message="Product page coming soon."
                 />
               }
             />
 
-            <Route path="/contact" element={<ContactPage />} />
+            {/* ================= MAIN PAGES ================= */}
 
             <Route path="/about" element={<ThesisPage />} />
+
+            <Route path="/contact" element={<ContactPage />} />
 
             <Route path="/ifa" element={<IfaPage />} />
 
@@ -107,26 +134,6 @@ const App = () => {
 
             <Route path="/cart" element={<CartPage />} />
 
-            <Route
-              path="/shop"
-              element={
-                <ComingSoon
-                  title="Online Shop"
-                  message="Our collection of authentic spiritual products is being carefully prepared. The online shop will be available very soon."
-                />
-              }
-            />
-
-            <Route
-              path="/shop/:id"
-              element={
-                <ComingSoon
-                  title="Product"
-                  message="This product will be available when our online shop launches."
-                />
-              }
-            />
-
             <Route path="/checkout/:params" element={<CheckoutPage />} />
 
             <Route path="/order" element={<OrderPage />} />
@@ -135,10 +142,17 @@ const App = () => {
 
             <Route path="/privacy" element={<Privacy />} />
 
-            <Route
-              path="/admin/blog/:id"
-              element={<AdminBlogForm type="detail" />}
-            />
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
+
+          {/* ================= ADMIN ================= */}
+
+          <Route element={<AdminRoutes />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+
+            <Route path="/admin/blog" element={<AdminDashboard />} />
+
+            <Route path="/admin/product" element={<AdminDashboard />} />
 
             <Route
               path="/admin/blog/editor"
@@ -146,40 +160,19 @@ const App = () => {
             />
 
             <Route
+              path="/admin/blog/:id"
+              element={<AdminBlogForm type="detail" />}
+            />
+
+            <Route
               path="/admin/createProduct"
               element={<AdminProductForm type="create" />}
             />
 
-            <Route element={<AdminRoutes />}>
-              <Route path="/admin" element={<AdminOverview />} />
-
-              <Route
-                path="/admin/product"
-                element={
-                  <ComingSoon
-                    title="Admin Products"
-                    message="The new product management system is currently being built."
-                  />
-                }
-              />
-
-              <Route
-                path="/admin/blog"
-                element={
-                  <ComingSoon
-                    title="Admin Blog"
-                    message="The new blog management system is currently being built."
-                  />
-                }
-              />
-
-              <Route
-                path="/admin/product/:id"
-                element={<AdminProductForm type="detail" />}
-              />
-            </Route>
-
-            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/admin/product/:id"
+              element={<AdminProductForm type="detail" />}
+            />
           </Route>
 
           <Route path="*" element={<ErrorPage />} />

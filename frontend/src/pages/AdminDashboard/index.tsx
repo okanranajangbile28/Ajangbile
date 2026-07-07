@@ -10,6 +10,7 @@ import RejectedMembers from "./RejectedMembers";
 import EmailCenter from "./EmailCenter";
 import Announcements from "./Announcements";
 import Settings from "./Settings";
+import BlogCMS from "./BlogCMS";
 
 const AdminDashboard = () => {
   const [active, setActive] = useState("Dashboard");
@@ -34,6 +35,9 @@ const AdminDashboard = () => {
 
       case "Rejected Members":
         return <RejectedMembers />;
+
+      case "Blog CMS":
+        return <BlogCMS />;
 
       case "Email Center":
         return <EmailCenter />;
