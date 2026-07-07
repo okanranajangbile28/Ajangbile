@@ -24,7 +24,7 @@ export const createBlog = async (
       content: req.body.content,
       category: req.body.category,
       featured: req.body.featured === 'true',
-      status: req.body.published === 'true' ? 'published' : 'draft',
+      published: req.body.published === 'true',
       coverImage: req.body.images?.[0] || '',
       readingTime,
     });
@@ -47,14 +47,23 @@ export const createBlog = async (
 
 export const getBlogs = async (req: Request, res: Response): Promise<void> => {
   try {
+    const total = await BlogV2.countDocuments({});
+    console.log('📚 Total BlogV2 documents:', total);
+
+    const published = await BlogV2.countDocuments({
+      published: true,
+    });
+    console.log('✅ Published BlogV2 documents:', published);
+
     const blogs = await BlogV2.find({
-      status: 'published',
+      published: true,
     }).sort({
       createdAt: -1,
     });
 
     res.status(200).json({
       success: true,
+      count: blogs.length,
       blogs,
     });
   } catch (error: any) {
@@ -64,13 +73,14 @@ export const getBlogs = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
-// ================= GET ONE BLOG =================
+
+// ================= GET BLOG BY SLUG =================
 
 export const getBlog = async (req: Request, res: Response): Promise<void> => {
   try {
     const blog = await BlogV2.findOne({
       slug: req.params.slug,
-      status: 'published',
+      published: true,
     });
 
     if (!blog) {
@@ -142,7 +152,7 @@ export const updateBlog = async (
       content: req.body.content,
       category: req.body.category,
       featured: req.body.featured === 'true',
-      status: req.body.published === 'true' ? 'published' : 'draft',
+      published: req.body.published === 'true',
       readingTime: Math.max(
         1,
         Math.ceil((req.body.content || '').split(/\s+/).length / 200),
@@ -207,7 +217,7 @@ export const featuredBlogs = async (
   try {
     const blogs = await BlogV2.find({
       featured: true,
-      status: 'published',
+      published: true,
     }).sort({
       createdAt: -1,
     });
@@ -238,7 +248,7 @@ export const searchBlogs = async (
         $regex: keyword,
         $options: 'i',
       },
-      status: 'published',
+      published: true,
     });
 
     res.status(200).json({

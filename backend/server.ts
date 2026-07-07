@@ -17,11 +17,20 @@ const DB = process.env.DATABASE?.replace(
   process.env.DATABASE_PASSWORD as string,
 );
 
-mongoose.connect(DB as string).then(() => {
-  console.log('connections established');
-});
+mongoose
+  .connect(DB as string)
+  .then((conn) => {
+    console.log('✅ connections established');
+    console.log('📦 Database:', conn.connection.name);
+    console.log('🌐 Host:', conn.connection.host);
+  })
+  .catch((err) => {
+    console.log('❌ MongoDB connection failed');
+    console.log(err);
+  });
 
 const port = process.env.PORT || 3000;
+
 const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
@@ -30,6 +39,7 @@ process.on('unhandledRejection', (err) => {
   if (err instanceof Error) {
     console.log('UNHANDLED REJECTION! 💥 Shutting down...');
     console.log(err.name, err.message);
+
     server.close(() => {
       process.exit(1);
     });
@@ -38,6 +48,7 @@ process.on('unhandledRejection', (err) => {
 
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+
   server.close(() => {
     console.log('💥 Process terminated!');
   });
