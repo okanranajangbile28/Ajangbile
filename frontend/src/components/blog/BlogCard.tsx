@@ -17,11 +17,13 @@ interface Props {
 const BlogCard = ({ blog }: Props) => {
   return (
     <article className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden">
-      <img
-        src={blog.coverImage}
-        alt={blog.title}
-        className="w-full h-64 object-cover"
-      />
+      <div className="w-full bg-gray-100">
+        <img
+          src={blog.coverImage}
+          alt={blog.title}
+          className="w-full aspect-[4/3] object-contain"
+        />
+      </div>
 
       <div className="p-6">
         <span className="inline-block bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full mb-4">

@@ -64,11 +64,13 @@ const BlogDetails = () => {
 
   return (
     <article className="max-w-4xl mx-auto py-16 px-6">
-      <img
-        src={blog.coverImage}
-        alt={blog.title}
-        className="w-full h-[450px] object-cover rounded-2xl mb-10"
-      />
+      <div className="w-full bg-gray-100 rounded-2xl overflow-hidden mb-10">
+        <img
+          src={blog.coverImage}
+          alt={blog.title}
+          className="w-full object-contain"
+        />
+      </div>
 
       <span className="inline-block bg-purple-100 text-purple-700 px-4 py-2 rounded-full mb-6">
         {blog.category}
