@@ -9,6 +9,8 @@ declare global {
   }
 }
 
+export {};
+
 export interface PopOptions {
   path: string;
   select?: string;
@@ -92,7 +94,7 @@ interface IPaymentInfo {
   status?: string;
 }
 
-interface IOrder extends Document {
+export interface IOrder extends Document {
   shippingInfo: IShippingInfo;
   additionalInfo?: string;
   orderItems: IOrderItem[];
@@ -205,7 +207,7 @@ export interface IUserMethods {
 
 // ================= TESTIMONIAL =================
 
-interface ITestimonial extends Document {
+export interface ITestimonial extends Document {
   fullName: string;
   quote: string;
   authorImage: string;
@@ -213,7 +215,7 @@ interface ITestimonial extends Document {
 
 // ================= BLOG =================
 
-interface IBlog extends Document {
+export interface IBlog extends Document {
   title: string;
   author: string;
   summary: string;
