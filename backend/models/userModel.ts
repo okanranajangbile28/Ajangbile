@@ -17,11 +17,17 @@ const userSchema = new Schema<IUser, Model<IUser>, IUserMethods>({
     trim: true,
   },
 
+  fullname: {
+    type: String,
+    required: [true, 'Please provide your full name'],
+    trim: true,
+  },
+
   username: {
     type: String,
     lowercase: true,
     unique: true,
-    required: [true, 'Please tell us your username!'],
+    required: [true, 'Please provide a username'],
     trim: true,
   },
 
@@ -33,6 +39,49 @@ const userSchema = new Schema<IUser, Model<IUser>, IUserMethods>({
     validate: [validator.isEmail, 'Please provide a valid email'],
   },
 
+  phone: {
+    type: String,
+    required: [true, 'Please provide your phone number'],
+    trim: true,
+  },
+
+  gender: {
+    type: String,
+    required: [true, 'Please select your gender'],
+  },
+
+  occupation: {
+    type: String,
+    required: [true, 'Please provide your occupation'],
+    trim: true,
+  },
+
+  chieftaincyTitle: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+
+  state: {
+    type: String,
+    required: [true, 'Please provide your state'],
+  },
+
+  localGovernment: {
+    type: String,
+    required: [true, 'Please provide your local government'],
+  },
+
+  city: {
+    type: String,
+    required: [true, 'Please provide your city'],
+  },
+
+  address: {
+    type: String,
+    required: [true, 'Please provide your address'],
+  },
+
   // Cloudinary profile image URL
   photo: {
     type: String,
@@ -41,8 +90,21 @@ const userSchema = new Schema<IUser, Model<IUser>, IUserMethods>({
 
   role: {
     type: String,
-    enum: ['admin', 'developer'],
-    default: 'admin',
+    enum: ['admin', 'developer', 'member'],
+    default: 'member',
+  },
+
+  approvalStatus: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected'],
+    default: 'Pending',
+  },
+
+  approvedAt: Date,
+
+  approvedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
   },
 
   password: {

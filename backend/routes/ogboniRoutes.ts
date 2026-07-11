@@ -5,6 +5,7 @@ import {
   loginMember,
   getAllMembers,
   approveMember,
+  rejectMember,
   forgotPassword,
   resetPassword,
   updateMemberProfile,
@@ -45,5 +46,7 @@ router.patch('/reset-password/:token', resetPassword);
 router.get('/members', getAllMembers);
 
 router.patch('/approve/:id', approveMember);
+
+router.delete('/reject/:id', rejectMember);
 
 export default router;

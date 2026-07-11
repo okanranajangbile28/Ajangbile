@@ -18,6 +18,8 @@ import productRouter from './routes/productRoutes';
 import userRouter from './routes/userRoutes';
 import blogRouter from './routes/blogRoute';
 import blogV2Router from './routes/blogV2Routes';
+import membershipApplicationRouter from './routes/membershipApplicationRoutes';
+import memberSignupRouter from './routes/memberSignupRoutes';
 import orderRouter from './routes/orderRoute';
 import ogboniRouter from './routes/ogboniRoutes';
 
@@ -136,8 +138,14 @@ app.use('/api/blogs', blogRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/ogboni', ogboniRouter);
 
-// New Blog CMS (completely independent of the old blog)
+// Blog CMS
 app.use('/api/blog-v2', blogV2Router);
+
+// Membership Applications
+app.use('/api/membership-applications', membershipApplicationRouter);
+
+// Existing Member Online Login Requests
+app.use('/api/member-signup', memberSignupRouter);
 
 // ======================================================
 // UNKNOWN ROUTES

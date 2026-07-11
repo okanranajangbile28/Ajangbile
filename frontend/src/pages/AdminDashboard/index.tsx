@@ -4,9 +4,14 @@ import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 import DashboardHome from "./DashboardHome";
 
+import OgboniMembers from "./OgboniMembers";
+import OgboniAccountApplications from "./OgboniAccountApplications";
+
 import PendingApplications from "./PendingApplications";
+import MembershipApplications from "./MembershipApplications";
 import ApprovedMembers from "./ApprovedMembers";
 import RejectedMembers from "./RejectedMembers";
+
 import EmailCenter from "./EmailCenter";
 import Announcements from "./Announcements";
 import Settings from "./Settings";
@@ -20,20 +25,22 @@ const AdminDashboard = () => {
       case "Dashboard":
         return <DashboardHome />;
 
-      case "Members":
-        return (
-          <div className="p-8 text-xl font-semibold">
-            Members Page (Coming Next)
-          </div>
-        );
+      case "Ogboni Members":
+        return <OgboniMembers />;
+
+      case "Ogboni Account Applications":
+        return <OgboniAccountApplications />;
+
+      case "Membership Applications":
+        return <MembershipApplications />;
 
       case "Pending Applications":
         return <PendingApplications />;
 
-      case "Approved Members":
+      case "Approved Applicants":
         return <ApprovedMembers />;
 
-      case "Rejected Members":
+      case "Rejected Applicants":
         return <RejectedMembers />;
 
       case "Blog CMS":

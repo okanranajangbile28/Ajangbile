@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { Landmark, UserPlus } from "lucide-react";
+
 import ogboniLogo from "../assets/Ogboni-logo.png";
 import eldersImage from "../assets/Ogboni-elders.jpg";
 
@@ -39,7 +41,7 @@ function OgboniPage() {
   return (
     <div className="min-h-screen bg-purple-950 text-white py-16 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
           <img
             src={ogboniLogo}
@@ -60,7 +62,7 @@ function OgboniPage() {
           </div>
         </div>
 
-        {/* About Section */}
+        {/* About */}
         <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
           <div>
             <h2 className="text-4xl font-bold text-yellow-400 mb-6">
@@ -94,7 +96,7 @@ function OgboniPage() {
         </div>
 
         {/* Core Values */}
-        <div className="mb-20">
+        <div className="mb-24">
           <h2 className="text-4xl text-center font-bold text-yellow-400 mb-12">
             Our Core Values
           </h2>
@@ -115,32 +117,71 @@ function OgboniPage() {
           </div>
         </div>
 
-        {/* Members Portal */}
-        <div className="bg-purple-900 border border-yellow-500 rounded-3xl p-12 text-center">
-          <h2 className="text-4xl font-bold text-yellow-400 mb-6">
-            Members Portal
+        {/* Portal Options */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-yellow-400 mb-5">
+            Begin Your Journey
           </h2>
 
-          <p className="text-lg text-gray-300 mb-8">
-            Access exclusive resources, updates and fraternity announcements
-            through the secure members portal.
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+            Whether you are an existing member of Iledi Ajangbile or wish to
+            begin your journey into the fraternity, choose one of the options
+            below.
           </p>
+        </div>
 
-          <div className="flex flex-col md:flex-row justify-center gap-6">
-            <Link
-              to="/ogboni-login"
-              className="bg-yellow-500 hover:bg-yellow-600 text-black px-10 py-4 rounded-full font-bold transition duration-300"
-            >
-              Login
-            </Link>
+        <div className="grid md:grid-cols-2 gap-10">
+          {/* Iledi */}
+          <Link
+            to="/iledi-ajangbile"
+            className="group bg-purple-900 border border-yellow-500 rounded-3xl p-10 text-center shadow-xl hover:scale-105 hover:bg-purple-800 transition duration-300"
+          >
+            <div className="flex justify-center mb-6">
+              <Landmark
+                size={70}
+                className="text-yellow-400 group-hover:scale-110 transition"
+              />
+            </div>
 
-            <Link
-              to="/ogboni/signup"
-              className="border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black px-10 py-4 rounded-full font-bold transition duration-300"
-            >
-              Sign Up
-            </Link>
-          </div>
+            <h3 className="text-3xl font-bold text-yellow-300 mb-5">
+              Iledi Ajangbile
+            </h3>
+
+            <p className="text-gray-300 leading-8 mb-8">
+              Access the official members' portal to log in, create your account
+              after approval, and stay connected with fraternity activities.
+            </p>
+
+            <span className="inline-block bg-yellow-500 text-black px-8 py-3 rounded-full font-bold">
+              Enter Iledi →
+            </span>
+          </Link>
+
+          {/* Become Member */}
+          <Link
+            to="/become-member"
+            className="group bg-purple-900 border border-yellow-500 rounded-3xl p-10 text-center shadow-xl hover:scale-105 hover:bg-purple-800 transition duration-300"
+          >
+            <div className="flex justify-center mb-6">
+              <UserPlus
+                size={70}
+                className="text-yellow-400 group-hover:scale-110 transition"
+              />
+            </div>
+
+            <h3 className="text-3xl font-bold text-yellow-300 mb-5">
+              Become a Member
+            </h3>
+
+            <p className="text-gray-300 leading-8 mb-8">
+              Submit your membership application and begin your journey toward
+              becoming part of the Confederation of Ogboni Aborigine Fraternity.
+            </p>
+
+            <span className="inline-block border-2 border-yellow-500 text-yellow-300 px-8 py-3 rounded-full font-bold group-hover:bg-yellow-500 group-hover:text-black transition">
+              Apply Now →
+            </span>
+          </Link>
         </div>
       </div>
     </div>

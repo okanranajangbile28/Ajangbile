@@ -2,10 +2,11 @@ import { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { Loading } from "../components/global_components";
-import { HomePage, LoginPage, Privacy, TermsAndCondition } from "../pages";
+import { HomePage, Privacy, TermsAndCondition } from "../pages";
 
 import ComingSoon from "../pages/ComingSoon";
 import AdminDashboard from "../pages/AdminDashboard";
+import AdminLogin from "../pages/AdminLogin";
 
 import UserRoutes from "../features/userFeature/user/UserRoutes";
 import AdminRoutes from "../features/adminFeature/admin/AdminRoutes";
@@ -25,24 +26,31 @@ const IfaPage = lazy(() => import("../pages/IfaPage"));
 const OgboniPage = lazy(() => import("../pages/OgboniPage"));
 const ConsultationPage = lazy(() => import("../pages/ConsultationPage"));
 
+const IlediAjangbile = lazy(() => import("../pages/IlediAjangbile"));
+const BecomeMember = lazy(() => import("../pages/BecomeMember"));
+
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
 const OgboniForgotPassword = lazy(
   () => import("../pages/OgboniForgotPassword"),
 );
 const OgboniResetPassword = lazy(() => import("../pages/OgboniResetPassword"));
+
 const OgboniDashboard = lazy(() => import("../pages/OgboniDashboard"));
+
 const OgboniAdminDashboard = lazy(
   () => import("../pages/OgboniAdminDashboard"),
 );
+
 const OgboniEditProfile = lazy(() => import("../pages/OgboniEditProfile"));
 
-// ================= BLOG V2 =================
+// ================= BLOG =================
 
 const BlogPageV2 = lazy(() => import("../pages/BlogPageV2"));
+
 const BlogDetails = lazy(() => import("../pages/BlogDetails"));
 
-// ================= OLD ADMIN FORMS =================
+// ================= ADMIN =================
 
 const AdminBlogForm = lazy(
   () => import("../features/adminFeature/admin/AdminBlog/BlogForm"),
@@ -59,16 +67,22 @@ const App = () => {
 
       <Suspense fallback={<Loading />}>
         <Routes>
-          {/* ================= PUBLIC ================= */}
+          {/* ================= PUBLIC + USER ROUTES ================= */}
 
           <Route element={<UserRoutes />}>
             <Route path="/" element={<HomePage />} />
 
+            {/* Admin Login MUST stay outside AdminRoutes */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+
             {/* Blog */}
+
             <Route path="/blog" element={<BlogPageV2 />} />
+
             <Route path="/blog/:slug" element={<BlogDetails />} />
 
             {/* Shop */}
+
             <Route
               path="/shop"
               element={
@@ -89,17 +103,33 @@ const App = () => {
               }
             />
 
-            {/* Main Pages */}
+            {/* Main */}
+
             <Route path="/about" element={<AboutPage />} />
+
             <Route path="/contact" element={<ContactPage />} />
+
             <Route path="/ifa" element={<IfaPage />} />
+
             <Route path="/ogboni" element={<OgboniPage />} />
+
+            <Route path="/iledi-ajangbile" element={<IlediAjangbile />} />
+
+            <Route path="/become-member" element={<BecomeMember />} />
+
             <Route path="/consultation" element={<ConsultationPage />} />
 
-            {/* Ogboni */}
+            {/* Member Authentication */}
+
+            <Route path="/signup" element={<OgboniSignupPage />} />
+
             <Route path="/ogboni/signup" element={<OgboniSignupPage />} />
 
+            <Route path="/login" element={<OgboniLoginPage />} />
+
             <Route path="/ogboni-login" element={<OgboniLoginPage />} />
+
+            <Route path="/forgot-password" element={<OgboniForgotPassword />} />
 
             <Route
               path="/ogboni-forgot-password"
@@ -107,9 +137,16 @@ const App = () => {
             />
 
             <Route
+              path="/reset-password/:token"
+              element={<OgboniResetPassword />}
+            />
+
+            <Route
               path="/ogboni-reset-password/:token"
               element={<OgboniResetPassword />}
             />
+
+            {/* Member Dashboard */}
 
             <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 
@@ -121,20 +158,21 @@ const App = () => {
             <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
 
             {/* Checkout */}
+
             <Route path="/cart" element={<CartPage />} />
+
             <Route path="/checkout/:params" element={<CheckoutPage />} />
+
             <Route path="/order" element={<OrderPage />} />
 
             {/* Legal */}
+
             <Route path="/terms-of-use" element={<TermsAndCondition />} />
 
             <Route path="/privacy" element={<Privacy />} />
-
-            {/* Login */}
-            <Route path="/login" element={<LoginPage />} />
           </Route>
 
-          {/* ================= ADMIN ================= */}
+          {/* ================= PROTECTED ADMIN ================= */}
 
           <Route element={<AdminRoutes />}>
             <Route path="/admin" element={<AdminDashboard />} />
@@ -143,7 +181,6 @@ const App = () => {
 
             <Route path="/admin/product" element={<AdminDashboard />} />
 
-            {/* Existing editor */}
             <Route
               path="/admin/blog/editor"
               element={<AdminBlogForm type="create" />}
@@ -154,7 +191,6 @@ const App = () => {
               element={<AdminBlogForm type="detail" />}
             />
 
-            {/* Products */}
             <Route
               path="/admin/createProduct"
               element={<AdminProductForm type="create" />}
@@ -166,7 +202,6 @@ const App = () => {
             />
           </Route>
 
-          {/* 404 */}
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </Suspense>

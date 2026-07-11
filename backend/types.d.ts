@@ -1,5 +1,3 @@
-import { Request } from 'express';
-import { IUser } from './models/userModel';
 import { Document, Model, Query, Types } from 'mongoose';
 
 declare global {
@@ -148,7 +146,7 @@ export interface IReviewQuery extends Query<any, IReview> {
 }
 
 export interface IReviewStatics {
-  calcAverageRatings: (productId: Types.ObjectId) => void;
+  calcAverageRatings(productId: Types.ObjectId): void;
 }
 
 // ================= USER =================
@@ -156,19 +154,39 @@ export interface IReviewStatics {
 export interface IUser extends Document {
   firstname: string;
   lastname: string;
+  fullname: string;
+
   username: string;
   email: string;
 
-  // Cloudinary profile picture URL
+  phone: string;
+  gender: string;
+  occupation: string;
+
+  chieftaincyTitle?: string;
+
+  state: string;
+  localGovernment: string;
+  city: string;
+  address: string;
+
   photo?: string;
 
-  role: 'admin' | 'developer';
+  role: 'admin' | 'developer' | 'member';
+
+  approvalStatus: 'Pending' | 'Approved' | 'Rejected';
+
+  approvedAt?: Date;
+
+  approvedBy?: Types.ObjectId;
 
   password: string;
-  passwordConfirm: string | undefined;
+  passwordConfirm?: string;
 
   passwordChangedAt?: Date;
+
   passwordResetToken?: string;
+
   passwordResetExpires?: number;
 
   active: boolean;

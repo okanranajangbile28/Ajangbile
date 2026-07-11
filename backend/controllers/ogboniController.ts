@@ -213,6 +213,36 @@ export const approveMember = async (
   }
 };
 
+// ================= REJECT MEMBER =================
+export const rejectMember = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const member = await OgboniMember.findById(req.params.id);
+
+    if (!member) {
+      res.status(404).json({
+        success: false,
+        message: 'Member not found',
+      });
+      return;
+    }
+
+    await member.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Application rejected successfully.',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // ================= UPDATE MEMBER PROFILE =================
 export const updateMemberProfile = async (
   req: Request,

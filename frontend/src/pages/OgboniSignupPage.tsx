@@ -21,7 +21,6 @@ const OgboniSignupPage = () => {
     lga: "",
     city: "",
     address: "",
-    reason: "",
   });
 
   const [image, setImage] = useState<File | null>(null);
@@ -81,7 +80,7 @@ const OgboniSignupPage = () => {
           replace: true,
           state: {
             message:
-              "Your membership application has been submitted successfully. Please wait for approval before logging in.",
+              "Your member account application has been submitted successfully. Please wait for administrator approval before logging in.",
           },
         });
       } else {
@@ -98,8 +97,15 @@ const OgboniSignupPage = () => {
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl p-10">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-purple-900">
-            Ogboni Membership Application Form
+            Member Account Application Form
           </h1>
+
+          <p className="mt-4 text-gray-600 max-w-3xl mx-auto leading-7">
+            Complete this application to request an online member account. Your
+            application will be reviewed by an administrator. Once approved, you
+            will be able to log in and access the members-only area of the Iledi
+            Ajangbile portal.
+          </p>
         </div>
 
         {error && (
@@ -253,17 +259,8 @@ const OgboniSignupPage = () => {
 
             <textarea
               name="address"
-              placeholder="Address"
+              placeholder="Residential Address"
               value={formData.address}
-              onChange={handleChange}
-              className="border p-4 rounded-xl md:col-span-2"
-              required
-            />
-
-            <textarea
-              name="reason"
-              placeholder="Why do you want to join?"
-              value={formData.reason}
               onChange={handleChange}
               className="border p-4 rounded-xl md:col-span-2"
               required
