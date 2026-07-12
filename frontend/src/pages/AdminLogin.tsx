@@ -6,9 +6,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,21 +17,24 @@ const AdminLogin = () => {
 
       const res = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/api/user/admin-login`,
-
         {
           email,
           password,
         },
-
         {
           withCredentials: true,
         },
       );
 
       if (res.data.status === "success") {
+        // Save JWT token
+        localStorage.setItem("token", res.data.token);
+
+        // Save logged in user
         localStorage.setItem("user", JSON.stringify(res.data.data.user));
 
-        navigate("/admin");
+        // Go to dashboard
+        navigate("/admin", { replace: true });
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {

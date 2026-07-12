@@ -9,14 +9,28 @@ const AdminRoutes = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setAuthorized(false);
+          setLoading(false);
+          return;
+        }
+
         const response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/api/user/me`,
           {
-            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
         );
 
-        const user = response.data?.data?.user;
+        // IMPORTANT:
+        // Your backend returns:
+        // { status: "success", data: { ...user } }
+
+        const user = response.data.data;
 
         if (user && (user.role === "admin" || user.role === "developer")) {
           setAuthorized(true);
@@ -27,7 +41,9 @@ const AdminRoutes = () => {
 
           localStorage.removeItem("user");
         }
-      } catch {
+      } catch (error) {
+        console.error(error);
+
         setAuthorized(false);
 
         localStorage.removeItem("user");
