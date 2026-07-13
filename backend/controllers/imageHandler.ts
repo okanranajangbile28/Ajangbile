@@ -13,86 +13,88 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
-console.log('API Key:', process.env.CLOUDINARY_API_KEY);
-console.log('API Secret exists:', !!process.env.CLOUDINARY_API_SECRET);
-
 // ===================== MULTER =====================
 
-const multerStorage = multer.memoryStorage();
+const storage = multer.memoryStorage();
 
-const multerFilter = (
+const fileFilter = (
   req: Request,
   file: Express.Multer.File,
   cb: FileFilterCallback,
 ) => {
+  console.log('Uploading file:', file.originalname);
+
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
-    cb(new AppError('Not an image! Please upload an image', 400));
+    cb(new AppError('Only images are allowed', 400));
   }
 };
 
 const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
+  storage,
+  fileFilter,
 });
+
+// ===================== EXPORTS =====================
 
 export const noUpload = () => upload.none();
 
 export const uploadPhoto = () => upload.single('image');
 
-export const multiplePhotos = (entries: { name: string; maxCount: number }[]) =>
-  upload.fields(entries);
+export const multiplePhotos = (fields: { name: string; maxCount: number }[]) =>
+  upload.fields(fields);
 
-export const multipleSinglePhotos = (entry: {
+export const multipleSinglePhotos = (field: {
   name: string;
   maxCount: number;
-}) => upload.array(entry.name, entry.maxCount);
+}) => upload.array(field.name, field.maxCount);
 
 // ===================== CLOUDINARY UPLOAD =====================
 
 export const cloudUpload = (folder: string) =>
   catchAsync(async (req, res, next) => {
+    console.log('FILES RECEIVED:');
+    console.log(req.files);
+
     let files: Express.Multer.File[] = [];
 
-    if (req.file) {
-      files = [req.file];
-    } else if (Array.isArray(req.files)) {
+    if (Array.isArray(req.files)) {
       files = req.files;
-    } else if (req.files && typeof req.files === 'object') {
-      files = Object.values(req.files).flat() as Express.Multer.File[];
     }
 
-    // No image uploaded? Continue without uploading.
     if (!files.length) {
+      console.log('NO FILES FOUND');
+
       req.body.images = [];
+
       return next();
     }
 
-    const uploadImage = (file: Express.Multer.File) =>
-      new Promise<string>((resolve, reject) => {
+    const uploadImage = (file: Express.Multer.File): Promise<string> => {
+      return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder,
+
+            public_id: `product-${Date.now()}-${crypto
+              .randomBytes(6)
+              .toString('hex')}`,
+
             resource_type: 'image',
-            format: 'webp',
+
             transformation: [
               {
-                width: 2500,
-                height: 2500,
+                width: 2000,
+                height: 2000,
                 crop: 'limit',
               },
             ],
-            public_id: `OA-${Date.now()}-${crypto
-              .randomBytes(8)
-              .toString('hex')}`,
           },
+
           (error, result) => {
             if (error) {
-              return reject(
-                new AppError(`Cloudinary upload error: ${error.message}`, 500),
-              );
+              return reject(new AppError(error.message, 500));
             }
 
             resolve(result!.secure_url);
@@ -101,33 +103,22 @@ export const cloudUpload = (folder: string) =>
 
         stream.end(file.buffer);
       });
+    };
 
-    const uploadedImages = await Promise.all(
-      files.map((file) => uploadImage(file)),
-    );
+    const uploadedImages = await Promise.all(files.map(uploadImage));
+
+    console.log('CLOUDINARY IMAGES:', uploadedImages);
 
     req.body.images = uploadedImages;
 
     next();
   });
 
-// ===================== PROCESS MULTIPLE =====================
+// ===================== PROCESS =====================
 
 export const processMultipleImages = catchAsync(async (req, res, next) => {
-  if (req.files && Array.isArray(req.files)) {
-    const fileImages = req.files.map(
-      (image: Express.Multer.File) => image.path,
-    );
-
-    if (req.body.images) {
-      if (!Array.isArray(req.body.images)) {
-        req.body.images = [req.body.images];
-      }
-
-      req.body.images = [...req.body.images, ...fileImages];
-    } else {
-      req.body.images = fileImages;
-    }
+  if (!req.body.images) {
+    req.body.images = [];
   }
 
   next();

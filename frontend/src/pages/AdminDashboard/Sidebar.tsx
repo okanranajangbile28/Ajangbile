@@ -5,6 +5,7 @@ import {
   Clock3,
   UserCheck,
   UserX,
+  ShoppingBag,
   Mail,
   BookOpen,
   LogOut,
@@ -47,6 +48,13 @@ const menu = [
     name: "Rejected Applicants",
     icon: UserX,
   },
+
+  // NEW PRODUCT SECTION
+  {
+    name: "Products",
+    icon: ShoppingBag,
+  },
+
   {
     name: "Blog CMS",
     icon: BookOpen,

@@ -35,7 +35,7 @@ const Navbar = () => {
         >
           <img
             src="/images/ajangbile-logo.png"
-            alt="Ajangbile Heritage Logo"
+            alt="Àjàngbìlẹ̀ Heritage Logo"
             className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain"
           />
 
@@ -45,7 +45,7 @@ const Navbar = () => {
             </div>
 
             <div className="text-[18px] sm:text-[24px] lg:text-[30px]">
-              Ajangbile
+              Àjàngbìlẹ̀
             </div>
           </div>
         </Link>

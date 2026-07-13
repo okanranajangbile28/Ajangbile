@@ -1,102 +1,205 @@
-// import { FaMinus, FaPlus } from 'react-icons/fa6';
-import { priceFormat } from '../utils/constants';
-// import { mockProduct1 } from '../assets';
-import SuggestedProducts from '../features/productFeature/product/SuggestedProducts';
-import { AddToCart } from '../features/cartFeature/cart';
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../App/hooks';
-import { useParams } from 'react-router-dom';
-import { fetchSingleProduct } from '../features/productFeature/productSlice';
-import { Loading } from '../components/global_components';
-import ImageWithSkeleton from '../components/global_components/ImageWithSkeleton';
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ShieldCheck, Truck, CheckCircle2, ArrowLeft } from "lucide-react";
+
+import { useAppDispatch, useAppSelector } from "../App/hooks";
+import { fetchSingleProduct } from "../features/productFeature/productSlice";
+
+import { priceFormat } from "../utils/constants";
+
+import SuggestedProducts from "../features/productFeature/product/SuggestedProducts";
+import { AddToCart } from "../features/cartFeature/cart";
+
+import { Loading } from "../components/global_components";
+import ImageWithSkeleton from "../components/global_components/ImageWithSkeleton";
 
 const SingleProductPage = () => {
-	const { id } = useParams();
-	const dispatch = useAppDispatch();
-	const { single_product, single_product_loading } = useAppSelector(
-		(state) => state.product
-	);
+  const { id } = useParams();
 
-	useEffect(() => {
-		document.title = `Okanran Ajangbile | ${single_product.productName}`;
-	}, [single_product.productName]);
+  const dispatch = useAppDispatch();
 
-	useEffect(() => {
-		dispatch(fetchSingleProduct(id!));
-	}, [id]);
-	return single_product_loading ? (
-		<Loading />
-	) : (
-		<div className='flex flex-col pt-[20px] pb-[80px] bg-white'>
-			<div className='flex flex-col items-center pt-[24px] px-[10px] pr-[10px] gap-[24px] bg-white'>
-				<div className='grid md:grid-cols-2 pt-[24px] px-[12px] sm:px-[24px] md:pr-[52px] pb-[24px] md:pl-[53px] gap-[24px] md:gap-[82px] justify-between'>
-					<div className='flex flex-col gap-[16px]'>
-						<div className='rounded-[4px] aspect-square w-full md:min-w-[300px] xl:max-w-[509px] xl:max-h-[509px] relative'>
-							<ImageWithSkeleton
-								src={single_product.images[0]}
-								alt=''
-								customStyle='w-full h-full object-contain'
-							/>
-						</div>
-						<div className='grid grid-cols-4 items-center gap-[16px]'>
-							{/* variation block */}
-							<div className='rounded-[4px] w-full min-h-[50px] aspect-square md:min-h-[109px] relative'>
-								<ImageWithSkeleton
-									src={single_product.images[0]}
-									alt=''
-									customStyle='object-cover'
-								/>
-							</div>
-						</div>
-					</div>
-					<div className='flex flex-col gap-[18px]'>
-						<div className='flex flex-col gap-[12px]'>
-							<div className='flex flex-col'>
-								{/* <div className='font-Open text-[20px] leading-[32px] text-[rgba(0,0,0,0.6)] items-center flex'>
-									Products
-								</div> */}
-								<div className='font-Manrope font-semibold text-[22px] leading-[100%] sm:leading-[60px] flex items-center text-[#ccb0e0]'>
-									{single_product.productName}
-								</div>
-							</div>
-							<div className='flex flex-col gap-[4px]'>
-								<div className='font-Manrope font-extrabold text-[24px] md:text-[32px] leading-[60px] text-black'>
-									{priceFormat(single_product.price)}
-								</div>
-								<div className='font-Open text-[14px] md:text-[18px] leading-[32px] flex items-center text-[rgba(134,68,180,0.7)]'>
-									{single_product.description}
-								</div>
-							</div>
-						</div>
-						{/* <div className='flex flex-col justify-center items-start gap-[12px]'>
-							<div className='flex justify-between w-full font-Manrope font-extrabold text-[22px] leading-[19px] text-[#4b0082] capitalize'>
-								<div>count</div>
-								{single_product.unit && (
-									<div className='text-[16px]'>Per {single_product.unit}</div>
-								)}
-							</div>
-							<div className='flex justify-center items-center p-[24px] gap-[8px] bg-[rgba(237,229,229,0.4)] rounded-[4px] w-full'>
-								<div className='flex justify-center items-center p-[10px] gap-[10px] text-[14px] text-black'>
-									<FaMinus />
-								</div>
-								<div className='justify-center items-center py-[4px] px-[11px] gap-[10px] border-2 border-black rounded-[4px]'>
-									<input
-										type='number'
-										className='bg-transparent w-[35px] text-center focus:outline-none'
-									/>
-								</div>
-								<div className='flex justify-center items-center p-[10px] gap-[10px] text-[14px] text-black'>
-									<FaPlus />
-								</div>
-							</div>
-						</div> */}
-						<AddToCart product={single_product} />
-					</div>
-				</div>
-			</div>
-			<SuggestedProducts />
-		</div>
-	);
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  const { single_product, single_product_loading } = useAppSelector(
+    (state) => state.product,
+  );
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchSingleProduct(id));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (single_product.productName) {
+      document.title = `${single_product.productName} | Ajangbile Heritage`;
+    }
+  }, [single_product.productName]);
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [single_product]);
+
+  if (single_product_loading) {
+    return <Loading />;
+  }
+
+  return (
+    <div className="bg-gray-50">
+      {/* HERO */}
+
+      <section className="bg-gradient-to-r from-purple-950 via-purple-900 to-purple-800 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <Link
+            to="/shop"
+            className="inline-flex items-center gap-2 text-yellow-300 hover:text-white transition mb-10"
+          >
+            <ArrowLeft size={18} />
+            Back to Shop
+          </Link>
+
+          <p className="uppercase tracking-[6px] text-yellow-400 font-semibold">
+            Ajangbile Heritage
+          </p>
+
+          <h1 className="text-4xl md:text-6xl font-black text-white mt-5">
+            {single_product.productName}
+          </h1>
+        </div>
+      </section>
+
+      {/* PRODUCT */}
+
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* LEFT */}
+
+          <div>
+            <div className="bg-white rounded-3xl shadow-xl p-8">
+              <ImageWithSkeleton
+                src={
+                  single_product.images?.[selectedImage] ??
+                  single_product.images?.[0]
+                }
+                alt={single_product.productName}
+                customStyle="w-full h-[550px] object-contain"
+              />
+            </div>
+
+            {single_product.images?.length > 1 && (
+              <div className="grid grid-cols-4 gap-4 mt-6">
+                {single_product.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`rounded-2xl overflow-hidden border-2 transition ${
+                      selectedImage === index
+                        ? "border-yellow-500"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <ImageWithSkeleton
+                      src={image}
+                      alt={single_product.productName}
+                      customStyle="w-full h-24 object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT */}
+
+          <div>
+            <div className="flex flex-wrap gap-3">
+              <span className="bg-purple-100 text-purple-900 px-4 py-2 rounded-full font-semibold capitalize">
+                {single_product.category}
+              </span>
+
+              <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full font-semibold">
+                In Stock
+              </span>
+            </div>
+
+            <h2 className="text-5xl font-black text-purple-950 mt-8">
+              {single_product.productName}
+            </h2>
+
+            <div className="text-4xl font-black text-yellow-600 mt-6">
+              {priceFormat(single_product.price)}
+            </div>
+
+            <p className="text-gray-600 leading-8 text-lg mt-8">
+              {single_product.description}
+            </p>
+
+            <div className="grid gap-5 mt-10">
+              <div className="flex items-center gap-4 bg-white rounded-2xl p-5 shadow">
+                <ShieldCheck className="text-green-600" size={28} />
+
+                <div>
+                  <h3 className="font-bold text-purple-950">Secure Payment</h3>
+
+                  <p className="text-gray-500 text-sm">
+                    Protected checkout with encrypted payment.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white rounded-2xl p-5 shadow">
+                <Truck className="text-purple-900" size={28} />
+
+                <div>
+                  <h3 className="font-bold text-purple-950">
+                    Nationwide Delivery
+                  </h3>
+
+                  <p className="text-gray-500 text-sm">
+                    Delivery available across Nigeria.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white rounded-2xl p-5 shadow">
+                <CheckCircle2 className="text-yellow-500" size={28} />
+
+                <div>
+                  <h3 className="font-bold text-purple-950">
+                    Authentic Product
+                  </h3>
+
+                  <p className="text-gray-500 text-sm">
+                    Carefully selected traditional spiritual products.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12">
+              <AddToCart product={single_product} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DESCRIPTION */}
+
+      <section className="max-w-7xl mx-auto px-6 pb-20">
+        <div className="bg-white rounded-3xl shadow-lg p-10">
+          <h2 className="text-3xl font-black text-purple-950 mb-8">
+            Product Description
+          </h2>
+
+          <div className="text-gray-700 leading-9 text-lg whitespace-pre-line">
+            {single_product.description}
+          </div>
+        </div>
+      </section>
+
+      <SuggestedProducts />
+    </div>
+  );
 };
 
 export default SingleProductPage;

@@ -12,6 +12,8 @@ import MembershipApplications from "./MembershipApplications";
 import ApprovedMembers from "./ApprovedMembers";
 import RejectedMembers from "./RejectedMembers";
 
+import AdminProductsPage from "../AdminProductsPage";
+
 import EmailCenter from "./EmailCenter";
 import Announcements from "./Announcements";
 import Settings from "./Settings";
@@ -43,6 +45,9 @@ const AdminDashboard = () => {
       case "Rejected Applicants":
         return <RejectedMembers />;
 
+      case "Products":
+        return <AdminProductsPage />;
+
       case "Blog CMS":
         return <BlogCMS />;
 
@@ -67,7 +72,9 @@ const AdminDashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopNavbar title={active} />
 
-        <div className="flex-1 overflow-y-auto">{renderContent()}</div>
+        <div className="flex-1 overflow-y-auto bg-gray-50">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

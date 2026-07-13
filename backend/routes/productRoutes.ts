@@ -1,42 +1,72 @@
-import { cloudUpload } from '../controllers/imageHandler';
 import express from 'express';
+
 import {
+  uploadProduct,
   getAllProducts,
   getProduct,
   updateProduct,
-  uploadProduct,
   deleteProduct,
 } from '../controllers/productsController';
-import { restrictTo, protect } from '../controllers/authControllers';
 
 import {
   multipleSinglePhotos,
+  cloudUpload,
   processMultipleImages,
 } from '../controllers/imageHandler';
 
+import { protect, restrictTo } from '../controllers/authControllers';
+
 const router = express.Router();
 
-router.route('/').get(getAllProducts);
-router.route('/:id').get(getProduct);
+/* ==========================================================
+   PUBLIC ROUTES
+========================================================== */
 
+router.get('/', getAllProducts);
+router.get('/:id', getProduct);
+
+/* ==========================================================
+   ADMIN ROUTES
+========================================================== */
+
+// Enable these when your authentication is ready.
 // router.use(protect);
-
 // router.use(restrictTo('admin'));
 
-router
-  .route('/')
-  .post(
-    multipleSinglePhotos({ name: 'images', maxCount: 4 }),
-    cloudUpload('OA/Product'),
-    uploadProduct,
-  );
-router
-  .route('/:id')
-  .delete(deleteProduct)
-  .put(
-    multipleSinglePhotos({ name: 'images', maxCount: 4 }),
-    processMultipleImages,
-    updateProduct,
-  );
+/* ==========================================================
+   CREATE PRODUCT
+========================================================== */
+
+router.post(
+  '/',
+  multipleSinglePhotos({
+    name: 'images',
+    maxCount: 4,
+  }),
+  cloudUpload('products'),
+  processMultipleImages,
+  uploadProduct,
+);
+
+/* ==========================================================
+   UPDATE PRODUCT
+========================================================== */
+
+router.put(
+  '/:id',
+  multipleSinglePhotos({
+    name: 'images',
+    maxCount: 4,
+  }),
+  cloudUpload('products'),
+  processMultipleImages,
+  updateProduct,
+);
+
+/* ==========================================================
+   DELETE PRODUCT
+========================================================== */
+
+router.delete('/:id', deleteProduct);
 
 export default router;

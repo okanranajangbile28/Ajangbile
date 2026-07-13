@@ -1,395 +1,459 @@
-import { ChangeEvent, SyntheticEvent, useEffect } from 'react';
+import { ChangeEvent, SyntheticEvent, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { FaTrash } from "react-icons/fa";
 
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../../../App/hooks';
-import { fetchSingleProduct } from '../../../productFeature/productSlice';
+import { useAppDispatch, useAppSelector } from "../../../../App/hooks";
 
-import { SingleProductType } from '../../../../types/product';
 import {
-	changeSideMenuValue,
-	clearFormImages,
-	createProduct,
-	// enablePreviewProduct,
-	loadFormProduct,
-	resetFormProduct,
-	setFieldMode,
-	setFormImages,
-	setFormValidity,
-	setShowErrorMessage,
-	updateFormProduct,
-	updateProduct,
-} from '../../adminSlice';
-import FormInput from '../../../../components/admin/AdminFormInput';
-import { FaTrash } from 'react-icons/fa';
-import FormTextArea from '../../../../components/admin/AdminTextAreaInput';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { productCategory } from '../../../../utils/constants';
-import { Loading } from '../../../../components/global_components';
+  changeSideMenuValue,
+  clearFormImages,
+  createProduct,
+  loadFormProduct,
+  resetFormProduct,
+  setFieldMode,
+  setFormImages,
+  setShowErrorMessage,
+  updateFormProduct,
+  updateProduct,
+} from "../../adminSlice";
+
+import { fetchSingleProduct } from "../../../productFeature/productSlice";
+
+import { SingleProductType } from "../../../../types/product";
+
+import FormInput from "../../../../components/admin/AdminFormInput";
+import FormTextArea from "../../../../components/admin/AdminTextAreaInput";
+import { Loading } from "../../../../components/global_components";
+
+import { productCategory } from "../../../../utils/constants";
 
 const AdminProductForm = ({
-	type,
+  type,
 }: {
-	type: 'detail' | 'create';
-	product?: SingleProductType;
+  type: "detail" | "create";
+  product?: SingleProductType;
 }) => {
-	const { id } = useParams();
-	const dispatch = useAppDispatch();
-	const navigate = useNavigate();
-	const { form, error, loading } = useAppSelector((state) => state.admin);
-	const { isValid, errorMessage, tempProduct, images } = form;
+  const { id } = useParams();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-	const { single_product } = useAppSelector((state) => state.product);
+  const { loading, error, form } = useAppSelector((state) => state.admin);
 
-	useEffect(() => {
-		localStorage.setItem('product', JSON.stringify(tempProduct));
-	}, [tempProduct]);
+  const { tempProduct, images, isValid } = form;
 
-	useEffect(() => {
-		dispatch(changeSideMenuValue('product'));
-	}, []);
+  const { single_product } = useAppSelector((state) => state.product);
 
-	useEffect(() => {
-		if (id) {
-			dispatch(fetchSingleProduct(id));
-		} else {
-			dispatch(resetFormProduct());
-			dispatch(clearFormImages());
-		}
-	}, [dispatch, id]);
+  useEffect(() => {
+    dispatch(changeSideMenuValue("product"));
+  }, [dispatch]);
 
-	useEffect(() => {
-		if (id && single_product) {
-			dispatch(loadFormProduct({ ...single_product }));
-			dispatch(setFormImages(single_product.images));
-		}
-	}, [dispatch, id, single_product]);
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchSingleProduct(id));
+    } else {
+      dispatch(resetFormProduct());
+      dispatch(clearFormImages());
+    }
+  }, [dispatch, id]);
 
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			dispatch(setShowErrorMessage(false));
-		}, 10000);
-		return () => clearTimeout(timer);
-	}, [errorMessage]);
+  useEffect(() => {
+    if (id && single_product) {
+      dispatch(loadFormProduct(single_product));
+      dispatch(setFormImages(single_product.images));
+    }
+  }, [dispatch, id, single_product]);
 
-	const enableEdit = (e: SyntheticEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		dispatch(setFieldMode('update'));
-	};
+  useEffect(() => {
+    localStorage.setItem("product", JSON.stringify(tempProduct));
+  }, [tempProduct]);
 
-	const onChange = (
-		e:
-			| ChangeEvent<HTMLInputElement>
-			| ChangeEvent<HTMLTextAreaElement>
-			| ChangeEvent<HTMLSelectElement>
-	) => {
-		const { name, value, validity } = e.target;
+  const onChange = (
+    e:
+      | ChangeEvent<HTMLInputElement>
+      | ChangeEvent<HTMLTextAreaElement>
+      | ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
 
-		if (validity.valid) dispatch(setFormValidity(true));
+    dispatch(
+      updateFormProduct({
+        detail: name,
+        info: value,
+      }),
+    );
+  };
 
-		dispatch(
-			updateFormProduct({
-				detail: name,
-				info: value,
-			})
-		);
-	};
+  const onCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch(
+      updateFormProduct({
+        detail: e.target.name,
+        info: e.target.checked,
+      }),
+    );
+  };
 
-	const handleSubmit = async (e: SyntheticEvent<HTMLButtonElement>) => {
-		e.preventDefault();
+  const onSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
 
-		// Get all form elements
-		const form = e.currentTarget.form;
-		if (!form) {
-			console.error('Form not found');
-			return;
-		}
+    if (!files) return;
 
-		const formElements = form.elements;
+    const previewImages = Array.from(files).map((file) =>
+      URL.createObjectURL(file),
+    );
 
-		// Check validity for each form element
-		for (let i = 0; i < formElements.length; i++) {
-			const element = formElements[i] as HTMLInputElement | HTMLTextAreaElement;
+    dispatch(setFormImages([...images, ...previewImages]));
+  };
 
-			if (
-				element instanceof HTMLInputElement ||
-				element instanceof HTMLTextAreaElement
-			) {
-				if (!element.validity.valid && element.name !== 'image') {
-					dispatch(setFormValidity(false));
-					dispatch(setShowErrorMessage(true));
+  const deleteImage = (index: number) => {
+    const updatedImages = images.filter((_, i) => i !== index);
 
-					console.log('form is not valid');
+    dispatch(setFormImages(updatedImages));
+  };
 
-					return;
-					// Stop checking if any field is invalid
-				} else if (
-					!element.validity.valid &&
-					element.name === 'image' &&
-					!images
-				) {
-					dispatch(setFormValidity(false));
-					dispatch(setShowErrorMessage(true));
-					console.log('form is not valid');
+  const convertBlobToFile = async (image: string, index: number) => {
+    const response = await axios.get(image, {
+      responseType: "blob",
+    });
 
-					return;
-				}
-			}
-		}
+    return new File([response.data], `product-image-${index}.jpg`, {
+      type: response.data.type,
+    });
+  };
 
-		dispatch(setShowErrorMessage(true));
+  const handleSubmit = async (e: SyntheticEvent<HTMLButtonElement>) => {
+    e.preventDefault();
 
-		const getExtension = (contentType: string) => {
-			const match = contentType.match(/\/(.+)$/);
-			return match ? match[1] : '';
-		};
+    if (!isValid) {
+      dispatch(setShowErrorMessage(true));
+      return;
+    }
 
-		// If all fields are valid, navigate to the next stage
-		if (isValid) {
-			const formData: FormData = new FormData();
-			let item: keyof SingleProductType;
-			for (item in tempProduct) {
-				if (item !== 'images' && item !== '_id') {
-					formData.append(item, tempProduct[item] as string);
-				} else if (item === 'images') {
-					if (images) {
-						for (let i = 0; i < images.length; i++) {
-							const img = images[i];
+    const formData = new FormData();
 
-							if (img.startsWith('blob')) {
-								const response = await axios.get(img, { responseType: 'blob' });
-								const contentType = response.headers['content-type'];
-								const file = new File(
-									[response.data],
-									`file${i}.${getExtension(contentType)}`,
-									{
-										type: contentType,
-									}
-								);
-								formData.append(`images`, file);
-							} else {
-								formData.append(`images`, img);
-							}
-						}
-					}
-				}
-			}
+    Object.entries(tempProduct).forEach(([key, value]) => {
+      if (key !== "images" && key !== "_id") {
+        formData.append(key, String(value));
+      }
+    });
 
-			try {
-				if (id) {
-					await dispatch(updateProduct({ id, data: formData }));
-				} else {
-					await dispatch(createProduct(formData));
-				}
-				if (!error.submit_product) {
-					dispatch(clearFormImages());
-					dispatch(setFieldMode('fixed'));
-					navigate('/admin/product');
-				}
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			} catch (error) {
-				dispatch(setShowErrorMessage(true));
-			}
-		}
-	};
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
 
-	const onSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
-		const selectedFiles = e.target.files;
-		if (!selectedFiles) {
-			return;
-		}
-		const selectedFilesUrl = [...selectedFiles].map((file: File) =>
-			URL.createObjectURL(file)
-		);
-		dispatch(setFormImages([...images, ...selectedFilesUrl]));
-	};
+      if (image.startsWith("blob:")) {
+        const file = await convertBlobToFile(image, i);
 
-	const deleteImage = (position: number) => {
-		const filteredImages = images.filter((_, index) => position !== index);
-		dispatch(setFormImages([...filteredImages]));
-	};
+        formData.append("images", file);
+      } else {
+        formData.append("images", image);
+      }
+    }
 
-	return loading ? (
-		<Loading />
-	) : (
-		<div className='bg-[rgba(75,0,130,0.1)]'>
-			<form className='flex flex-col pt-[24px] px-[24px] md:px-[48px] pb-[100px]  md:w-3/4 gap-[24px] '>
-				<div className='text-[16px] sm:text-[24px] md:text-[28px] xl:text-[36px] font-bold font-Manrope text-[#4b0082]'>
-					<Link
-						to={'/admin'}
-						className='text-[rgba(0,0,0,0.5)] hover'
-					>
-						<span className='hover:underline underline-offset-8 font-semibold'>
-							Admin
-						</span>{' '}
-						<span>{'> '}</span>
-					</Link>
-					<Link
-						to={'/admin/product'}
-						className='text-[rgba(0,0,0,0.5)] hover'
-					>
-						<span className='hover:underline underline-offset-8 font-semibold'>
-							Product
-						</span>{' '}
-						<span>{'> '}</span>
-					</Link>
-					Create Product
-				</div>
-				<FormInput
-					type='text'
-					name='productName'
-					label='Product Name'
-					id='productName'
-					placeholder='Enter Product Name'
-					value={form.tempProduct.productName || ''}
-					mode={type}
-					required
-					onChange={onChange}
-				/>
-				<FormTextArea
-					name='description'
-					label='Description'
-					id='description'
-					placeholder='Enter Product Description'
-					value={form.tempProduct.description || ''}
-					mode={type}
-					required
-					onChange={onChange}
-				/>
+    try {
+      if (id) {
+        await dispatch(
+          updateProduct({
+            id,
+            data: formData,
+          }),
+        ).unwrap();
+      } else {
+        await dispatch(createProduct(formData)).unwrap();
+      }
 
-				{/* <FormInput
-					type='number'
-					name='totalQuantity'
-					label='Total Quantity'
-					id='totalQuantity'
-					placeholder='Enter Stock Availabe'
-					value={form.tempProduct.totalQuantity || ''}
-					mode={type}
-					required
-					onChange={onChange}
-				/> */}
-				<div className='grid grid-cols-2 gap-3'>
-					<FormInput
-						type='number'
-						name='price'
-						label='Price'
-						id='price'
-						placeholder='Enter Product Price'
-						value={form.tempProduct.price || ''}
-						mode={type}
-						required
-						onChange={onChange}
-					/>
-					<FormInput
-						type='text'
-						name='unit'
-						label='Price Unit'
-						id='unit'
-						placeholder='Enter Product Price Unit'
-						value={form.tempProduct.unit || ''}
-						mode={type}
-						onChange={onChange}
-					/>
-				</div>
-				<div className='flex flex-col gap-[8px] items-start'>
-					<label
-						htmlFor='category'
-						className={`font-Manrope font-bold text-[16px] sm:text-[24px] leading-[33px] text-center text-[#01248c] capitalize`}
-					>
-						Category
-					</label>
-					<select
-						onChange={onChange}
-						className='flex items-center py-[18px] px-[20px] bg-[#f2f4f7] rounded-[8px] self-stretch font-Manrope text-[14px] leading-[19px] text-[rgba(0,0,0,0.5)] appearance-none'
-						id='category'
-						name='category'
-						value={form.tempProduct.category || ''}
-						required
-					>
-						<option
-							value=''
-							disabled
-						>
-							Category
-						</option>
-						{productCategory.map((x, index) => (
-							<option
-								key={index}
-								value={x.value}
-							>
-								{x.title}
-							</option>
-						))}
-					</select>
-				</div>
-				{/* <FormInput
-					type='number'
-					name='discount'
-					label='Discount'
-					id='discount'
-					max={'100'}
-					placeholder='Enter Product Discount Percentage'
-					value={form.tempProduct.discount || ''}
-					mode={type}
-					onChange={onChange}
-				/> */}
-				<FormInput
-					label='image'
-					type='file'
-					name='image'
-					id='image'
-					accept='.avif, .webp, .jpg, .png'
-					multiple
-					onChange={onSelectFile}
-					max={4}
-					mode={type}
-				/>
+      dispatch(clearFormImages());
 
-				{images && (
-					<div className='grid grid-cols-4'>
-						{images.map((image, index) => (
-							<div
-								key={index}
-								className='h-[200px] aspect-square'
-							>
-								<img
-									src={image as string}
-									alt=''
-									className='object-contain h-full'
-								/>
-								<button
-									className='text-[#4b0082]'
-									onClick={(e) => {
-										e.preventDefault();
-										deleteImage(index);
-									}}
-								>
-									<FaTrash />
-								</button>
-							</div>
-						))}
-					</div>
-				)}
-				<div className='flex gap-[8px]'>
-					<button
-						className='flex items-center justify-center py-[12px] px-[32px] bg-[#f2f2f2] shadow-sm rounded-[8px] font-Inter font-semibold text-[14px] leading-[100%] text-[#4b0082]'
-						onClick={enableEdit}
-					>
-						Edit Product
-					</button>
-					<button
-						className='flex items-center justify-center py-[12px] px-[32px] bg-[#4b0082] rounded-[8px] font-Inter font-semibold text-[14px] leading-[100%] text-[#f3f3f3]'
-						onClick={handleSubmit}
-					>
-						{type === 'create' ? 'Publish' : 'Update'} Product
-					</button>
-					{error.submit_product && (
-						<div className='font-DM'>Something went wrong</div>
-					)}
-				</div>
-			</form>
-		</div>
-	);
+      dispatch(setFieldMode("fixed"));
+
+      navigate("/admin/product");
+    } catch {
+      dispatch(setShowErrorMessage(true));
+    }
+  };
+  return loading ? (
+    <Loading />
+  ) : (
+    <div className="bg-[rgba(75,0,130,0.08)] min-h-screen">
+      <form
+        className="
+				flex flex-col 
+				gap-[24px]
+				pt-[24px]
+				px-[20px]
+				md:px-[48px]
+				pb-[100px]
+				md:w-4/5
+				"
+      >
+        <div
+          className="
+					text-[20px]
+					md:text-[32px]
+					font-bold
+					text-[#4b0082]
+					"
+        >
+          <Link to="/admin" className="text-gray-500 hover:underline">
+            Admin
+          </Link>
+
+          <span className="mx-2">&gt;</span>
+
+          <Link to="/admin/product" className="text-gray-500 hover:underline">
+            Product
+          </Link>
+
+          <span className="mx-2">&gt;</span>
+
+          {id ? "Edit Product" : "Create Product"}
+        </div>
+
+        <FormInput
+          type="text"
+          name="productName"
+          label="Product Name"
+          id="productName"
+          placeholder="Enter product name"
+          value={tempProduct.productName || ""}
+          mode={type}
+          required
+          onChange={onChange}
+        />
+
+        <FormTextArea
+          name="description"
+          label="Description"
+          id="description"
+          placeholder="Enter product description"
+          value={tempProduct.description || ""}
+          mode={type}
+          required
+          onChange={onChange}
+        />
+
+        <div
+          className="
+					grid
+					grid-cols-1
+					md:grid-cols-2
+					gap-4
+					"
+        >
+          <FormInput
+            type="number"
+            name="price"
+            label="Price"
+            id="price"
+            placeholder="Product price"
+            value={tempProduct.price || ""}
+            mode={type}
+            required
+            onChange={onChange}
+          />
+
+          <FormInput
+            type="text"
+            name="unit"
+            label="Price Unit"
+            id="unit"
+            placeholder="Example: piece, pack"
+            value={tempProduct.unit || ""}
+            mode={type}
+            onChange={onChange}
+          />
+        </div>
+
+        <div
+          className="
+					grid
+					grid-cols-1
+					md:grid-cols-3
+					gap-4
+					"
+        >
+          <FormInput
+            type="number"
+            name="discount"
+            label="Discount (%)"
+            id="discount"
+            value={tempProduct.discount || ""}
+            mode={type}
+            onChange={onChange}
+          />
+
+          <FormInput
+            type="number"
+            name="totalQuantity"
+            label="Stock Quantity"
+            id="totalQuantity"
+            value={tempProduct.totalQuantity || ""}
+            mode={type}
+            onChange={onChange}
+          />
+
+          <FormInput
+            type="text"
+            name="priceID"
+            label="Stripe Price ID"
+            id="priceID"
+            value={tempProduct.priceID || ""}
+            mode={type}
+            onChange={onChange}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            className="
+						font-bold
+						text-[#4b0082]
+						"
+          >
+            Category
+          </label>
+
+          <select
+            name="category"
+            value={tempProduct.category || ""}
+            onChange={onChange}
+            className="
+						bg-gray-100
+						rounded-lg
+						p-4
+						"
+          >
+            <option value="">Select Category</option>
+
+            {productCategory.map((item, index) => (
+              <option key={index} value={item.value}>
+                {item.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div
+          className="
+					flex
+					items-center
+					gap-3
+					"
+        >
+          <input
+            type="checkbox"
+            name="featured"
+            checked={tempProduct.featured || false}
+            onChange={onCheckboxChange}
+          />
+
+          <label className="font-semibold">Featured Product</label>
+        </div>
+
+        <FormInput
+          type="file"
+          name="image"
+          label="Product Images"
+          id="image"
+          accept=".jpg,.png,.webp,.avif"
+          multiple
+          mode={type}
+          onChange={onSelectFile}
+        />
+
+        {images.length > 0 && (
+          <div
+            className="
+							grid
+							grid-cols-2
+							md:grid-cols-4
+							gap-4
+							"
+          >
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className="
+											relative
+											border
+											bg-white
+											rounded-lg
+											p-2
+											"
+              >
+                <img
+                  src={image}
+                  alt="product"
+                  className="
+												w-full
+												h-[150px]
+												object-contain
+												"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => deleteImage(index)}
+                  className="
+												absolute
+												top-2
+												right-2
+												text-red-600
+												"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div
+          className="
+					flex
+					gap-4
+					mt-4
+					"
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch(setFieldMode("update"));
+            }}
+            className="
+						bg-gray-200
+						text-[#4b0082]
+						px-6
+						py-3
+						rounded-lg
+						font-semibold
+						"
+          >
+            Edit Product
+          </button>
+
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="
+						bg-[#4b0082]
+						text-white
+						px-6
+						py-3
+						rounded-lg
+						font-semibold
+						"
+          >
+            {id ? "Update Product" : "Publish Product"}
+          </button>
+        </div>
+
+        {error.submit_product && (
+          <p className="text-red-600">{error.submit_product}</p>
+        )}
+      </form>
+    </div>
+  );
 };
 
 export default AdminProductForm;

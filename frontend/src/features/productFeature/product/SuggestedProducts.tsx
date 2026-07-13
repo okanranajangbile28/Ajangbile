@@ -1,41 +1,51 @@
 import { Link } from "react-router-dom";
+
+import { ArrowRight } from "lucide-react";
+
 import { useAppSelector } from "../../../App/hooks";
-import GridView from "./GridView";
+
+import ProductGrid from "../../../components/shop/ProductGrid";
 
 const SuggestedProducts = () => {
   const { products } = useAppSelector((state) => state.product);
 
+  const suggested = products.slice(0, 4);
+
   return (
-    <div className="flex flex-col items-center pt-[24px] pb-[10px] px-[10px] gap-[24px] bg-white overflow-x-hidden">
-      <div className="flex pt-[20px] min-[550px]:pl-[46px] w-full">
-        <div className="flex flex-col gap-[17px]">
-          <div className="font-Open text-[16px] md:text-[20px] leading-[32px] flex items-center text-[#c4c4c4]">
-            More products
+    <section className="bg-white py-24">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Heading */}
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-14">
+          <div>
+            <p className="uppercase tracking-[6px] text-yellow-500 font-semibold">
+              Continue Shopping
+            </p>
+
+            <h2 className="text-4xl md:text-5xl font-black text-purple-950 mt-3">
+              You may also like
+            </h2>
+
+            <p className="text-gray-600 mt-4 max-w-2xl">
+              Explore more authentic spiritual products carefully selected to
+              preserve our heritage and traditions.
+            </p>
           </div>
 
-          <div className="font-Manrope text-[28px] md:text-[32px] lg:text-[48px] leading-[32px] md:leading-[48px] lg:leading-[60px] text-[#4b0082]">
-            See other amazing products
-          </div>
+          <Link
+            to="/shop"
+            className="flex items-center gap-3 bg-purple-900 hover:bg-purple-800 text-white px-8 py-4 rounded-full font-bold transition"
+          >
+            View All Products
+            <ArrowRight size={20} />
+          </Link>
         </div>
-      </div>
 
-      <div className="w-full lg:py-[24px] overflow-hidden">
-        <GridView
-          products={[...products.slice(0, 4)]}
-          customStyle="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 w-full"
-          productStyle="w-full min-w-0"
-        />
-      </div>
+        {/* Products */}
 
-      <div className="flex justify-end sm:px-[88px] w-full">
-        <Link
-          to="/shop"
-          className="py-[8px] px-[12px] md:py-[14px] md:px-[32px] items-center justify-center border-2 border-[#4b0082] rounded-[56px] font-Open font-bold text-[14px] md:text-[20px] leading-[28px] text-[#3f3843]"
-        >
-          See More
-        </Link>
+        <ProductGrid products={suggested} />
       </div>
-    </div>
+    </section>
   );
 };
 

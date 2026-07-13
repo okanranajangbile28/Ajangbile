@@ -1,104 +1,128 @@
-import { FaMinus, FaPlus, FaTrash } from 'react-icons/fa';
+import { ChangeEvent, KeyboardEvent } from "react";
+import { Trash2, Minus, Plus } from "lucide-react";
 
-import { priceFormat } from '../../../utils/constants';
+import { useAppDispatch } from "../../../App/hooks";
+import { removeItem, setAmount } from "../cartSlice";
 
-import { CartItemType } from '../../../types/cart';
-import { useAppDispatch } from '../../../App/hooks';
-import { removeItem, setAmount } from '../cartSlice';
-import { ChangeEvent, KeyboardEvent } from 'react';
-import ImageWithSkeleton from '../../../components/global_components/ImageWithSkeleton';
+import ImageWithSkeleton from "../../../components/global_components/ImageWithSkeleton";
+
+import { CartItemType } from "../../../types/cart";
+import { priceFormat } from "../../../utils/constants";
 
 const CartItem = ({ data }: { data: CartItemType }) => {
-	const { productID, image, productName, price, amount } = data;
-	const dispatch = useAppDispatch();
-	const deleteCart = () => {
-		dispatch(removeItem(data));
-	};
+  const dispatch = useAppDispatch();
 
-	const handleChange = (
-		e: KeyboardEvent<HTMLInputElement> | ChangeEvent<HTMLInputElement>
-	) => {
-		if (e.target instanceof HTMLInputElement) {
-			let value: number | string = +e.target.value;
-			value = value < 1 ? '' : Number(value);
+  const { productID, image, productName, price, amount } = data;
 
-			dispatch(setAmount({ id: productID, value }));
-		}
-	};
+  const remove = () => {
+    dispatch(removeItem(data));
+  };
 
-	const increase = () => {
-		dispatch(
-			setAmount({
-				id: productID,
-				value: Number(amount) + 1,
-			})
-		);
-	};
-	const decrease = () => {
-		dispatch(
-			setAmount({
-				id: productID,
-				value: Number(amount) - 1 < 1 ? 1 : Number(amount) - 1,
-			})
-		);
-	};
+  const increase = () => {
+    dispatch(
+      setAmount({
+        id: productID,
+        value: Number(amount) + 1,
+      }),
+    );
+  };
 
-	return (
-		<div className='flex flex-col gap-[8px]'>
-			<div className='flex gap-[10px] sm:gap-[16px] lg:gap-[24px] h-[150px]'>
-				<div className='aspect-square h-[150px] rounded-[4px] relative'>
-					<ImageWithSkeleton
-						src={image}
-						alt=''
-						customStyle='object-cover'
-					/>
-				</div>
-				<div className='flex flex-col justify-between w-full'>
-					<div className='flex items-center justify-between gap-[24px] sm:gap-[48px] lg:gap-[93px]'>
-						<div className='font-Manrope font-bold sm:text-[18px] lg:text-[24px] leading-[150%]  text-[#4b0082]'>
-							{productName}
-						</div>
-						<div className='font-Manrope font-extrabold text-[16px] sm:text-[24px] lg:text-[32px] leading-[150%] text-black'>
-							{priceFormat(price)}
-						</div>
-					</div>
-					<div className='flex flex-col justify-between py-[10px] gap-[8px] relative group'>
-						{/* <div className='font-Manrope font-extrabold text-[22px] leading-[19px] text-[rgba(75,0,130,0.7)] capitalize'>
-							count
-						</div> */}
-						<button
-							className='self-end text-[16px] text-[#4b0082] group-hover:text-rose-700'
-							onClick={deleteCart}
-						>
-							<FaTrash />
-						</button>
-						<div className='flex relative justify-center items-center px-[10px] gap-[8px] bg-[rgba(237,229,229,0.4)] rounded-[4px]'>
-							<button
-								className='p-[10px] text-[14px]'
-								onClick={decrease}
-							>
-								<FaMinus />
-							</button>
-							<div className='flex items-center justify-center gap-[10px] rounded-[4px]'>
-								<input
-									type='number'
-									className='bg-transparent focus:outline-none text-center text-[24px] h-[40px] py-[14px] w-[80px] font-semibold'
-									value={amount}
-									onChange={handleChange}
-								/>
-							</div>
-							<button
-								className='p-[10px] text-[14px]'
-								onClick={increase}
-							>
-								<FaPlus />
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+  const decrease = () => {
+    dispatch(
+      setAmount({
+        id: productID,
+        value: Number(amount) <= 1 ? 1 : Number(amount) - 1,
+      }),
+    );
+  };
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement> | KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.target instanceof HTMLInputElement) {
+      let value: number | string = Number(e.target.value);
+
+      value = value < 1 ? "" : value;
+
+      dispatch(
+        setAmount({
+          id: productID,
+          value,
+        }),
+      );
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-3xl border border-gray-200 shadow-md hover:shadow-xl transition duration-300 p-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Product Image */}
+
+        <div className="w-full md:w-44 h-44 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
+          <ImageWithSkeleton
+            src={image}
+            alt={productName}
+            customStyle="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Product Details */}
+
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <h2 className="text-2xl font-black text-purple-950">
+              {productName}
+            </h2>
+
+            <p className="text-gray-500 mt-2">
+              Authentic spiritual product from Ajangbile Heritage.
+            </p>
+
+            <div className="mt-5 text-3xl font-black text-yellow-600">
+              {priceFormat(price)}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-between items-center gap-6 mt-8">
+            {/* Quantity */}
+
+            <div className="flex items-center border-2 border-purple-200 rounded-2xl overflow-hidden">
+              <button
+                onClick={decrease}
+                className="w-14 h-14 flex justify-center items-center hover:bg-purple-100 transition"
+              >
+                <Minus size={18} />
+              </button>
+
+              <input
+                type="number"
+                value={amount}
+                onChange={handleChange}
+                className="w-20 text-center font-bold text-xl outline-none"
+              />
+
+              <button
+                onClick={increase}
+                className="w-14 h-14 flex justify-center items-center hover:bg-purple-100 transition"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+
+            {/* Remove */}
+
+            <button
+              onClick={remove}
+              className="flex items-center gap-3 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 px-5 py-3 rounded-xl transition font-semibold"
+            >
+              <Trash2 size={18} />
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CartItem;

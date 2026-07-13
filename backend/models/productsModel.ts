@@ -22,8 +22,7 @@ const productSchema = new Schema<IProduct>(
 
     priceID: {
       type: String,
-      required: [true, 'Price ID is required'],
-      unique: true,
+      default: '',
     },
 
     totalQuantity: {
