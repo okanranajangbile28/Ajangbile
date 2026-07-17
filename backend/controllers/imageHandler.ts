@@ -54,13 +54,27 @@ export const multipleSinglePhotos = (field: {
 
 export const cloudUpload = (folder: string) =>
   catchAsync(async (req, res, next) => {
+    console.log('FILE RECEIVED:');
+    console.log(req.file);
+
     console.log('FILES RECEIVED:');
     console.log(req.files);
 
     let files: Express.Multer.File[] = [];
 
-    if (Array.isArray(req.files)) {
+    // upload.single(...)
+    if (req.file) {
+      files = [req.file];
+    }
+
+    // upload.array(...)
+    else if (Array.isArray(req.files)) {
       files = req.files;
+    }
+
+    // upload.fields(...)
+    else if (req.files && typeof req.files === 'object') {
+      files = Object.values(req.files).flat() as Express.Multer.File[];
     }
 
     if (!files.length) {
@@ -71,18 +85,15 @@ export const cloudUpload = (folder: string) =>
       return next();
     }
 
-    const uploadImage = (file: Express.Multer.File): Promise<string> => {
-      return new Promise((resolve, reject) => {
+    const uploadImage = (file: Express.Multer.File): Promise<string> =>
+      new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder,
-
-            public_id: `product-${Date.now()}-${crypto
+            resource_type: 'image',
+            public_id: `upload-${Date.now()}-${crypto
               .randomBytes(6)
               .toString('hex')}`,
-
-            resource_type: 'image',
-
             transformation: [
               {
                 width: 2000,
@@ -91,7 +102,6 @@ export const cloudUpload = (folder: string) =>
               },
             ],
           },
-
           (error, result) => {
             if (error) {
               return reject(new AppError(error.message, 500));
@@ -103,7 +113,6 @@ export const cloudUpload = (folder: string) =>
 
         stream.end(file.buffer);
       });
-    };
 
     const uploadedImages = await Promise.all(files.map(uploadImage));
 
@@ -113,7 +122,6 @@ export const cloudUpload = (folder: string) =>
 
     next();
   });
-
 // ===================== PROCESS =====================
 
 export const processMultipleImages = catchAsync(async (req, res, next) => {

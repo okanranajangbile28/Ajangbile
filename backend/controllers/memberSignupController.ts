@@ -52,7 +52,7 @@ export const signupRequest = async (
       localGovernment: req.body.localGovernment,
       city: req.body.city,
       address: req.body.address,
-      photo: req.body.photo || '',
+      photo: req.body.images?.[0] || '',
       status: 'Pending',
     });
 

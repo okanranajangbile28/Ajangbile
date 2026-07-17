@@ -76,16 +76,18 @@ const OgboniSignupPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        navigate("/ogboni-login", {
+        alert(
+          "Your application has been submitted successfully.\n\nPlease wait for administrator approval before attempting to log in.",
+        );
+
+        navigate("/login", {
           replace: true,
-          state: {
-            message:
-              "Your member account application has been submitted successfully. Please wait for administrator approval before logging in.",
-          },
         });
-      } else {
-        setError(data.message || "Something went wrong.");
+
+        return;
       }
+
+      setError(data.message || "Something went wrong.");
     } catch (err) {
       console.error(err);
       setError("Unable to connect to the server. Please try again.");

@@ -20,9 +20,19 @@ export const sendApprovalEmail = async (email: string, fullName: string) => {
 
         <div style="max-width:700px;margin:auto;background:#fff;padding:40px;border-radius:12px;">
 
-          <h1 style="color:#4b0082;text-align:center;">
-            Congratulations!
-          </h1>
+          <h1
+  style="
+    color:#4b0082;
+    text-align:center;
+    font-size:38px;
+    line-height:1.25;
+    margin:0 0 25px;
+    font-weight:bold;
+  "
+>
+  Member Account<br>
+  Approved
+</h1>
 
           <h2 style="text-align:center;">
             ${fullName}
@@ -113,9 +123,19 @@ export const sendMembershipApprovalEmail = async ({
 
         <div style="max-width:700px;margin:auto;background:#fff;padding:40px;border-radius:12px;">
 
-          <h1 style="color:#4b0082;text-align:center;">
-            Membership Application Approved
-          </h1>
+          <h1
+  style="
+    color:#4b0082;
+    text-align:center;
+    font-size:38px;
+    line-height:1.25;
+    margin:0 0 25px;
+    font-weight:bold;
+  "
+>
+  Membership<br>
+  Application Approved
+</h1>
 
           <h2 style="text-align:center;">
   ${fullName}
