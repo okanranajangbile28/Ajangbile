@@ -1,12 +1,12 @@
 import express from 'express';
 
 import { signupRequest } from '../controllers/memberSignupController';
-
 import { uploadPhoto, cloudUpload } from '../controllers/imageHandler';
-
-import { sendSMS } from '../utils/sendSMS';
+import { sendMembershipApprovalSMS } from '../utils/sendSMS';
 
 const router = express.Router();
+
+console.log('memberSignupRoutes loaded');
 
 // ======================================================
 // Existing member requests an online login account
@@ -20,26 +20,30 @@ router.post(
 );
 
 // ======================================================
-// SMS TEST ROUTE
+// TEST TWILIO SMS
 // ======================================================
 
 router.get('/test-sms', async (req, res) => {
   try {
-    await sendSMS({
-      to: '+2348032697087',
-      message: 'Termii SMS test from Iledi Ajangbile.',
+    await sendMembershipApprovalSMS({
+      phone: '+2348032697087', // replace with your verified number
+      fullName: 'Test User',
+      initiationDate: new Date(),
+      initiationTime: '10:00 AM',
+      initiationVenue: 'Iledi Ajangbile',
+      initiationFee: 50000,
     });
 
     res.json({
       success: true,
       message: 'SMS sent successfully.',
     });
-  } catch (error: any) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to send SMS.',
     });
   }
 });

@@ -48,6 +48,7 @@ export interface IMembershipApplication extends Document {
   initiationTime?: string;
   initiationVenue?: string;
   initiationInstructions?: string;
+  initiationFee?: number;
 
   createdAt: Date;
   updatedAt: Date;
@@ -213,6 +214,11 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       type: String,
       default: '',
       trim: true,
+    },
+
+    initiationFee: {
+      type: Number,
+      default: 50000,
     },
   },
   {

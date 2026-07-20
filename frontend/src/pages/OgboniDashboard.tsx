@@ -28,7 +28,7 @@ const OgboniDashboard = () => {
     const storedMember = localStorage.getItem("ogboniMember");
 
     if (!storedMember) {
-      navigate("/ogboni-login");
+      navigate("/login", { replace: true });
       return;
     }
 
@@ -38,7 +38,8 @@ const OgboniDashboard = () => {
   const logout = () => {
     localStorage.removeItem("ogboniMember");
     localStorage.removeItem("ogboniToken");
-    navigate("/ogboni-login");
+
+    navigate("/login", { replace: true });
   };
 
   const memberTitle =

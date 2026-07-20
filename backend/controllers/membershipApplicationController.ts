@@ -3,6 +3,7 @@ import MembershipApplication from '../models/membershipApplicationModel';
 import { v2 as cloudinary } from 'cloudinary';
 import crypto from 'crypto';
 import { sendMembershipApprovalEmail } from '../utils/sendEmail';
+import { sendMembershipApprovalSMS } from '../utils/sendSMS';
 // =======================
 // CLOUDINARY CONFIG
 // =======================
@@ -247,6 +248,7 @@ export const approveApplication = async (
       initiationTime,
       initiationVenue,
       initiationInstructions,
+      initiationFee,
     } = req.body;
 
     const application = await MembershipApplication.findById(req.params.id);
@@ -271,6 +273,11 @@ export const approveApplication = async (
 
     application.initiationInstructions = initiationInstructions || '';
 
+    application.initiationFee =
+      initiationFee !== undefined && initiationFee !== null
+        ? Number(initiationFee)
+        : (application.initiationFee ?? 50000);
+
     await application.save();
 
     // =======================
@@ -284,8 +291,20 @@ export const approveApplication = async (
       initiationTime: application.initiationTime,
       initiationVenue: application.initiationVenue,
       initiationInstructions: application.initiationInstructions,
+      initiationFee: application.initiationFee,
     });
-
+    try {
+      await sendMembershipApprovalSMS({
+        phone: application.phone,
+        fullName: application.fullName,
+        initiationDate: application.initiationDate,
+        initiationTime: application.initiationTime,
+        initiationVenue: application.initiationVenue,
+        initiationFee: application.initiationFee,
+      });
+    } catch (err) {
+      console.error('SMS sending failed:', err);
+    }
     res.status(200).json({
       success: true,
       message: 'Application approved successfully.',

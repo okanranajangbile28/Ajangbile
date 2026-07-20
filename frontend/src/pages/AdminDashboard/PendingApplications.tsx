@@ -26,6 +26,7 @@ const PendingApplications = () => {
     initiationTime: "",
     initiationVenue: "",
     initiationInstructions: "",
+    initiationFee: 50000,
   });
 
   const fetchApplications = async () => {
@@ -54,6 +55,7 @@ const PendingApplications = () => {
       initiationTime: "",
       initiationVenue: "",
       initiationInstructions: "",
+      initiationFee: 50000,
     });
 
     setShowApprovalModal(true);
@@ -75,8 +77,8 @@ const PendingApplications = () => {
         initiationTime: "",
         initiationVenue: "",
         initiationInstructions: "",
+        initiationFee: 50000,
       });
-
       await fetchApplications();
 
       alert("Application approved successfully.");
@@ -190,8 +192,8 @@ const PendingApplications = () => {
       )}
 
       {showApprovalModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl p-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8">
             <h2 className="text-2xl font-bold text-purple-900 mb-6">
               Approve Membership
             </h2>
@@ -270,7 +272,24 @@ const PendingApplications = () => {
                 />
               </div>
             </div>
+            <div>
+              <label className="block font-semibold mb-2">
+                Initiation Fee (₦)
+              </label>
 
+              <input
+                type="number"
+                className="w-full border rounded-lg p-3"
+                placeholder="50000"
+                value={approvalForm.initiationFee}
+                onChange={(e) =>
+                  setApprovalForm({
+                    ...approvalForm,
+                    initiationFee: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
             <div className="flex justify-end gap-4 mt-8">
               <button
                 onClick={() => setShowApprovalModal(false)}

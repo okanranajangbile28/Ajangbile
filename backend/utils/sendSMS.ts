@@ -1,37 +1,64 @@
-import axios from 'axios';
+import twilio from 'twilio';
 
-interface SMSOptions {
-  to: string;
-  message: string;
-}
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID!,
+  process.env.TWILIO_AUTH_TOKEN!,
+);
 
-export const sendSMS = async ({ to, message }: SMSOptions) => {
+export const sendMembershipApprovalSMS = async ({
+  phone,
+  fullName,
+  initiationDate,
+  initiationTime,
+  initiationVenue,
+  initiationFee,
+}: {
+  phone: string;
+  fullName: string;
+  initiationDate?: Date;
+  initiationTime?: string;
+  initiationVenue?: string;
+  initiationFee?: number;
+}) => {
   try {
-    const response = await axios.post(
-      'https://api.ng.termii.com/api/sms/send',
-      {
-        api_key: process.env.TERMII_API_KEY,
-        to,
-        from: process.env.TERMII_SENDER_ID || 'Termii',
-        sms: message,
-        type: 'plain',
-        channel: 'generic',
-      },
-    );
+    const formattedDate = initiationDate
+      ? new Date(initiationDate).toLocaleDateString('en-GB')
+      : 'To Be Announced';
 
-    console.log('✅ SMS SENT');
-    console.log(response.data);
+    const formattedFee = new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+      minimumFractionDigits: 0,
+    }).format(initiationFee || 50000);
 
-    return response.data;
-  } catch (error: any) {
-    console.error('❌ SMS FAILED');
+    const message = `Congratulations ${fullName}!
 
-    if (error.response) {
-      console.error(error.response.data);
-    } else {
-      console.error(error.message);
-    }
+Your membership application has been APPROVED.
 
-    throw error;
+Initiation Date: ${formattedDate}
+Time: ${initiationTime || 'TBA'}
+Venue: ${initiationVenue || 'TBA'}
+
+Initiation Fee: ${formattedFee}
+
+For more information visit:
+https://www.ajangbileheritage.com`;
+
+    const sms = await client.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phone,
+    });
+
+    console.log('========== TWILIO RESPONSE ==========');
+    console.log('SID:', sms.sid);
+    console.log('Status:', sms.status);
+    console.log('Error Code:', sms.errorCode);
+    console.log('Error Message:', sms.errorMessage);
+    console.log('To:', sms.to);
+    console.log('From:', sms.from);
+    console.log('====================================');
+  } catch (err) {
+    console.error('Twilio SMS Error:', err);
   }
 };

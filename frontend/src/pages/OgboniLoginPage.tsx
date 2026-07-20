@@ -105,7 +105,7 @@ const OgboniLoginPage = () => {
 
           <div className="text-right">
             <Link
-              to="/ogboni-forgot-password"
+              to="/forgot-password"
               className="text-sm font-semibold text-purple-900 hover:underline"
             >
               Forgot Password?

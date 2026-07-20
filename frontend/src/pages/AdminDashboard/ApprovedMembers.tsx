@@ -34,6 +34,7 @@ interface Application {
   initiationTime?: string;
   initiationVenue?: string;
   initiationInstructions?: string;
+  initiationFee?: number;
 }
 
 const ApprovedMembers = () => {
@@ -105,7 +106,12 @@ const ApprovedMembers = () => {
     );
 
     if (initiationInstructions === null) return;
+    const initiationFee = prompt(
+      "Initiation Fee (₦)",
+      app.initiationFee?.toString() || "50000",
+    );
 
+    if (initiationFee === null) return;
     try {
       await axios.patch(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/approve/${app._id}`,
@@ -115,6 +121,7 @@ const ApprovedMembers = () => {
           initiationTime,
           initiationVenue,
           initiationInstructions,
+          initiationFee: Number(initiationFee),
         },
       );
 
@@ -299,9 +306,23 @@ const ApprovedMembers = () => {
                 </p>
               </div>
 
-              <div className="bg-green-50 p-5 rounded-xl">
+              <div className="bg-green-50 p-5 rounded-xl space-y-2">
                 <p>
                   <strong>Status:</strong> {selectedMember.status}
+                </p>
+
+                <p>
+                  <strong>Initiation Date:</strong>{" "}
+                  {selectedMember.initiationDate
+                    ? new Date(
+                        selectedMember.initiationDate,
+                      ).toLocaleDateString()
+                    : "Not Set"}
+                </p>
+
+                <p>
+                  <strong>Initiation Time:</strong>{" "}
+                  {selectedMember.initiationTime || "Not Set"}
                 </p>
 
                 <p>
@@ -310,8 +331,13 @@ const ApprovedMembers = () => {
                 </p>
 
                 <p>
-                  <strong>Initiation Time:</strong>{" "}
-                  {selectedMember.initiationTime || "Not Set"}
+                  <strong>Initiation Fee:</strong> ₦
+                  {(selectedMember.initiationFee ?? 50000).toLocaleString()}
+                </p>
+
+                <p>
+                  <strong>Instructions:</strong>{" "}
+                  {selectedMember.initiationInstructions || "Not Set"}
                 </p>
               </div>
             </div>

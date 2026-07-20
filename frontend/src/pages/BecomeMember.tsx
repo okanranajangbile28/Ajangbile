@@ -1,7 +1,10 @@
 import { useState, type ReactNode } from "react";
-
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 const BecomeMember = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [signature, setSignature] = useState<File | null>(null);
@@ -19,7 +22,7 @@ const BecomeMember = () => {
     address: "",
     city: "",
     state: "",
-    country: "Nigeria",
+    country: "",
 
     nextOfKin: "",
     nextOfKinPhone: "",
@@ -40,15 +43,15 @@ const BecomeMember = () => {
   ) => {
     const { name, value } = e.target;
 
-    setForm((previous) => ({
-      ...previous,
+    setForm((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
   const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((previous) => ({
-      ...previous,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.checked,
     }));
   };
@@ -62,7 +65,7 @@ const BecomeMember = () => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
+      alert("Please upload an image.");
       return;
     }
 
@@ -76,23 +79,26 @@ const BecomeMember = () => {
   const submitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setError("");
+    setSuccess("");
+
     if (!photo) {
-      alert("Please upload your passport photograph.");
+      setError("Please upload your passport photograph.");
       return;
     }
 
     if (!signature) {
-      alert("Please upload your signature.");
+      setError("Please upload your signature.");
       return;
     }
 
     if (!form.declarationAccepted) {
-      alert("Please accept the declaration agreement.");
+      setError("Please accept the declaration.");
       return;
     }
 
     if (!form.ndaAccepted) {
-      alert("Please accept the confidentiality agreement.");
+      setError("Please accept the confidentiality agreement.");
       return;
     }
 
@@ -106,7 +112,6 @@ const BecomeMember = () => {
       });
 
       formData.append("passportPhoto", photo);
-
       formData.append("signature", signature);
 
       const response = await fetch(
@@ -117,33 +122,26 @@ const BecomeMember = () => {
         },
       );
 
-      const data: {
-        success: boolean;
-        message?: string;
-      } = await response.json();
+      const data = await response.json();
 
       if (data.success) {
-        alert(
-          "Your membership application has been submitted successfully. We will contact you after review.",
+        setSuccess(
+          "Your membership application has been submitted successfully.",
         );
 
         setForm(initialForm);
-
         setPhoto(null);
-
         setSignature(null);
       } else {
-        alert(data.message || "Application submission failed.");
+        setError(data.message || "Application submission failed.");
       }
-    } catch (error) {
-      console.error(error);
-
-      alert("Something went wrong while submitting your application.");
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong while submitting your application.");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <section className="min-h-screen bg-gray-100 py-16 px-6">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
@@ -160,6 +158,26 @@ const BecomeMember = () => {
           </p>
         </div>
 
+        {success && (
+          <div className="m-8 rounded-xl border border-green-400 bg-green-50 p-6 text-green-800">
+            <h3 className="font-bold text-xl mb-2">
+              Application Submitted Successfully
+            </h3>
+
+            <p>{success}</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="m-8 rounded-xl border border-red-400 bg-red-50 p-6 text-red-800">
+            <h3 className="font-bold text-xl mb-2">
+              Unable to Submit Application
+            </h3>
+
+            <p>{error}</p>
+          </div>
+        )}
+
         <form onSubmit={submitApplication} className="p-10 space-y-10">
           <Section title="Personal Information">
             <Input
@@ -174,24 +192,30 @@ const BecomeMember = () => {
               name="gender"
               value={form.gender}
               onChange={handleChange}
-              options={["Male", "Female"]}
               placeholder="Gender"
+              options={["Male", "Female"]}
             />
 
-            <Input
-              type="date"
-              name="dateOfBirth"
-              value={form.dateOfBirth}
-              onChange={handleChange}
-              required
-            />
+            <div>
+              <label className="block mb-2 font-semibold text-gray-700">
+                Date of Birth
+              </label>
+
+              <Input
+                type="date"
+                name="dateOfBirth"
+                value={form.dateOfBirth}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
             <Select
               name="maritalStatus"
               value={form.maritalStatus}
               onChange={handleChange}
-              options={["Single", "Married", "Divorced", "Widowed"]}
               placeholder="Marital Status"
+              options={["Single", "Married", "Divorced", "Widowed"]}
             />
 
             <Input
@@ -204,12 +228,64 @@ const BecomeMember = () => {
           </Section>
 
           <Section title="Contact Information">
-            <Input
-              name="phone"
-              placeholder="Phone Number"
-              value={form.phone}
+            <div className="flex flex-col">
+              <label className="font-semibold mb-2">Phone Number</label>
+
+              <PhoneInput
+                country={"ng"}
+                enableSearch
+                value={form.phone}
+                onChange={(phone) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    phone: "+" + phone,
+                  }))
+                }
+                inputStyle={{
+                  width: "100%",
+                  height: "56px",
+                  borderRadius: "12px",
+                  border: "1px solid #d1d5db",
+                  fontSize: "16px",
+                }}
+                buttonStyle={{
+                  borderTopLeftRadius: "12px",
+                  borderBottomLeftRadius: "12px",
+                }}
+                searchStyle={{
+                  width: "100%",
+                }}
+                placeholder="Enter phone number"
+              />
+            </div>
+
+            <Select
+              name="country"
+              value={form.country}
               onChange={handleChange}
-              required
+              placeholder="Select Country"
+              options={[
+                "Nigeria",
+                "Ghana",
+                "South Africa",
+                "United Kingdom",
+                "United States",
+                "Canada",
+                "Germany",
+                "France",
+                "Italy",
+                "Spain",
+                "United Arab Emirates",
+                "Saudi Arabia",
+                "Ireland",
+                "Netherlands",
+                "Australia",
+                "New Zealand",
+                "India",
+                "Brazil",
+                "Kenya",
+                "Other",
+              ]}
             />
 
             <Input
@@ -239,36 +315,61 @@ const BecomeMember = () => {
 
             <textarea
               name="address"
-              placeholder="Residential Address"
               value={form.address}
               onChange={handleChange}
+              placeholder="Residential Address"
               rows={3}
               required
-              className="border rounded-xl p-4 w-full"
+              className="border rounded-xl p-4 w-full md:col-span-2"
             />
           </Section>
           <Section title="Next of Kin">
             <Input
               name="nextOfKin"
-              placeholder="Next of Kin"
+              placeholder="Next of Kin Full Name"
               value={form.nextOfKin}
               onChange={handleChange}
               required
             />
 
-            <Input
-              name="nextOfKinPhone"
-              placeholder="Next of Kin Phone Number"
-              value={form.nextOfKinPhone}
-              onChange={handleChange}
-              required
-            />
+            <div className="flex flex-col">
+              <label className="font-semibold mb-2">
+                Next of Kin Phone Number
+              </label>
+
+              <PhoneInput
+                country={"ng"}
+                enableSearch
+                value={form.nextOfKinPhone}
+                onChange={(phone) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    nextOfKinPhone: "+" + phone,
+                  }))
+                }
+                inputStyle={{
+                  width: "100%",
+                  height: "56px",
+                  borderRadius: "12px",
+                  border: "1px solid #d1d5db",
+                  fontSize: "16px",
+                }}
+                buttonStyle={{
+                  borderTopLeftRadius: "12px",
+                  borderBottomLeftRadius: "12px",
+                }}
+                searchStyle={{
+                  width: "100%",
+                }}
+                placeholder="Enter Next of Kin phone number"
+              />
+            </div>
           </Section>
+
           <Section title="Passport Photograph">
             <div className="md:col-span-2">
               <p className="text-gray-600 mb-3">
-                Upload a clear passport photograph. This is required for your
-                membership application.
+                Upload a clear passport photograph.
               </p>
 
               <input
@@ -290,7 +391,7 @@ const BecomeMember = () => {
           <Section title="Signature">
             <div className="md:col-span-2">
               <p className="text-gray-600 mb-3">
-                Upload your handwritten signature image.
+                Upload your handwritten signature.
               </p>
 
               <input
@@ -314,13 +415,12 @@ const BecomeMember = () => {
               name="reason"
               value={form.reason}
               onChange={handleChange}
-              rows={6}
               placeholder="Explain why you wish to become a member."
+              rows={6}
               required
               className="border rounded-xl p-4 w-full md:col-span-2"
             />
           </Section>
-
           {/* AGREEMENTS */}
 
           <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6 space-y-6">
@@ -343,11 +443,11 @@ const BecomeMember = () => {
               />
 
               <span className="leading-7 text-gray-700">
-                <strong>Declaration:</strong>
+                <strong>Declaration</strong>
                 <br />I declare that the information provided in this
-                application is true and correct to the best of my knowledge. I
-                confirm that I am applying voluntarily and agree to uphold the
-                values, principles, dignity and reputation of the fraternity.
+                application is true and correct to the best of my knowledge and
+                I voluntarily agree to uphold the values and dignity of the
+                fraternity.
               </span>
             </label>
 
@@ -361,11 +461,10 @@ const BecomeMember = () => {
               />
 
               <span className="leading-7 text-gray-700">
-                <strong>Confidentiality Agreement:</strong>
-                <br />I agree that any knowledge, information, teachings,
-                discussions, ceremonies, activities or private matters I may
-                learn as a member shall remain confidential. I agree not to
-                disclose such information to non-members.
+                <strong>Confidentiality Agreement</strong>
+                <br />I agree that every confidential knowledge, teachings,
+                ceremonies, discussions and activities of the fraternity shall
+                remain private and shall never be disclosed to non-members.
               </span>
             </label>
           </div>
@@ -373,9 +472,9 @@ const BecomeMember = () => {
           <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-6">
             <p className="text-gray-700 leading-8">
               Submission of this application does not automatically guarantee
-              membership. Every application will be reviewed carefully.
-              Successful applicants will be contacted through the details
-              provided.
+              membership. Every application will be reviewed carefully by the
+              Membership Committee. Successful applicants will be contacted
+              through the details provided.
             </p>
           </div>
 
@@ -394,9 +493,9 @@ const BecomeMember = () => {
   );
 };
 
-// =========================
+// ============================
 // REUSABLE COMPONENTS
-// =========================
+// ============================
 
 interface SectionProps {
   title: string;
@@ -415,20 +514,15 @@ const Section = ({ title, children }: SectionProps) => (
 
 interface InputProps {
   name: string;
-
   value: string;
-
   onChange: (
     e:
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLTextAreaElement>
       | React.ChangeEvent<HTMLSelectElement>,
   ) => void;
-
   placeholder?: string;
-
   type?: string;
-
   required?: boolean;
 }
 
@@ -453,13 +547,9 @@ const Input = ({
 
 interface SelectProps {
   name: string;
-
   value: string;
-
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-
   options: string[];
-
   placeholder: string;
 }
 
@@ -478,9 +568,9 @@ const Select = ({
   >
     <option value="">{placeholder}</option>
 
-    {options.map((item) => (
-      <option key={item} value={item}>
-        {item}
+    {options.map((option) => (
+      <option key={option} value={option}>
+        {option}
       </option>
     ))}
   </select>

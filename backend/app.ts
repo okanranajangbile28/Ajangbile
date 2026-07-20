@@ -22,6 +22,7 @@ import membershipApplicationRouter from './routes/membershipApplicationRoutes';
 import memberSignupRouter from './routes/memberSignupRoutes';
 import orderRouter from './routes/orderRoute';
 import ogboniRouter from './routes/ogboniRoutes';
+import contactRouter from './routes/contactRoutes';
 
 console.log('Ogboni router imported');
 
@@ -137,6 +138,7 @@ app.use('/api/user', userRouter);
 app.use('/api/blogs', blogRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/ogboni', ogboniRouter);
+app.use('/api/contact', contactRouter);
 
 // Blog CMS
 app.use('/api/blog-v2', blogV2Router);

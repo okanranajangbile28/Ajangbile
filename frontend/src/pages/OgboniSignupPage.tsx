@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 const OgboniSignupPage = () => {
   const navigate = useNavigate();
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -76,12 +79,11 @@ const OgboniSignupPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert(
-          "Your application has been submitted successfully.\n\nPlease wait for administrator approval before attempting to log in.",
-        );
+        setSuccess(true);
 
-        navigate("/login", {
-          replace: true,
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
         });
 
         return;
@@ -109,10 +111,48 @@ const OgboniSignupPage = () => {
             Ajangbile portal.
           </p>
         </div>
-
         {error && (
           <div className="mb-8 rounded-xl border border-red-400 bg-red-100 p-4 text-red-700">
             {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-10 rounded-3xl border border-green-300 bg-green-50 p-8 text-center shadow-lg">
+            <img
+              src="/images/crest.png"
+              alt="Iledi Ajangbile Crest"
+              className="mx-auto mb-6 w-28"
+            />
+
+            <h2 className="text-3xl font-bold text-purple-900">
+              Application Submitted Successfully
+            </h2>
+
+            <p className="mt-5 text-lg leading-8 text-gray-700">
+              Thank you for applying for an online member account with
+              <strong>
+                {" "}
+                Confederation of Ogboni Aborigine Fraternity of Nigeria
+              </strong>
+              , Ogun State Chapter – Iledi Ajangbile.
+            </p>
+
+            <p className="mt-4 text-gray-700 leading-8">
+              Your application has been received successfully and is currently
+              awaiting administrative review.
+            </p>
+
+            <p className="mt-4 text-gray-700 leading-8">
+              Once your application has been approved, you will receive an email
+              notification and you can then log in to your member account.
+            </p>
+
+            <button
+              onClick={() => navigate("/login")}
+              className="mt-8 rounded-xl bg-purple-900 px-8 py-4 font-bold text-white hover:bg-purple-800"
+            >
+              Go to Login
+            </button>
           </div>
         )}
 
@@ -179,15 +219,27 @@ const OgboniSignupPage = () => {
               required
             />
 
-            <input
-              type="tel"
-              name="phoneNumber"
-              placeholder="Phone Number"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              className="border p-4 rounded-xl"
-              required
-            />
+            <div>
+              <label className="block mb-2 font-semibold">Phone Number</label>
+
+              <PhoneInput
+                country={"ng"}
+                enableSearch
+                value={formData.phoneNumber}
+                onChange={(phone) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    phoneNumber: "+" + phone,
+                  }))
+                }
+                inputStyle={{
+                  width: "100%",
+                  height: "58px",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                }}
+              />
+            </div>
 
             <select
               name="gender"
@@ -201,14 +253,18 @@ const OgboniSignupPage = () => {
               <option value="Female">Female</option>
             </select>
 
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              className="border p-4 rounded-xl"
-              required
-            />
+            <div>
+              <label className="block mb-2 font-semibold">Date of Birth</label>
+
+              <input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                className="border p-4 rounded-xl w-full"
+                required
+              />
+            </div>
 
             <input
               type="text"
