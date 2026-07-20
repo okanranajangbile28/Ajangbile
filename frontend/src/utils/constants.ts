@@ -104,10 +104,11 @@ export const initialSingleBlog = {
 } as BlogType;
 
 export const priceFormat = (price: number) =>
-  new Intl.NumberFormat("en-NG", {
+  new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(price);
 
 /* ===========================

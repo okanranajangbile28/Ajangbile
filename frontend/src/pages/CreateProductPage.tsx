@@ -172,7 +172,8 @@ const CreateProductPage = () => {
           </h1>
 
           <p className="mt-3 text-lg text-gray-600">
-            Manage products for the Ajangbile Heritage store.
+            Manage products for the Ajangbile Heritage store. All prices are
+            entered in USD.
           </p>
         </div>
 
@@ -190,7 +191,7 @@ const CreateProductPage = () => {
             <div className="grid lg:grid-cols-2 gap-8">
               {[
                 { name: "productName", label: "Product Name" },
-                { name: "price", label: "Price (₦)" },
+                { name: "price", label: "Price (USD $)" },
                 { name: "discount", label: "Discount (%)" },
                 { name: "totalQuantity", label: "Quantity" },
                 { name: "unit", label: "Unit" },
@@ -202,6 +203,23 @@ const CreateProductPage = () => {
                     name={field.name}
                     value={form[field.name as keyof typeof form] as string}
                     onChange={handleChange}
+                    placeholder={
+                      field.name === "price"
+                        ? "e.g. 49.99"
+                        : field.name === "discount"
+                          ? "0"
+                          : field.name === "totalQuantity"
+                            ? "100"
+                            : ""
+                    }
+                    type={
+                      field.name === "price" ||
+                      field.name === "discount" ||
+                      field.name === "totalQuantity"
+                        ? "number"
+                        : "text"
+                    }
+                    step={field.name === "price" ? "0.01" : undefined}
                     className="w-full rounded-2xl border px-5 py-4"
                   />
                 </div>
