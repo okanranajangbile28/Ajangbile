@@ -78,7 +78,7 @@ const ConsultationPage = () => {
 
           <div className="flex flex-col md:flex-row justify-center gap-6">
             <a
-              href="https://wa.me/2349049402607"
+              href="https://wa.me/2349023323697"
               target="_blank"
               rel="noreferrer"
               className="bg-green-600 hover:bg-green-700 px-10 py-4 rounded-full font-bold transition duration-300"
