@@ -73,7 +73,7 @@ const PaidMembers = () => {
 
     try {
       await axios.patch(
-        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/save-initiation/${selectedMember._id}`,
+        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/send-initiation/${selectedMember._id}`,
         formData,
       );
 
@@ -91,7 +91,7 @@ const PaidMembers = () => {
 
   const sendInitiationEmail = async (id: string) => {
     try {
-      await axios.patch(
+      await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/send-initiation-email/${id}`,
       );
 
