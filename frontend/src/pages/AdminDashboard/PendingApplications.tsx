@@ -21,13 +21,7 @@ const PendingApplications = () => {
 
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
-  const [approvalForm, setApprovalForm] = useState({
-    initiationDate: "",
-    initiationTime: "",
-    initiationVenue: "",
-    initiationInstructions: "",
-    initiationFee: 50000,
-  });
+  const [approvalForm] = useState({});
 
   const fetchApplications = async () => {
     try {
@@ -50,14 +44,6 @@ const PendingApplications = () => {
   const openApprovalModal = (id: string) => {
     setSelectedId(id);
 
-    setApprovalForm({
-      initiationDate: "",
-      initiationTime: "",
-      initiationVenue: "",
-      initiationInstructions: "",
-      initiationFee: 50000,
-    });
-
     setShowApprovalModal(true);
   };
 
@@ -72,13 +58,6 @@ const PendingApplications = () => {
 
       setSelectedId("");
 
-      setApprovalForm({
-        initiationDate: "",
-        initiationTime: "",
-        initiationVenue: "",
-        initiationInstructions: "",
-        initiationFee: 50000,
-      });
       await fetchApplications();
 
       alert("Application approved successfully.");
@@ -198,97 +177,26 @@ const PendingApplications = () => {
               Approve Membership
             </h2>
 
-            <div className="space-y-5">
-              <div>
-                <label className="block font-semibold mb-2">
-                  Initiation Date
-                </label>
+            <div className="space-y-6">
+              <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
+                <h3 className="text-lg font-bold text-purple-900 mb-3">
+                  Membership Approval
+                </h3>
 
-                <input
-                  type="date"
-                  className="w-full border rounded-lg p-3"
-                  value={approvalForm.initiationDate}
-                  onChange={(e) =>
-                    setApprovalForm({
-                      ...approvalForm,
-                      initiationDate: e.target.value,
-                    })
-                  }
-                />
+                <p className="text-gray-700 leading-7">
+                  This applicant will immediately receive an approval email.
+                </p>
+
+                <p className="text-gray-700 leading-7 mt-3">
+                  The email contains the three available initiation payment
+                  packages.
+                </p>
+
+                <p className="text-gray-700 leading-7 mt-3">
+                  After payment has been completed, you will later schedule the
+                  initiation date and send another notification.
+                </p>
               </div>
-
-              <div>
-                <label className="block font-semibold mb-2">
-                  Initiation Time
-                </label>
-
-                <input
-                  type="time"
-                  className="w-full border rounded-lg p-3"
-                  value={approvalForm.initiationTime}
-                  onChange={(e) =>
-                    setApprovalForm({
-                      ...approvalForm,
-                      initiationTime: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-2">
-                  Initiation Venue
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter venue"
-                  className="w-full border rounded-lg p-3"
-                  value={approvalForm.initiationVenue}
-                  onChange={(e) =>
-                    setApprovalForm({
-                      ...approvalForm,
-                      initiationVenue: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold mb-2">
-                  Special Instructions
-                </label>
-
-                <textarea
-                  rows={5}
-                  className="w-full border rounded-lg p-3"
-                  value={approvalForm.initiationInstructions}
-                  onChange={(e) =>
-                    setApprovalForm({
-                      ...approvalForm,
-                      initiationInstructions: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block font-semibold mb-2">
-                Initiation Fee (₦)
-              </label>
-
-              <input
-                type="number"
-                className="w-full border rounded-lg p-3"
-                placeholder="50000"
-                value={approvalForm.initiationFee}
-                onChange={(e) =>
-                  setApprovalForm({
-                    ...approvalForm,
-                    initiationFee: Number(e.target.value),
-                  })
-                }
-              />
             </div>
             <div className="flex justify-end gap-4 mt-8">
               <button

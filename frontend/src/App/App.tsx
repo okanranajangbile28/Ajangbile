@@ -33,6 +33,8 @@ const ConsultationPage = lazy(() => import("../pages/ConsultationPage"));
 const IlediAjangbile = lazy(() => import("../pages/IlediAjangbile"));
 const BecomeMember = lazy(() => import("../pages/BecomeMember"));
 
+const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
+
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
 
@@ -99,6 +101,8 @@ const App = () => {
             <Route path="/login" element={<OgboniLoginPage />} />
 
             <Route path="/forgot-password" element={<OgboniForgotPassword />} />
+
+            <Route path="/payment-success" element={<PaymentSuccess />} />
 
             <Route
               path="/reset-password/:token"

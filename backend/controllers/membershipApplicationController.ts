@@ -4,6 +4,10 @@ import { v2 as cloudinary } from 'cloudinary';
 import crypto from 'crypto';
 import { sendMembershipApprovalEmail } from '../utils/sendEmail';
 import { sendMembershipApprovalSMS } from '../utils/sendSMS';
+import catchAsync from '../utils/catchAsync';
+import AppError from '../utils/appError';
+import { sendInitiationEmail } from '../utils/sendInitiationEmail';
+
 // =======================
 // CLOUDINARY CONFIG
 // =======================
@@ -243,13 +247,7 @@ export const approveApplication = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const {
-      initiationDate,
-      initiationTime,
-      initiationVenue,
-      initiationInstructions,
-      initiationFee,
-    } = req.body;
+    // No initiation details are collected at approval stage anymore.
 
     const application = await MembershipApplication.findById(req.params.id);
 
@@ -263,20 +261,20 @@ export const approveApplication = async (
 
     application.status = 'Accepted';
 
-    if (initiationDate) {
-      application.initiationDate = new Date(initiationDate);
-    }
+    // Reset payment information
+    application.paymentStatus = 'Pending';
+    application.paymentAmount = 0;
+    application.paymentReference = '';
+    application.paymentDate = undefined;
 
-    application.initiationTime = initiationTime || '';
+    // Package will be selected by the applicant later
+    application.initiationPackage = undefined;
 
-    application.initiationVenue = initiationVenue || '';
-
-    application.initiationInstructions = initiationInstructions || '';
-
-    application.initiationFee =
-      initiationFee !== undefined && initiationFee !== null
-        ? Number(initiationFee)
-        : (application.initiationFee ?? 50000);
+    // Clear initiation details until payment has been confirmed
+    application.initiationDate = undefined;
+    application.initiationTime = '';
+    application.initiationVenue = '';
+    application.initiationInstructions = '';
 
     await application.save();
 
@@ -287,11 +285,7 @@ export const approveApplication = async (
     await sendMembershipApprovalEmail({
       fullName: application.fullName,
       email: application.email,
-      initiationDate: application.initiationDate,
-      initiationTime: application.initiationTime,
-      initiationVenue: application.initiationVenue,
-      initiationInstructions: application.initiationInstructions,
-      initiationFee: application.initiationFee,
+      applicationId: application.id,
     });
     try {
       await sendMembershipApprovalSMS({
@@ -471,6 +465,129 @@ export const deleteApplication = async (
     res.status(200).json({
       success: true,
       message: 'Application deleted successfully.',
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// =======================================================
+// MARK MEMBER AS PAID
+// =======================================================
+export const markAsPaid = catchAsync(
+  async (req: Request, res: Response, next) => {
+    const application = await MembershipApplication.findById(req.params.id);
+
+    if (!application) {
+      return next(new AppError('Application not found.', 404));
+    }
+
+    application.status = 'Paid';
+
+    await application.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Member marked as Paid.',
+      application,
+    });
+  },
+);
+// ======================================================
+// GET PAID MEMBERS
+// ======================================================
+
+export const getPaidApplications = catchAsync(
+  async (req: Request, res: Response) => {
+    const applications = await MembershipApplication.find({
+      status: 'Paid',
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      results: applications.length,
+      applications,
+    });
+  },
+);
+
+// ======================================================
+// SAVE INITIATION DETAILS
+// ======================================================
+
+export const saveInitiationDetails = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const application = await MembershipApplication.findById(req.params.id);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Application not found.',
+      });
+      return;
+    }
+
+    application.initiationDate = req.body.initiationDate;
+    application.initiationTime = req.body.initiationTime;
+    application.initiationVenue = req.body.initiationVenue;
+    application.initiationInstructions = req.body.initiationInstructions;
+
+    application.status = 'Initiation Scheduled';
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Initiation details saved.',
+      application,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// ======================================================
+// SEND INITIATION EMAIL
+// ======================================================
+
+export const sendInitiationEmailToMember = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const application = await MembershipApplication.findById(req.params.id);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Application not found.',
+      });
+      return;
+    }
+
+    await sendInitiationEmail({
+      fullName: application.fullName,
+      email: application.email,
+      initiationDate: application.initiationDate,
+      initiationTime: application.initiationTime || '',
+      initiationVenue: application.initiationVenue || '',
+      initiationInstructions: application.initiationInstructions || '',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Initiation email sent successfully.',
     });
   } catch (error: any) {
     console.error(error);

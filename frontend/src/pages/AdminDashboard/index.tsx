@@ -10,6 +10,7 @@ import OgboniAccountApplications from "./OgboniAccountApplications";
 import PendingApplications from "./PendingApplications";
 import MembershipApplications from "./MembershipApplications";
 import ApprovedMembers from "./ApprovedMembers";
+import PaidMembers from "./PaidMembers";
 import RejectedMembers from "./RejectedMembers";
 
 import AdminProductsPage from "../AdminProductsPage";
@@ -41,6 +42,9 @@ const AdminDashboard = () => {
 
       case "Approved Applicants":
         return <ApprovedMembers />;
+
+      case "Paid Members":
+        return <PaidMembers />;
 
       case "Rejected Applicants":
         return <RejectedMembers />;

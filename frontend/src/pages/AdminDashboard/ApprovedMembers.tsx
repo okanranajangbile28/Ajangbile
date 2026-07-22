@@ -3,7 +3,6 @@ import axios from "axios";
 
 interface Application {
   _id: string;
-
   fullName: string;
   email: string;
   phone: string;
@@ -16,7 +15,7 @@ interface Application {
 
   country?: string;
   state: string;
-  city: string;
+  city?: string;
   address?: string;
 
   nextOfKin?: string;
@@ -74,64 +73,24 @@ const ApprovedMembers = () => {
       alert("Approval email sent successfully.");
     } catch (err) {
       console.error(err);
-
       alert("Unable to send approval email.");
     }
   };
 
-  const editInitiation = async (app: Application) => {
-    const initiationDate = prompt(
-      "Initiation Date (YYYY-MM-DD)",
-      app.initiationDate
-        ? new Date(app.initiationDate).toISOString().split("T")[0]
-        : "",
-    );
+  const markAsPaid = async (id: string) => {
+    if (!window.confirm("Mark this member as Paid?")) return;
 
-    if (!initiationDate) return;
-
-    const initiationTime = prompt("Initiation Time", app.initiationTime || "");
-
-    if (initiationTime === null) return;
-
-    const initiationVenue = prompt(
-      "Initiation Venue",
-      app.initiationVenue || "",
-    );
-
-    if (initiationVenue === null) return;
-
-    const initiationInstructions = prompt(
-      "Instructions",
-      app.initiationInstructions || "",
-    );
-
-    if (initiationInstructions === null) return;
-    const initiationFee = prompt(
-      "Initiation Fee (₦)",
-      app.initiationFee?.toString() || "50000",
-    );
-
-    if (initiationFee === null) return;
     try {
       await axios.patch(
-        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/approve/${app._id}`,
-
-        {
-          initiationDate,
-          initiationTime,
-          initiationVenue,
-          initiationInstructions,
-          initiationFee: Number(initiationFee),
-        },
+        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/mark-paid/${id}`,
       );
 
-      fetchApprovedApplications();
+      await fetchApprovedApplications();
 
-      alert("Initiation details updated.");
+      alert("Member marked as Paid.");
     } catch (err) {
       console.error(err);
-
-      alert("Unable to update details.");
+      alert("Unable to mark member as Paid.");
     }
   };
 
@@ -192,13 +151,12 @@ const ApprovedMembers = () => {
                     </p>
 
                     <p>
-                      <strong>City:</strong> {app.city}
+                      <strong>City:</strong> {app.city || "N/A"}
                     </p>
 
                     <p>
-                      <strong>Status:</strong>
-
-                      <span className="text-green-700 font-bold ml-2">
+                      <strong>Status:</strong>{" "}
+                      <span className="text-green-700 font-bold">
                         {app.status}
                       </span>
                     </p>
@@ -216,10 +174,10 @@ const ApprovedMembers = () => {
                     </button>
 
                     <button
-                      onClick={() => editInitiation(app)}
+                      onClick={() => markAsPaid(app._id)}
                       className="bg-purple-900 hover:bg-purple-800 text-white px-6 py-3 rounded-lg font-semibold"
                     >
-                      Edit Initiation Details
+                      ✅ Mark As Paid
                     </button>
 
                     <button
@@ -247,7 +205,6 @@ const ApprovedMembers = () => {
               <button
                 onClick={() => {
                   setShowDetailsModal(false);
-
                   setSelectedMember(null);
                 }}
                 className="bg-red-600 px-5 py-2 rounded-lg"
@@ -275,32 +232,25 @@ const ApprovedMembers = () => {
                 <p>
                   <strong>Name:</strong> {selectedMember.fullName}
                 </p>
-
                 <p>
                   <strong>Email:</strong> {selectedMember.email}
                 </p>
-
                 <p>
                   <strong>Phone:</strong> {selectedMember.phone}
                 </p>
-
                 <p>
                   <strong>Gender:</strong> {selectedMember.gender || "N/A"}
                 </p>
-
                 <p>
                   <strong>Occupation:</strong> {selectedMember.occupation}
                 </p>
-
                 <p>
                   <strong>Address:</strong> {selectedMember.address || "N/A"}
                 </p>
-
                 <p>
                   <strong>Next Of Kin:</strong>{" "}
                   {selectedMember.nextOfKin || "N/A"}
                 </p>
-
                 <p>
                   <strong>Reason:</strong> {selectedMember.reason || "N/A"}
                 </p>

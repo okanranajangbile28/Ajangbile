@@ -38,10 +38,23 @@ export interface IMembershipApplication extends Document {
     | 'Interview Scheduled'
     | 'Initiation Scheduled'
     | 'Accepted'
+    | 'Paid'
     | 'Rejected'
     | 'Completed';
 
   adminNotes?: string;
+
+  // Initiation Package
+  initiationPackage?: 'Basic' | 'Standard' | 'Premium';
+
+  // Payment
+  paymentStatus?: 'Pending' | 'Paid';
+
+  paymentAmount?: number;
+
+  paymentReference?: string;
+
+  paymentDate?: Date;
 
   // Initiation Details
   initiationDate?: Date;
@@ -177,6 +190,7 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
         'Interview Scheduled',
         'Initiation Scheduled',
         'Accepted',
+        'Paid',
         'Rejected',
         'Completed',
       ],
@@ -188,7 +202,41 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       default: '',
       trim: true,
     },
+    // ======================
+    // Initiation Package
+    // ======================
 
+    initiationPackage: {
+      type: String,
+      enum: ['Basic', 'Standard', 'Premium'],
+      default: null,
+    },
+
+    // ======================
+    // Payment Information
+    // ======================
+
+    paymentStatus: {
+      type: String,
+      enum: ['Pending', 'Paid'],
+      default: 'Pending',
+    },
+
+    paymentAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    paymentReference: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    paymentDate: {
+      type: Date,
+      default: null,
+    },
     // ======================
     // Initiation Information
     // ======================

@@ -4,6 +4,13 @@ const IlediAjangbile = () => {
   return (
     <section className="max-w-6xl mx-auto px-6 py-20">
       <div className="text-center">
+        {/* Crest */}
+        <img
+          src="https://www.ajangbileheritage.com/images/crest.png"
+          alt="Iledi Ajangbile Crest"
+          className="w-36 h-36 mx-auto mb-8"
+        />
+
         <h1 className="text-5xl font-bold text-[#4b0082] mb-6">
           Iledi Ajangbile
         </h1>
@@ -16,7 +23,8 @@ const IlediAjangbile = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 mt-20">
-        <div className="bg-white rounded-2xl shadow-lg p-10 text-center">
+        {/* Login Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-10 text-center hover:shadow-xl transition">
           <h2 className="text-3xl font-bold text-[#4b0082] mb-4">Login</h2>
 
           <p className="text-gray-600 mb-8">Access your member dashboard.</p>
@@ -29,7 +37,8 @@ const IlediAjangbile = () => {
           </Link>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-10 text-center">
+        {/* Sign Up Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-10 text-center hover:shadow-xl transition">
           <h2 className="text-3xl font-bold text-[#4b0082] mb-4">Sign Up</h2>
 
           <p className="text-gray-600 mb-8">

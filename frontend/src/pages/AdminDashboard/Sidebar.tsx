@@ -45,6 +45,10 @@ const menu = [
     icon: UserCheck,
   },
   {
+    name: "Paid Members",
+    icon: UserCheck,
+  },
+  {
     name: "Rejected Applicants",
     icon: UserX,
   },
