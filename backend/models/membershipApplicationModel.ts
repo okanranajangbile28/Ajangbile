@@ -44,11 +44,11 @@ export interface IMembershipApplication extends Document {
 
   adminNotes?: string;
 
-  // Initiation Package
   initiationPackage?: 'Basic' | 'Standard' | 'Premium';
 
-  // Payment
   paymentStatus?: 'Pending' | 'Paid';
+
+  initiationStatus?: 'Pending' | 'Scheduled' | 'Completed';
 
   paymentAmount?: number;
 
@@ -56,7 +56,6 @@ export interface IMembershipApplication extends Document {
 
   paymentDate?: Date;
 
-  // Initiation Details
   initiationDate?: Date;
   initiationTime?: string;
   initiationVenue?: string;
@@ -202,9 +201,6 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       default: '',
       trim: true,
     },
-    // ======================
-    // Initiation Package
-    // ======================
 
     initiationPackage: {
       type: String,
@@ -212,13 +208,15 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       default: null,
     },
 
-    // ======================
-    // Payment Information
-    // ======================
-
     paymentStatus: {
       type: String,
       enum: ['Pending', 'Paid'],
+      default: 'Pending',
+    },
+
+    initiationStatus: {
+      type: String,
+      enum: ['Pending', 'Scheduled', 'Completed'],
       default: 'Pending',
     },
 
@@ -237,9 +235,6 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       type: Date,
       default: null,
     },
-    // ======================
-    // Initiation Information
-    // ======================
 
     initiationDate: {
       type: Date,

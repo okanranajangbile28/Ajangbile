@@ -516,10 +516,10 @@ export const getPaidApplications = catchAsync(
 );
 
 // ======================================================
-// SAVE INITIATION DETAILS
+// SCHEDULE & SEND INITIATION
 // ======================================================
 
-export const saveInitiationDetails = async (
+export const scheduleAndSendInitiation = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
@@ -539,14 +539,36 @@ export const saveInitiationDetails = async (
     application.initiationVenue = req.body.initiationVenue;
     application.initiationInstructions = req.body.initiationInstructions;
 
-    application.status = 'Initiation Scheduled';
+    // Convert 24-hour time to 12-hour AM/PM
+    const formattedTime = application.initiationTime
+      ? new Date(`1970-01-01T${application.initiationTime}`).toLocaleTimeString(
+          'en-US',
+          {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          },
+        )
+      : '';
+
+    await sendInitiationEmail({
+      fullName: application.fullName,
+      email: application.email,
+      initiationDate: application.initiationDate,
+      initiationTime: formattedTime,
+      initiationVenue: application.initiationVenue || '',
+      initiationInstructions: application.initiationInstructions || '',
+    });
+
+    application.paymentStatus = 'Paid';
+    application.status = 'Paid';
+    application.initiationStatus = 'Scheduled';
 
     await application.save();
 
     res.status(200).json({
       success: true,
-      message: 'Initiation details saved.',
-      application,
+      message: 'Initiation scheduled and email sent successfully.',
     });
   } catch (error: any) {
     console.error(error);
@@ -557,11 +579,12 @@ export const saveInitiationDetails = async (
     });
   }
 };
+
 // ======================================================
-// SEND INITIATION EMAIL
+// RESEND INITIATION EMAIL
 // ======================================================
 
-export const sendInitiationEmailToMember = async (
+export const resendInitiationEmail = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
@@ -576,18 +599,30 @@ export const sendInitiationEmailToMember = async (
       return;
     }
 
+    // Convert 24-hour time to 12-hour AM/PM
+    const formattedTime = application.initiationTime
+      ? new Date(`1970-01-01T${application.initiationTime}`).toLocaleTimeString(
+          'en-US',
+          {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          },
+        )
+      : '';
+
     await sendInitiationEmail({
       fullName: application.fullName,
       email: application.email,
       initiationDate: application.initiationDate,
-      initiationTime: application.initiationTime || '',
+      initiationTime: formattedTime,
       initiationVenue: application.initiationVenue || '',
       initiationInstructions: application.initiationInstructions || '',
     });
 
     res.status(200).json({
       success: true,
-      message: 'Initiation email sent successfully.',
+      message: 'Initiation email resent successfully.',
     });
   } catch (error: any) {
     console.error(error);

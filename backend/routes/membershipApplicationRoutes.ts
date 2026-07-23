@@ -13,8 +13,8 @@ import {
   getRejectedApplications,
   getPaidApplications,
   markAsPaid,
-  saveInitiationDetails,
-  sendInitiationEmailToMember,
+  scheduleAndSendInitiation,
+  resendInitiationEmail,
 } from '../controllers/membershipApplicationController';
 
 import { multiplePhotos } from '../controllers/imageHandler';
@@ -78,10 +78,10 @@ router.patch('/:id', updateApplication);
 // Delete Application
 router.delete('/:id', deleteApplication);
 
-// Save initiation schedule
-router.patch('/send-initiation/:id', saveInitiationDetails);
+// Schedule initiation and send email
+router.post('/schedule-initiation/:id', scheduleAndSendInitiation);
 
-// Send initiation email
-router.post('/send-initiation-email/:id', sendInitiationEmailToMember);
+// Resend initiation email
+router.post('/resend-initiation-email/:id', resendInitiationEmail);
 
 export default router;

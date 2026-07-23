@@ -1,4 +1,6 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface InitiationEmailOptions {
   fullName: string;
@@ -17,16 +19,6 @@ export const sendInitiationEmail = async ({
   initiationVenue,
   initiationInstructions,
 }: InitiationEmailOptions) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT),
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
   const formattedDate = initiationDate
     ? new Date(initiationDate).toLocaleDateString('en-GB', {
         weekday: 'long',
@@ -36,13 +28,15 @@ export const sendInitiationEmail = async ({
       })
     : 'To Be Announced';
 
-  await transporter.sendMail({
-    from: `"Ajangbile Heritage" <${process.env.EMAIL_USERNAME}>`,
+  const { data, error } = await resend.emails.send({
+    from: 'Ajangbile Heritage <admin@ajangbileheritage.com>',
     to: email,
     subject: 'Your Initiation Ceremony Details',
+
     html: `
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset="UTF-8">
 <title>Initiation Ceremony</title>
@@ -73,7 +67,11 @@ color:white;
 AJANGBILE HERITAGE
 </h1>
 
-<p style="margin-top:10px;color:#FFD700;font-size:18px;">
+<p style="
+margin-top:10px;
+color:#FFD700;
+font-size:18px;
+">
 Confederation of Ogboni Aborigine Fraternity of Nigeria
 </p>
 
@@ -81,6 +79,7 @@ Confederation of Ogboni Aborigine Fraternity of Nigeria
 </tr>
 
 <tr>
+
 <td style="padding:45px;">
 
 <h2 style="
@@ -163,9 +162,7 @@ We look forward to welcoming you into the fraternity.
 
 </div>
 
-<hr style="
-margin:40px 0;
-">
+<hr style="margin:40px 0;">
 
 <p style="
 text-align:center;
@@ -180,6 +177,7 @@ Confederation of Ogboni Aborigine Fraternity of Nigeria
 </p>
 
 </td>
+
 </tr>
 
 </table>
@@ -189,4 +187,16 @@ Confederation of Ogboni Aborigine Fraternity of Nigeria
 </html>
 `,
   });
+
+  if (error) {
+    console.error(error);
+    throw new Error(error.message);
+  }
+
+  console.log('====================================');
+  console.log('RESEND INITIATION EMAIL SENT');
+  console.log(data);
+  console.log('====================================');
+
+  return data;
 };

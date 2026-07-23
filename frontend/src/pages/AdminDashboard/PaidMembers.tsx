@@ -3,14 +3,49 @@ import axios from "axios";
 
 interface Application {
   _id: string;
+
   fullName: string;
   email: string;
   phone: string;
-  occupation: string;
-  state: string;
-  city: string;
-  photo: string;
+
+  gender?: string;
+  dateOfBirth?: string;
+  maritalStatus?: string;
+
+  country?: string;
+  state?: string;
+  city?: string;
+  address?: string;
+
+  occupation?: string;
+
+  nextOfKin?: string;
+  nextOfKinPhone?: string;
+
+  reason?: string;
+
+  previousInstitution?: boolean;
+  institutionName?: string;
+  referredBy?: string;
+
+  photo?: string;
+  signature?: string;
+
+  declarationAccepted?: boolean;
+  ndaAccepted?: boolean;
+
   status: string;
+
+  adminNotes?: string;
+
+  paymentStatus?: string;
+  paymentAmount?: number;
+  paymentReference?: string;
+  paymentDate?: string;
+
+  initiationPackage?: string;
+
+  initiationStatus?: "Pending" | "Scheduled" | "Completed";
 
   initiationDate?: string;
   initiationTime?: string;
@@ -27,6 +62,8 @@ const PaidMembers = () => {
   );
 
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
 
   const [formData, setFormData] = useState({
     initiationDate: "",
@@ -53,6 +90,11 @@ const PaidMembers = () => {
     fetchPaidMembers();
   }, []);
 
+  const openApplicationModal = (member: Application) => {
+    setSelectedMember(member);
+    setShowApplicationModal(true);
+  };
+
   const openScheduleModal = (member: Application) => {
     setSelectedMember(member);
 
@@ -68,40 +110,37 @@ const PaidMembers = () => {
     setShowScheduleModal(true);
   };
 
-  const saveInitiationDetails = async () => {
+  const scheduleAndSendInitiation = async () => {
     if (!selectedMember) return;
 
     try {
-      await axios.patch(
-        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/send-initiation/${selectedMember._id}`,
-        formData,
-      );
-
-      alert("Initiation details saved successfully.");
-
-      setShowScheduleModal(false);
-
-      fetchPaidMembers();
-    } catch (err) {
-      console.error(err);
-
-      alert("Unable to save initiation details.");
-    }
-  };
-
-  const sendInitiationEmail = async (id: string) => {
-    try {
       await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/send-initiation-email/${id}`,
+        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/schedule-initiation/${selectedMember._id}`,
+        formData,
       );
 
       alert("Initiation email sent successfully.");
 
+      setShowScheduleModal(false);
+      setSelectedMember(null);
+
       fetchPaidMembers();
     } catch (err) {
       console.error(err);
+      alert("Unable to schedule initiation.");
+    }
+  };
 
-      alert("Unable to send initiation email.");
+  const resendInitiationEmail = async (memberId: string) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/resend-initiation-email/${memberId}`,
+      );
+
+      alert("Initiation email resent successfully.");
+    } catch (err) {
+      console.error(err);
+      alert("Unable to resend initiation email.");
     }
   };
 
@@ -151,42 +190,60 @@ const PaidMembers = () => {
                   </p>
 
                   <p>
-                    <strong>Occupation:</strong> {member.occupation}
+                    <strong>Occupation:</strong> {member.occupation || "-"}
                   </p>
 
                   <p>
-                    <strong>State:</strong> {member.state}
+                    <strong>State:</strong> {member.state || "-"}
                   </p>
 
                   <p>
-                    <strong>City:</strong> {member.city}
+                    <strong>City:</strong> {member.city || "-"}
                   </p>
 
-                  <p className="mt-2">
-                    <strong>Status:</strong>{" "}
+                  <p className="mt-3">
+                    <strong>Payment Status:</strong>{" "}
                     <span className="text-green-700 font-bold">
                       {member.status}
                     </span>
                   </p>
 
+                  <p>
+                    <strong>Initiation Status:</strong>{" "}
+                    <span
+                      className={
+                        member.initiationStatus === "Scheduled"
+                          ? "text-purple-700 font-bold"
+                          : "text-orange-600 font-bold"
+                      }
+                    >
+                      {member.initiationStatus || "Pending"}
+                    </span>
+                  </p>
+
                   <div className="flex flex-wrap gap-4 mt-6">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+                    <button
+                      onClick={() => openApplicationModal(member)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+                    >
                       View Full Application
                     </button>
 
-                    <button
-                      onClick={() => openScheduleModal(member)}
-                      className="bg-purple-900 hover:bg-purple-800 text-white px-6 py-3 rounded-lg"
-                    >
-                      Schedule Initiation
-                    </button>
-
-                    <button
-                      onClick={() => sendInitiationEmail(member._id)}
-                      className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg"
-                    >
-                      Send Initiation Email
-                    </button>
+                    {member.initiationStatus !== "Scheduled" ? (
+                      <button
+                        onClick={() => openScheduleModal(member)}
+                        className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-semibold"
+                      >
+                        Schedule & Send Initiation
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => resendInitiationEmail(member._id)}
+                        className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-3 rounded-lg font-semibold"
+                      >
+                        Resend Initiation Email
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -199,7 +256,7 @@ const PaidMembers = () => {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-5">
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl p-8">
             <h2 className="text-3xl font-bold text-purple-900 mb-6">
-              Schedule Initiation
+              Schedule & Send Initiation
             </h2>
 
             <div className="space-y-5">
@@ -256,18 +313,264 @@ const PaidMembers = () => {
 
             <div className="flex justify-end gap-4 mt-8">
               <button
-                onClick={() => setShowScheduleModal(false)}
+                onClick={() => {
+                  setShowScheduleModal(false);
+                  setSelectedMember(null);
+
+                  setFormData({
+                    initiationDate: "",
+                    initiationTime: "",
+                    initiationVenue: "",
+                    initiationInstructions: "",
+                  });
+                }}
                 className="bg-gray-300 px-6 py-3 rounded-lg"
               >
                 Cancel
               </button>
 
               <button
-                onClick={saveInitiationDetails}
-                className="bg-purple-900 text-white px-6 py-3 rounded-lg"
+                onClick={scheduleAndSendInitiation}
+                className="bg-green-700 text-white px-6 py-3 rounded-lg font-semibold"
               >
-                Save Initiation Details
+                Send Initiation Email
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ====================================================== */}
+      {/* FULL APPLICATION MODAL */}
+      {/* ====================================================== */}
+
+      {showApplicationModal && selectedMember && (
+        <div className="fixed inset-0 z-50 bg-black/70 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-auto my-10 p-8">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-purple-900">
+                Membership Application
+              </h2>
+
+              <button
+                onClick={() => {
+                  setShowApplicationModal(false);
+                  setSelectedMember(null);
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg"
+              >
+                ← Back to Paid Members
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                {selectedMember.photo ? (
+                  <img
+                    src={selectedMember.photo}
+                    alt={selectedMember.fullName}
+                    className="w-full rounded-xl border-4 border-purple-900"
+                  />
+                ) : (
+                  <div className="w-full h-80 rounded-xl border-4 border-purple-900 bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                    No Passport Photo
+                  </div>
+                )}
+
+                <p className="mt-4 font-bold text-purple-900">
+                  Passport Photograph
+                </p>
+
+                {selectedMember.signature ? (
+                  <>
+                    <img
+                      src={selectedMember.signature}
+                      alt="Signature"
+                      className="w-full mt-6 border rounded-lg"
+                    />
+
+                    <p className="font-bold text-purple-900 mt-2">Signature</p>
+                  </>
+                ) : (
+                  <div className="mt-6 w-full h-32 border rounded-lg bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                    No Signature
+                  </div>
+                )}
+              </div>
+
+              <div className="md:col-span-2 space-y-3">
+                <p>
+                  <strong>Full Name:</strong> {selectedMember.fullName}
+                </p>
+                <p>
+                  <strong>Email:</strong> {selectedMember.email}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {selectedMember.phone}
+                </p>
+
+                <hr />
+
+                <p>
+                  <strong>Gender:</strong> {selectedMember.gender || "-"}
+                </p>
+
+                <p>
+                  <strong>Date of Birth:</strong>{" "}
+                  {selectedMember.dateOfBirth
+                    ? new Date(selectedMember.dateOfBirth).toLocaleDateString()
+                    : "-"}
+                </p>
+
+                <p>
+                  <strong>Marital Status:</strong>{" "}
+                  {selectedMember.maritalStatus || "-"}
+                </p>
+
+                <hr />
+
+                <p>
+                  <strong>Country:</strong> {selectedMember.country || "-"}
+                </p>
+                <p>
+                  <strong>State:</strong> {selectedMember.state || "-"}
+                </p>
+                <p>
+                  <strong>City:</strong> {selectedMember.city || "-"}
+                </p>
+                <p>
+                  <strong>Address:</strong> {selectedMember.address || "-"}
+                </p>
+
+                <hr />
+
+                <p>
+                  <strong>Occupation:</strong>{" "}
+                  {selectedMember.occupation || "-"}
+                </p>
+
+                <hr />
+
+                <p>
+                  <strong>Next of Kin:</strong>{" "}
+                  {selectedMember.nextOfKin || "-"}
+                </p>
+
+                <p>
+                  <strong>Next of Kin Phone:</strong>{" "}
+                  {selectedMember.nextOfKinPhone || "-"}
+                </p>
+
+                <hr />
+
+                <p>
+                  <strong>Reason:</strong>
+                </p>
+
+                <div className="bg-gray-100 rounded-lg p-4">
+                  {selectedMember.reason || "-"}
+                </div>
+
+                <hr />
+
+                <p>
+                  <strong>Previous Institution:</strong>{" "}
+                  {selectedMember.previousInstitution ? "Yes" : "No"}
+                </p>
+
+                {selectedMember.previousInstitution && (
+                  <p>
+                    <strong>Institution Name:</strong>{" "}
+                    {selectedMember.institutionName}
+                  </p>
+                )}
+
+                <p>
+                  <strong>Referred By:</strong>{" "}
+                  {selectedMember.referredBy || "-"}
+                </p>
+
+                <hr />
+
+                <p>
+                  <strong>Declaration Accepted:</strong>{" "}
+                  {selectedMember.declarationAccepted ? "Yes" : "No"}
+                </p>
+
+                <p>
+                  <strong>NDA Accepted:</strong>{" "}
+                  {selectedMember.ndaAccepted ? "Yes" : "No"}
+                </p>
+
+                <hr />
+
+                <h3 className="text-xl font-bold text-purple-900">
+                  Payment Information
+                </h3>
+
+                <p>
+                  <strong>Payment Status:</strong>{" "}
+                  {selectedMember.paymentStatus || "-"}
+                </p>
+
+                <p>
+                  <strong>Amount:</strong> ₦
+                  {selectedMember.paymentAmount?.toLocaleString() || "-"}
+                </p>
+
+                <p>
+                  <strong>Reference:</strong>{" "}
+                  {selectedMember.paymentReference || "-"}
+                </p>
+
+                <p>
+                  <strong>Payment Date:</strong>{" "}
+                  {selectedMember.paymentDate
+                    ? new Date(selectedMember.paymentDate).toLocaleString()
+                    : "-"}
+                </p>
+
+                <hr />
+
+                <h3 className="text-xl font-bold text-purple-900">
+                  Initiation
+                </h3>
+
+                <p>
+                  <strong>Package:</strong>{" "}
+                  {selectedMember.initiationPackage || "-"}
+                </p>
+
+                <p>
+                  <strong>Status:</strong>{" "}
+                  {selectedMember.initiationStatus || "Pending"}
+                </p>
+
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {selectedMember.initiationDate
+                    ? new Date(
+                        selectedMember.initiationDate,
+                      ).toLocaleDateString()
+                    : "-"}
+                </p>
+
+                <p>
+                  <strong>Time:</strong> {selectedMember.initiationTime || "-"}
+                </p>
+
+                <p>
+                  <strong>Venue:</strong>{" "}
+                  {selectedMember.initiationVenue || "-"}
+                </p>
+
+                <p>
+                  <strong>Instructions:</strong>
+                </p>
+
+                <div className="bg-yellow-50 border rounded-lg p-4">
+                  {selectedMember.initiationInstructions || "-"}
+                </div>
+              </div>
             </div>
           </div>
         </div>
