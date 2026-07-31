@@ -25,6 +25,7 @@ import ogboniRouter from './routes/ogboniRoutes';
 import contactRouter from './routes/contactRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 
+import announcementRouter from './routes/announcementRoutes';
 console.log('Ogboni router imported');
 
 // Create a DOMPurify instance
@@ -140,7 +141,9 @@ app.use('/api/blogs', blogRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/ogboni', ogboniRouter);
 app.use('/api/contact', contactRouter);
+app.use('/api/membership-applications', membershipApplicationRouter);
 
+app.use('/api/announcements', announcementRouter);
 // NEW
 app.use('/api/payments', paymentRoutes);
 

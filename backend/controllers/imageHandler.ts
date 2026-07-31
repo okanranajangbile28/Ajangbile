@@ -42,6 +42,8 @@ export const noUpload = () => upload.none();
 
 export const uploadPhoto = () => upload.single('image');
 
+export const uploadAnnouncementImage = () => upload.single('announcementImage');
+
 export const multiplePhotos = (fields: { name: string; maxCount: number }[]) =>
   upload.fields(fields);
 

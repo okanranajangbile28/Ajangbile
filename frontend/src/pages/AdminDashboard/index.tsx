@@ -58,7 +58,7 @@ const AdminDashboard = () => {
       case "Email Center":
         return <EmailCenter />;
 
-      case "Announcements":
+      case "Announcements & Updates":
         return <Announcements />;
 
       case "Settings":

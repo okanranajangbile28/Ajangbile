@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Mail,
   BookOpen,
+  Bell,
   LogOut,
 } from "lucide-react";
 
@@ -52,13 +53,14 @@ const menu = [
     name: "Rejected Applicants",
     icon: UserX,
   },
-
-  // NEW PRODUCT SECTION
   {
     name: "Products",
     icon: ShoppingBag,
   },
-
+  {
+    name: "Announcements & Updates",
+    icon: Bell,
+  },
   {
     name: "Blog CMS",
     icon: BookOpen,
@@ -108,8 +110,8 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
 
           return (
             <button
-              type="button"
               key={item.name}
+              type="button"
               onClick={() => setActive(item.name)}
               className={`w-full flex items-center gap-3 px-4 py-4 rounded-xl mb-2 transition ${
                 active === item.name
@@ -118,7 +120,6 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
               }`}
             >
               <Icon size={20} />
-
               {item.name}
             </button>
           );
