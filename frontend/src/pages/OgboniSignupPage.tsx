@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -6,10 +7,7 @@ import "react-phone-input-2/lib/style.css";
 const OgboniSignupPage = () => {
   const navigate = useNavigate();
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     username: "",
     email: "",
     password: "",
@@ -24,8 +22,15 @@ const OgboniSignupPage = () => {
     lga: "",
     city: "",
     address: "",
-  });
+  };
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [formData, setFormData] = useState(initialFormData);
   const [image, setImage] = useState<File | null>(null);
 
   const handleChange = (
@@ -79,6 +84,8 @@ const OgboniSignupPage = () => {
       const data = await response.json();
 
       if (response.ok) {
+        setFormData(initialFormData);
+        setImage(null);
         setSuccess(true);
 
         window.scrollTo({
@@ -96,6 +103,50 @@ const OgboniSignupPage = () => {
     }
   };
 
+  // SUCCESS SCREEN
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gray-100 py-16 px-4">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl p-10 text-center">
+          <img
+            src="/images/crest.png"
+            alt="Iledi Ajangbile Crest"
+            className="mx-auto mb-6 w-28"
+          />
+
+          <h1 className="text-3xl font-bold text-purple-900">
+            Application Submitted Successfully
+          </h1>
+
+          <p className="mt-6 text-lg leading-8 text-gray-700">
+            Thank you for applying for an online member account with{" "}
+            <strong>
+              Confederation of Ogboni Aborigine Fraternity of Nigeria
+            </strong>
+            , Ogun State Chapter – Iledi Ajangbile.
+          </p>
+
+          <p className="mt-4 text-gray-700 leading-8">
+            Your application has been received successfully and is currently
+            awaiting administrative review.
+          </p>
+
+          <p className="mt-4 text-gray-700 leading-8">
+            Once your application has been approved, you will receive an email
+            notification. You can then log in and access your member account.
+          </p>
+
+          <button
+            onClick={() => navigate("/login")}
+            className="mt-8 rounded-xl bg-purple-900 px-8 py-4 font-bold text-white hover:bg-purple-800 transition"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 py-16 px-4">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl p-10">
@@ -111,48 +162,10 @@ const OgboniSignupPage = () => {
             Ajangbile portal.
           </p>
         </div>
+
         {error && (
           <div className="mb-8 rounded-xl border border-red-400 bg-red-100 p-4 text-red-700">
             {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-10 rounded-3xl border border-green-300 bg-green-50 p-8 text-center shadow-lg">
-            <img
-              src="/images/crest.png"
-              alt="Iledi Ajangbile Crest"
-              className="mx-auto mb-6 w-28"
-            />
-
-            <h2 className="text-3xl font-bold text-purple-900">
-              Application Submitted Successfully
-            </h2>
-
-            <p className="mt-5 text-lg leading-8 text-gray-700">
-              Thank you for applying for an online member account with
-              <strong>
-                {" "}
-                Confederation of Ogboni Aborigine Fraternity of Nigeria
-              </strong>
-              , Ogun State Chapter – Iledi Ajangbile.
-            </p>
-
-            <p className="mt-4 text-gray-700 leading-8">
-              Your application has been received successfully and is currently
-              awaiting administrative review.
-            </p>
-
-            <p className="mt-4 text-gray-700 leading-8">
-              Once your application has been approved, you will receive an email
-              notification and you can then log in to your member account.
-            </p>
-
-            <button
-              onClick={() => navigate("/login")}
-              className="mt-8 rounded-xl bg-purple-900 px-8 py-4 font-bold text-white hover:bg-purple-800"
-            >
-              Go to Login
-            </button>
           </div>
         )}
 
@@ -189,25 +202,53 @@ const OgboniSignupPage = () => {
               required
             />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="border p-4 rounded-xl"
-              required
-            />
+            {/* PASSWORD WITH SHOW/HIDE EYE */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="border p-4 rounded-xl w-full pr-12"
+                required
+              />
 
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="border p-4 rounded-xl"
-              required
-            />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-900"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+
+            {/* CONFIRM PASSWORD WITH SHOW/HIDE EYE */}
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="border p-4 rounded-xl w-full pr-12"
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-900"
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
 
             <input
               type="text"

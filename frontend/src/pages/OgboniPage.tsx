@@ -51,8 +51,7 @@ function OgboniPage() {
 
           <div>
             <h1 className="text-3xl md:text-6xl font-bold leading-tight text-yellow-400">
-              Confederation of Ogboni Aborigine Fraternity of Nigeria, Ogun
-              State Chapter
+              Confederation of Ogboni Aborigine Fraternity of Nigeria. (COAFN)
             </h1>
 
             <p className="mt-6 text-xl italic text-yellow-200">

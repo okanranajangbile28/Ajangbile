@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const OgboniLoginPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const OgboniLoginPage = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -40,7 +42,6 @@ const OgboniLoginPage = () => {
 
       if (!response.ok) {
         alert(data.message || "Login failed");
-        setLoading(false);
         return;
       }
 
@@ -83,6 +84,7 @@ const OgboniLoginPage = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* EMAIL */}
           <input
             type="email"
             name="email"
@@ -93,15 +95,27 @@ const OgboniLoginPage = () => {
             required
           />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full rounded-xl border p-4 focus:outline-none focus:ring-2 focus:ring-purple-700"
-            required
-          />
+          {/* PASSWORD WITH SHOW/HIDE EYE */}
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full rounded-xl border p-4 pr-12 focus:outline-none focus:ring-2 focus:ring-purple-700"
+              required
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-900 transition"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
 
           <div className="text-right">
             <Link
