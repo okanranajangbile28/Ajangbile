@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -79,6 +79,15 @@ const AdminLogin = () => {
               placeholder="Password"
               required
             />
+          </div>
+
+          <div className="text-right">
+            <Link
+              to="/admin-forgot-password"
+              className="text-sm font-medium text-purple-800 hover:underline"
+            >
+              Forgot Password?
+            </Link>
           </div>
 
           <button

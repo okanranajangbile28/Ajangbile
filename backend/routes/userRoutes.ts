@@ -17,6 +17,7 @@ import {
   adminLogin,
   logout,
   forgotPassword,
+  adminForgotPassword,
   resetPassword,
   protect,
   updatePassword,
@@ -51,6 +52,9 @@ router.post('/login', login);
 
 // Admin login
 router.post('/admin-login', adminLogin);
+
+// Admin forgot password
+router.post('/admin-forgot-password', adminForgotPassword);
 
 // Logout
 router.get('/logout', logout);

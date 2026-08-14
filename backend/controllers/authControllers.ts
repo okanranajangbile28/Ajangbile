@@ -205,13 +205,8 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     await sendMail({
-      from: 'adeyinkaroqeeb@gmail.com',
-
       to: user.email,
-
       subject: 'PASSWORD RESET',
-
-      text: 'Reset password',
 
       html: `
       <p>
@@ -237,6 +232,71 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     });
 
     return next(new AppError('Email failed', 500));
+  }
+});
+
+export const adminForgotPassword = catchAsync(async (req, res, next) => {
+  const adminEmail = 'ajangbileheritage007@gmail.com';
+
+  if (req.body.email.toLowerCase() !== adminEmail) {
+    return next(
+      new AppError('Please enter the authorized admin email address', 403),
+    );
+  }
+
+  const user = await User.findOne({
+    email: adminEmail,
+  });
+
+  if (!user) {
+    return next(new AppError('No admin account found with that email', 404));
+  }
+
+  if (user.role !== 'admin' && user.role !== 'developer') {
+    return next(
+      new AppError('This email does not belong to an admin account', 403),
+    );
+  }
+
+  const resetToken = user.createPasswordResetToken();
+
+  await user.save({
+    validateBeforeSave: false,
+  });
+
+  try {
+    const resetURL = `${process.env.FRONTEND_URL}/admin-reset-password/${resetToken}`;
+
+    await sendMail({
+      from: 'adeyinkaroqeeb@gmail.com',
+      to: user.email,
+      subject: 'Admin Password Reset',
+      text: 'Reset your admin password',
+      html: `
+        <h2>Admin Password Reset</h2>
+        <p>You requested a password reset for your Ajangbile admin account.</p>
+        <p>
+          <a href="${resetURL}">
+            Reset Admin Password
+          </a>
+        </p>
+        <p>If you did not request this, you can ignore this email.</p>
+      `,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password reset link sent to your admin email',
+    });
+  } catch {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    await user.save({
+      validateBeforeSave: false,
+    });
+
+    return next(new AppError('Unable to send password reset email', 500));
   }
 });
 

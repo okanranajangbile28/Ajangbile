@@ -13,6 +13,8 @@ import AdminRoutes from "../features/adminFeature/admin/AdminRoutes";
 
 import ScrollToTop from "../components/global_components/ScrollToTop";
 
+import AdminForgotPassword from "../pages/AdminForgotPassword";
+import AdminResetPassword from "../pages/AdminResetPassword";
 // ================= Pages =================
 
 const AboutPage = lazy(() => import("../pages/About"));
@@ -75,6 +77,15 @@ const App = () => {
 
             <Route path="/admin-login" element={<AdminLogin />} />
 
+            <Route
+              path="/admin-forgot-password"
+              element={<AdminForgotPassword />}
+            />
+
+            <Route
+              path="/admin-reset-password/:token"
+              element={<AdminResetPassword />}
+            />
             {/* Blog */}
 
             <Route path="/blog" element={<BlogPageV2 />} />
