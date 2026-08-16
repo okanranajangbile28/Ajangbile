@@ -13,9 +13,14 @@ import { priceFormat } from "../utils/constants";
 const CheckoutPage = () => {
   const dispatch = useAppDispatch();
 
-  const { cart, subtotal, checkout_loading } = useAppSelector(
-    (state) => state.cart,
-  );
+  const {
+    cart,
+    subtotal,
+    checkout_loading,
+    shippingInfo,
+    total_items,
+    total_amount,
+  } = useAppSelector((state) => state.cart);
 
   useEffect(() => {
     document.title = "Ajangbile Heritage | Checkout";
@@ -23,9 +28,15 @@ const CheckoutPage = () => {
   }, [dispatch]);
 
   const checkout = () => {
+    const validCart = cart.filter((item) => item.amount > 0);
+
     dispatch(
       handleStripe({
-        cart: cart.filter((item) => item.amount > 0),
+        cart: validCart,
+        shippingInfo,
+        subtotal,
+        total_items,
+        total_amount: total_amount || subtotal,
       }),
     );
   };

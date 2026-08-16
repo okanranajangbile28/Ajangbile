@@ -26,20 +26,26 @@ import contactRouter from './routes/contactRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 
 import announcementRouter from './routes/announcementRoutes';
+
 console.log('Ogboni router imported');
 
-// Create a DOMPurify instance
+// ======================================================
+// DOMPURIFY
+// ======================================================
+
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 
-// Start express app
+// ======================================================
+// START EXPRESS APP
+// ======================================================
+
 const app = express();
 
 // ======================================================
-// GLOBAL MIDDLEWARES
+// CORS
 // ======================================================
 
-// CORS
 app.use(
   cors({
     origin: [
@@ -48,19 +54,25 @@ app.use(
       'https://ajangbile-frontend.onrender.com',
       'http://localhost:5173',
     ],
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+
     credentials: true,
   }),
 );
 
 app.options('*', cors());
 
-// Session
+// ======================================================
+// SESSION
+// ======================================================
+
 app.use(
   session({
     secret: 'keyboard time',
     resave: false,
     saveUninitialized: false,
+
     cookie: {
       secure: false,
       httpOnly: true,
@@ -70,44 +82,102 @@ app.use(
   }),
 );
 
-// Serve static files
+// ======================================================
+// STATIC FILES
+// ======================================================
+
 app.use(
   express.static(path.join(__dirname, 'public'), {
     maxAge: 31557600000,
   }),
 );
 
-// Security headers
+// ======================================================
+// SECURITY HEADERS
+// ======================================================
+
 app.use(helmet());
 
-// Development logger
+// ======================================================
+// DEVELOPMENT LOGGER
+// ======================================================
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Body parser
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// ======================================================
+// STRIPE WEBHOOK
+//
+// IMPORTANT:
+// Stripe requires the ORIGINAL RAW request body
+// to verify the webhook signature.
+//
+// This MUST come BEFORE express.json().
+// ======================================================
 
-// Cookie parser
+app.use(
+  '/api/order/stripe/webhook',
+  express.raw({
+    type: 'application/json',
+  }),
+);
+
+// ======================================================
+// BODY PARSERS
+//
+// These apply to all normal API requests.
+// The Stripe webhook above has already been handled
+// with express.raw().
+// ======================================================
+
+app.use(
+  express.json({
+    limit: '10kb',
+  }),
+);
+
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: '10kb',
+  }),
+);
+
+// ======================================================
+// COOKIE PARSER
+// ======================================================
+
 app.use(cookieParser());
 
-// Prevent Mongo injection
+// ======================================================
+// PREVENT MONGO INJECTION
+// ======================================================
+
 app.use(mongoSanitize());
 
-// Prevent HTTP Parameter Pollution
+// ======================================================
+// PREVENT HTTP PARAMETER POLLUTION
+// ======================================================
+
 app.use(
   hpp({
     whitelist: [],
   }),
 );
 
-// Compression
+// ======================================================
+// COMPRESSION
+// ======================================================
+
 app.use(compression());
 
-// Sanitize HTML input
+// ======================================================
+// SANITIZE HTML INPUT
+// ======================================================
+
 app.use((req, res, next) => {
-  if (req.body) {
+  if (req.body && typeof req.body === 'object') {
     Object.keys(req.body).forEach((key) => {
       if (typeof req.body[key] === 'string') {
         req.body[key] = DOMPurify.sanitize(req.body[key]);
@@ -118,15 +188,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Request timestamp
+// ======================================================
+// REQUEST TIMESTAMP
+// ======================================================
+
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
 
-// Root test route
+// ======================================================
+// ROOT TEST ROUTE
+// ======================================================
+
 app.get('/', (req, res) => {
   console.log('Root route hit');
+
   res.status(200).send('Backend server is running successfully!');
 });
 
@@ -134,26 +211,37 @@ app.get('/', (req, res) => {
 // ROUTES
 // ======================================================
 
-// Existing APIs
+// Products
 app.use('/api/products', productRouter);
+
+// Users / Authentication
 app.use('/api/user', userRouter);
+
+// Blog
 app.use('/api/blogs', blogRouter);
+
+// Orders / Stripe / PayPal / Paystack
 app.use('/api/order', orderRouter);
+
+// Ogboni
 app.use('/api/ogboni', ogboniRouter);
+
+// Contact
 app.use('/api/contact', contactRouter);
+
+// Membership Applications
 app.use('/api/membership-applications', membershipApplicationRouter);
 
+// Announcements
 app.use('/api/announcements', announcementRouter);
-// NEW
+
+// Payments
 app.use('/api/payments', paymentRoutes);
 
 // Blog CMS
 app.use('/api/blog-v2', blogV2Router);
 
-// Membership Applications
-app.use('/api/membership-applications', membershipApplicationRouter);
-
-// Existing Member Online Login Requests
+// Member Signup
 app.use('/api/member-signup', memberSignupRouter);
 
 // ======================================================
@@ -164,7 +252,10 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-// Global error handler
+// ======================================================
+// GLOBAL ERROR HANDLER
+// ======================================================
+
 app.use(globalErrorHandler);
 
 export default app;

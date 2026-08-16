@@ -10,6 +10,7 @@ import {
   BookOpen,
   Bell,
   LogOut,
+  ClipboardList,
 } from "lucide-react";
 
 import axios from "axios";
@@ -58,6 +59,10 @@ const menu = [
     icon: ShoppingBag,
   },
   {
+    name: "Orders",
+    icon: ClipboardList,
+  },
+  {
     name: "Announcements & Updates",
     icon: Bell,
   },
@@ -97,6 +102,7 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
   return (
     <aside className="w-72 h-screen bg-purple-950 text-white flex flex-col">
       {/* Header */}
+
       <div className="p-6 border-b border-purple-800">
         <h1 className="text-2xl font-bold text-yellow-400">AJANGBILE</h1>
 
@@ -104,6 +110,7 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
       </div>
 
       {/* Navigation */}
+
       <nav className="flex-1 overflow-y-auto p-4">
         {menu.map((item) => {
           const Icon = item.icon;
@@ -120,13 +127,15 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
               }`}
             >
               <Icon size={20} />
-              {item.name}
+
+              <span>{item.name}</span>
             </button>
           );
         })}
       </nav>
 
       {/* Logout */}
+
       <div className="p-4 border-t border-purple-800">
         <button
           type="button"
@@ -134,7 +143,8 @@ const Sidebar = ({ active, setActive }: SidebarProps) => {
           className="w-full flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-red-600 transition"
         >
           <LogOut size={20} />
-          Log Out
+
+          <span>Log Out</span>
         </button>
       </div>
     </aside>

@@ -6,6 +6,7 @@ import { HomePage, Privacy, TermsAndCondition } from "../pages";
 
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminProductsPage from "../pages/AdminProductsPage";
+import AdminOrdersPage from "../pages/AdminOrdersPage";
 import AdminLogin from "../pages/AdminLogin";
 
 import UserRoutes from "../features/userFeature/user/UserRoutes";
@@ -15,7 +16,10 @@ import ScrollToTop from "../components/global_components/ScrollToTop";
 
 import AdminForgotPassword from "../pages/AdminForgotPassword";
 import AdminResetPassword from "../pages/AdminResetPassword";
-// ================= Pages =================
+
+// ======================================================
+// PUBLIC PAGES
+// ======================================================
 
 const AboutPage = lazy(() => import("../pages/About"));
 const CartPage = lazy(() => import("../pages/CartPage"));
@@ -54,14 +58,21 @@ const OgboniAdminDashboard = lazy(
 
 const OgboniEditProfile = lazy(() => import("../pages/OgboniEditProfile"));
 
-// ================= BLOG =================
+// ======================================================
+// BLOG
+// ======================================================
 
 const BlogPageV2 = lazy(() => import("../pages/BlogPageV2"));
+
 const BlogDetails = lazy(() => import("../pages/BlogDetails"));
 
 const AdminBlogForm = lazy(
   () => import("../features/adminFeature/admin/AdminBlog/BlogForm"),
 );
+
+// ======================================================
+// APP
+// ======================================================
 
 const App = () => {
   return (
@@ -70,11 +81,15 @@ const App = () => {
 
       <Suspense fallback={<Loading />}>
         <Routes>
-          {/* PUBLIC */}
+          {/* ==================================================
+              PUBLIC / USER ROUTES
+          ================================================== */}
 
           <Route element={<UserRoutes />}>
+            {/* HOME */}
             <Route path="/" element={<HomePage />} />
 
+            {/* ADMIN AUTH */}
             <Route path="/admin-login" element={<AdminLogin />} />
 
             <Route
@@ -86,34 +101,41 @@ const App = () => {
               path="/admin-reset-password/:token"
               element={<AdminResetPassword />}
             />
-            {/* Blog */}
 
+            {/* BLOG */}
             <Route path="/blog" element={<BlogPageV2 />} />
+
             <Route path="/blog/:slug" element={<BlogDetails />} />
 
-            {/* Shop */}
-
+            {/* SHOP */}
             <Route path="/shop" element={<ProductsPage />} />
+
             <Route path="/shop/:id" element={<SingleProductPage />} />
 
-            {/* Main */}
-
+            {/* MAIN PAGES */}
             <Route path="/about" element={<AboutPage />} />
+
             <Route path="/contact" element={<ContactPage />} />
+
             <Route path="/ifa" element={<IfaPage />} />
+
             <Route path="/ogboni" element={<OgboniPage />} />
+
             <Route path="/consultation" element={<ConsultationPage />} />
+
             <Route path="/iledi-ajangbile" element={<IlediAjangbile />} />
+
             <Route path="/become-member" element={<BecomeMember />} />
 
-            {/* Member */}
+            {/* ==================================================
+                MEMBER
+            ================================================== */}
 
             <Route path="/signup" element={<OgboniSignupPage />} />
+
             <Route path="/login" element={<OgboniLoginPage />} />
 
             <Route path="/forgot-password" element={<OgboniForgotPassword />} />
-
-            <Route path="/payment-success" element={<PaymentSuccess />} />
 
             <Route
               path="/reset-password/:token"
@@ -129,23 +151,46 @@ const App = () => {
 
             <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
 
-            {/* Cart */}
+            {/* ==================================================
+                SHOPPING / CHECKOUT
+            ================================================== */}
 
             <Route path="/cart" element={<CartPage />} />
+
             <Route path="/checkout/:params" element={<CheckoutPage />} />
-            <Route path="/order" element={<OrderPage />} />
 
-            {/* Legal */}
+            {/* ==================================================
+                STRIPE SUCCESS PAGE
+            ==================================================
 
+                Stripe sends customers here after payment:
+
+                /order-success?session_id=...
+
+                OrderPage is currently being used as the
+                success page.
+            */}
+
+            <Route path="/order-success" element={<OrderPage />} />
+
+            {/* Existing payment success route */}
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+
+            {/* LEGAL */}
             <Route path="/privacy" element={<Privacy />} />
+
             <Route path="/terms-of-use" element={<TermsAndCondition />} />
           </Route>
 
-          {/* ADMIN */}
+          {/* ==================================================
+              ADMIN ROUTES
+          ================================================== */}
 
           <Route element={<AdminRoutes />}>
+            {/* ADMIN DASHBOARD */}
             <Route path="/admin" element={<AdminDashboard />} />
 
+            {/* ADMIN PRODUCTS */}
             <Route path="/admin/products" element={<AdminProductsPage />} />
 
             <Route
@@ -157,6 +202,16 @@ const App = () => {
               path="/admin/products/edit/:id"
               element={<CreateProductPage />}
             />
+
+            {/* ==================================================
+                ADMIN ORDERS
+            ================================================== */}
+
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
+
+            {/* ==================================================
+                ADMIN BLOG
+            ================================================== */}
 
             <Route path="/admin/blog" element={<AdminDashboard />} />
 
@@ -170,6 +225,10 @@ const App = () => {
               element={<AdminBlogForm type="detail" />}
             />
           </Route>
+
+          {/* ==================================================
+              404
+          ================================================== */}
 
           <Route path="*" element={<ErrorPage />} />
         </Routes>

@@ -36,11 +36,27 @@ export const handlePayStack = createAsyncThunk(
 
 export const handleStripe = createAsyncThunk(
   "cart/handleStripe",
-  async ({ cart }: { cart: CartItemType[] }) => {
+  async ({
+    cart,
+    shippingInfo,
+    subtotal,
+    total_items,
+    total_amount,
+  }: {
+    cart: CartItemType[];
+    shippingInfo: CartStateType["shippingInfo"];
+    subtotal: number;
+    total_items: number;
+    total_amount: number;
+  }) => {
     const response = await axios.post(
-      `${import.meta.env.VITE_SERVER_URL}/order/stripe-checkout`,
+      `${import.meta.env.VITE_SERVER_URL}/api/order/stripe-checkout`,
       {
         orderItems: cart,
+        shippingInfo,
+        subtotal,
+        total_items,
+        total_amount,
       },
       {
         withCredentials: true,
