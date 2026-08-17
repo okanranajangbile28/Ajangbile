@@ -116,8 +116,17 @@ if (process.env.NODE_ENV === 'development') {
 // This MUST come BEFORE express.json().
 // ======================================================
 
+// SHOP STRIPE WEBHOOK
 app.use(
   '/api/order/stripe/webhook',
+  express.raw({
+    type: 'application/json',
+  }),
+);
+
+// MEMBERSHIP INITIATION STRIPE WEBHOOK
+app.use(
+  '/api/payments/stripe/webhook',
   express.raw({
     type: 'application/json',
   }),

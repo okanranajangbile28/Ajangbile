@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+
 const BecomeMember = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [signature, setSignature] = useState<File | null>(null);
@@ -35,6 +35,10 @@ const BecomeMember = () => {
 
   const [form, setForm] = useState(initialForm);
 
+  // ======================================================
+  // HANDLE INPUT
+  // ======================================================
+
   const handleChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
@@ -49,12 +53,20 @@ const BecomeMember = () => {
     }));
   };
 
+  // ======================================================
+  // HANDLE CHECKBOX
+  // ======================================================
+
   const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.checked,
     }));
   };
+
+  // ======================================================
+  // HANDLE FILE
+  // ======================================================
 
   const handleFile = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -65,7 +77,7 @@ const BecomeMember = () => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image.");
+      setError("Please upload an image file.");
       return;
     }
 
@@ -74,13 +86,22 @@ const BecomeMember = () => {
     } else {
       setSignature(file);
     }
+
+    setError("");
   };
+
+  // ======================================================
+  // SUBMIT APPLICATION
+  // ======================================================
 
   const submitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setError("");
-    setSuccess("");
+
+    // ----------------------------------------------------
+    // FRONTEND VALIDATION
+    // ----------------------------------------------------
 
     if (!photo) {
       setError("Please upload your passport photograph.");
@@ -105,6 +126,10 @@ const BecomeMember = () => {
     try {
       setLoading(true);
 
+      // --------------------------------------------------
+      // CREATE APPLICATION
+      // --------------------------------------------------
+
       const formData = new FormData();
 
       Object.entries(form).forEach(([key, value]) => {
@@ -124,27 +149,61 @@ const BecomeMember = () => {
 
       const data = await response.json();
 
-      if (data.success) {
-        setSuccess(
-          "Your membership application has been submitted successfully.",
+      if (!response.ok || !data.success) {
+        setError(
+          data.message || "Unable to create your membership application.",
         );
 
-        setForm(initialForm);
-        setPhoto(null);
-        setSignature(null);
-      } else {
-        setError(data.message || "Application submission failed.");
+        setLoading(false);
+        return;
       }
+
+      // --------------------------------------------------
+      // GET APPLICATION ID
+      // --------------------------------------------------
+
+      const applicationId = data.application?._id;
+
+      if (!applicationId) {
+        console.error("Application ID missing:", data);
+
+        setError(
+          "Your application was created, but we could not start the payment process. Please contact support.",
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      // --------------------------------------------------
+      // SEND APPLICANT TO STRIPE
+      // --------------------------------------------------
+      //
+      // The $5 application fee must be paid before the
+      // application process is considered complete.
+      //
+
+      window.location.href =
+        `${import.meta.env.VITE_SERVER_URL}/api/payments/application-fee` +
+        `?applicationId=${encodeURIComponent(applicationId)}`;
     } catch (err) {
-      console.error(err);
-      setError("Something went wrong while submitting your application.");
-    } finally {
+      console.error("Membership application error:", err);
+
+      setError(
+        "Something went wrong while creating your application. Please try again.",
+      );
+
       setLoading(false);
     }
   };
+
   return (
     <section className="min-h-screen bg-gray-100 py-16 px-6">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* ==================================================
+            HEADER
+        ================================================== */}
+
         <div className="bg-[#4b0082] text-white px-10 py-12 text-center">
           <h1 className="text-5xl font-bold mb-4">Become a Member</h1>
 
@@ -158,27 +217,27 @@ const BecomeMember = () => {
           </p>
         </div>
 
-        {success && (
-          <div className="m-8 rounded-xl border border-green-400 bg-green-50 p-6 text-green-800">
-            <h3 className="font-bold text-xl mb-2">
-              Application Submitted Successfully
-            </h3>
-
-            <p>{success}</p>
-          </div>
-        )}
+        {/* ==================================================
+            ERROR MESSAGE
+        ================================================== */}
 
         {error && (
           <div className="m-8 rounded-xl border border-red-400 bg-red-50 p-6 text-red-800">
-            <h3 className="font-bold text-xl mb-2">
-              Unable to Submit Application
-            </h3>
+            <h3 className="font-bold text-xl mb-2">Unable to Continue</h3>
 
             <p>{error}</p>
           </div>
         )}
 
+        {/* ==================================================
+            APPLICATION FORM
+        ================================================== */}
+
         <form onSubmit={submitApplication} className="p-10 space-y-10">
+          {/* ==================================================
+              PERSONAL INFORMATION
+          ================================================== */}
+
           <Section title="Personal Information">
             <Input
               name="fullName"
@@ -227,12 +286,16 @@ const BecomeMember = () => {
             />
           </Section>
 
+          {/* ==================================================
+              CONTACT INFORMATION
+          ================================================== */}
+
           <Section title="Contact Information">
             <div className="flex flex-col">
               <label className="font-semibold mb-2">Phone Number</label>
 
               <PhoneInput
-                country={"ng"}
+                country="ng"
                 enableSearch
                 value={form.phone}
                 onChange={(phone) =>
@@ -323,6 +386,11 @@ const BecomeMember = () => {
               className="border rounded-xl p-4 w-full md:col-span-2"
             />
           </Section>
+
+          {/* ==================================================
+              NEXT OF KIN
+          ================================================== */}
+
           <Section title="Next of Kin">
             <Input
               name="nextOfKin"
@@ -338,7 +406,7 @@ const BecomeMember = () => {
               </label>
 
               <PhoneInput
-                country={"ng"}
+                country="ng"
                 enableSearch
                 value={form.nextOfKinPhone}
                 onChange={(phone) =>
@@ -366,6 +434,10 @@ const BecomeMember = () => {
             </div>
           </Section>
 
+          {/* ==================================================
+              PASSPORT PHOTO
+          ================================================== */}
+
           <Section title="Passport Photograph">
             <div className="md:col-span-2">
               <p className="text-gray-600 mb-3">
@@ -387,6 +459,10 @@ const BecomeMember = () => {
               )}
             </div>
           </Section>
+
+          {/* ==================================================
+              SIGNATURE
+          ================================================== */}
 
           <Section title="Signature">
             <div className="md:col-span-2">
@@ -410,6 +486,10 @@ const BecomeMember = () => {
             </div>
           </Section>
 
+          {/* ==================================================
+              REASON
+          ================================================== */}
+
           <Section title="Reason For Joining">
             <textarea
               name="reason"
@@ -421,7 +501,10 @@ const BecomeMember = () => {
               className="border rounded-xl p-4 w-full md:col-span-2"
             />
           </Section>
-          {/* AGREEMENTS */}
+
+          {/* ==================================================
+              AGREEMENTS
+          ================================================== */}
 
           <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6 space-y-6">
             <h2 className="text-2xl font-bold text-[#4b0082]">
@@ -429,8 +512,8 @@ const BecomeMember = () => {
             </h2>
 
             <p className="text-gray-700 leading-7">
-              Please read and accept the following agreements before submitting
-              your application.
+              Please read and accept the following agreements before continuing
+              to payment.
             </p>
 
             <label className="flex items-start gap-4">
@@ -469,14 +552,48 @@ const BecomeMember = () => {
             </label>
           </div>
 
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-6">
+          {/* ==================================================
+              APPLICATION FEE NOTICE
+          ================================================== */}
+
+          <div className="bg-yellow-50 border border-yellow-300 rounded-2xl p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-3">
+              Application Processing Fee
+            </h2>
+
+            <p className="text-gray-700 leading-7">
+              A non-refundable application processing fee of{" "}
+              <strong>$5.00</strong> is required to complete your membership
+              application.
+            </p>
+
+            <p className="mt-3 text-gray-700 leading-7">
+              After clicking the button below, you will be securely redirected
+              to Stripe to complete the $5.00 payment.
+            </p>
+
+            <p className="mt-3 font-semibold text-[#4b0082]">
+              Your application will not be considered complete until the payment
+              has been successfully confirmed.
+            </p>
+          </div>
+
+          {/* ==================================================
+              FINAL NOTICE
+          ================================================== */}
+
+          <div className="bg-gray-50 border-l-4 border-[#4b0082] rounded-xl p-6">
             <p className="text-gray-700 leading-8">
-              Submission of this application does not automatically guarantee
+              Payment of the application processing fee does not guarantee
               membership. Every application will be reviewed carefully by the
               Membership Committee. Successful applicants will be contacted
               through the details provided.
             </p>
           </div>
+
+          {/* ==================================================
+              SUBMIT / PAY BUTTON
+          ================================================== */}
 
           <button
             type="submit"
@@ -484,8 +601,8 @@ const BecomeMember = () => {
             className="w-full bg-[#4b0082] hover:bg-[#360061] text-white py-5 rounded-xl text-xl font-bold transition disabled:opacity-50"
           >
             {loading
-              ? "Submitting Application..."
-              : "Submit Membership Application"}
+              ? "Preparing Secure Payment..."
+              : "Continue to $5 Application Payment"}
           </button>
         </form>
       </div>
@@ -493,9 +610,9 @@ const BecomeMember = () => {
   );
 };
 
-// ============================
+// ======================================================
 // REUSABLE COMPONENTS
-// ============================
+// ======================================================
 
 interface SectionProps {
   title: string;
@@ -564,6 +681,7 @@ const Select = ({
     name={name}
     value={value}
     onChange={onChange}
+    required
     className="border rounded-xl p-4 w-full"
   >
     <option value="">{placeholder}</option>

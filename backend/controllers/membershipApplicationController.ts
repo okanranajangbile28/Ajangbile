@@ -107,16 +107,34 @@ export const createApplication = async (
       return;
     }
 
+    // ==================================================
+    // CREATE APPLICATION
+    // PAYMENT MUST BE COMPLETED BEFORE APPLICATION
+    // BECOMES A NORMAL PENDING APPLICATION
+    // ==================================================
+
     const application = await MembershipApplication.create({
       ...req.body,
+
       photo,
       signature,
-      status: 'Pending',
+
+      status: 'Payment Pending',
+
+      applicationFeeStatus: 'Pending',
+
+      applicationFeeAmount: 5,
+
+      applicationFeeReference: '',
+
+      applicationFeeDate: undefined,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Membership application submitted successfully.',
+      message:
+        'Application created. Payment is required to complete submission.',
+      applicationId: application._id,
       application,
     });
   } catch (error: any) {
@@ -144,9 +162,7 @@ export const getApplications = async (
 
     res.status(200).json({
       success: true,
-
       count: applications.length,
-
       applications,
     });
   } catch (error: any) {
@@ -154,7 +170,6 @@ export const getApplications = async (
 
     res.status(500).json({
       success: false,
-
       message: 'Failed to fetch applications.',
     });
   }
@@ -174,7 +189,6 @@ export const getApplication = async (
     if (!application) {
       res.status(404).json({
         success: false,
-
         message: 'Application not found.',
       });
 
@@ -183,7 +197,6 @@ export const getApplication = async (
 
     res.status(200).json({
       success: true,
-
       application,
     });
   } catch (error: any) {
@@ -191,7 +204,6 @@ export const getApplication = async (
 
     res.status(500).json({
       success: false,
-
       message: 'Failed to fetch application.',
     });
   }
@@ -247,8 +259,6 @@ export const approveApplication = async (
   res: Response,
 ): Promise<void> => {
   try {
-    // No initiation details are collected at approval stage anymore.
-
     const application = await MembershipApplication.findById(req.params.id);
 
     if (!application) {
@@ -256,21 +266,53 @@ export const approveApplication = async (
         success: false,
         message: 'Application not found.',
       });
+
       return;
     }
 
+    // ==========================================
+    // APPLICATION FEE MUST BE PAID FIRST
+    // ==========================================
+
+    if (application.applicationFeeStatus !== 'Paid') {
+      res.status(400).json({
+        success: false,
+        message:
+          'This application cannot be approved because the $5 application fee has not been paid.',
+      });
+
+      return;
+    }
+
+    // ==========================================
+    // APPLICATION MUST BE PENDING
+    // ==========================================
+
+    if (application.status !== 'Pending') {
+      res.status(400).json({
+        success: false,
+        message: 'Only applications with a Pending status can be approved.',
+      });
+
+      return;
+    }
+
+    // ==========================================
+    // APPROVE APPLICATION
+    // ==========================================
+
     application.status = 'Accepted';
 
-    // Reset payment information
+    // Reset initiation payment information
     application.paymentStatus = 'Pending';
     application.paymentAmount = 0;
     application.paymentReference = '';
     application.paymentDate = undefined;
 
-    // Package will be selected by the applicant later
+    // Package will be selected later
     application.initiationPackage = undefined;
 
-    // Clear initiation details until payment has been confirmed
+    // Clear initiation details
     application.initiationDate = undefined;
     application.initiationTime = '';
     application.initiationVenue = '';
@@ -278,15 +320,20 @@ export const approveApplication = async (
 
     await application.save();
 
-    // =======================
+    // ==========================================
     // SEND APPROVAL EMAIL
-    // =======================
+    // ==========================================
 
     await sendMembershipApprovalEmail({
       fullName: application.fullName,
       email: application.email,
       applicationId: application.id,
     });
+
+    // ==========================================
+    // SEND APPROVAL SMS
+    // ==========================================
+
     try {
       await sendMembershipApprovalSMS({
         phone: application.phone,
@@ -299,6 +346,7 @@ export const approveApplication = async (
     } catch (err) {
       console.error('SMS sending failed:', err);
     }
+
     res.status(200).json({
       success: true,
       message: 'Application approved successfully.',
@@ -354,6 +402,35 @@ export const rejectApplication = async (
 };
 
 // =======================
+// GET PAYMENT-PENDING APPLICATIONS
+// =======================
+
+export const getPaymentPendingApplications = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const applications = await MembershipApplication.find({
+      status: 'Payment Pending',
+    }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      applications,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =======================
 // GET PENDING APPLICATIONS
 // =======================
 
@@ -364,6 +441,7 @@ export const getPendingApplications = async (
   try {
     const applications = await MembershipApplication.find({
       status: 'Pending',
+      applicationFeeStatus: 'Paid',
     }).sort({
       createdAt: -1,
     });
@@ -393,6 +471,7 @@ export const getApprovedApplications = async (
   try {
     const applications = await MembershipApplication.find({
       status: 'Accepted',
+      applicationFeeStatus: 'Paid',
     }).sort({
       initiationDate: 1,
     });
@@ -475,9 +554,13 @@ export const deleteApplication = async (
     });
   }
 };
+
 // =======================================================
 // MARK MEMBER AS PAID
 // =======================================================
+// This is for the INITIATION payment stage.
+// The $5 application fee must already have been paid.
+
 export const markAsPaid = catchAsync(
   async (req: Request, res: Response, next) => {
     const application = await MembershipApplication.findById(req.params.id);
@@ -486,7 +569,29 @@ export const markAsPaid = catchAsync(
       return next(new AppError('Application not found.', 404));
     }
 
+    // The $5 application fee must be paid first
+    if (application.applicationFeeStatus !== 'Paid') {
+      return next(
+        new AppError(
+          'The $5 application fee must be paid before this member can be marked as Paid.',
+          400,
+        ),
+      );
+    }
+
+    // Application must already be accepted
+    if (application.status !== 'Accepted') {
+      return next(
+        new AppError(
+          'Only an accepted application can be marked as Paid.',
+          400,
+        ),
+      );
+    }
+
     application.status = 'Paid';
+    application.paymentStatus = 'Paid';
+    application.paymentDate = new Date();
 
     await application.save();
 
@@ -497,6 +602,7 @@ export const markAsPaid = catchAsync(
     });
   },
 );
+
 // ======================================================
 // GET PAID MEMBERS
 // ======================================================
@@ -531,15 +637,50 @@ export const scheduleAndSendInitiation = async (
         success: false,
         message: 'Application not found.',
       });
+
       return;
     }
+
+    // ==================================================
+    // INITIATION PAYMENT MUST BE PAID FIRST
+    // ==================================================
+
+    if (application.paymentStatus !== 'Paid') {
+      res.status(400).json({
+        success: false,
+        message:
+          'Initiation cannot be scheduled because the initiation payment has not been completed.',
+      });
+
+      return;
+    }
+
+    // ==================================================
+    // APPLICATION MUST BE ACCEPTED
+    // ==================================================
+
+    if (application.status !== 'Paid') {
+      res.status(400).json({
+        success: false,
+        message: 'This application is not ready for initiation scheduling.',
+      });
+
+      return;
+    }
+
+    // ==================================================
+    // SAVE INITIATION DETAILS
+    // ==================================================
 
     application.initiationDate = req.body.initiationDate;
     application.initiationTime = req.body.initiationTime;
     application.initiationVenue = req.body.initiationVenue;
     application.initiationInstructions = req.body.initiationInstructions;
 
-    // Convert 24-hour time to 12-hour AM/PM
+    // ==================================================
+    // CONVERT 24-HOUR TIME TO 12-HOUR AM/PM
+    // ==================================================
+
     const formattedTime = application.initiationTime
       ? new Date(`1970-01-01T${application.initiationTime}`).toLocaleTimeString(
           'en-US',
@@ -551,6 +692,10 @@ export const scheduleAndSendInitiation = async (
         )
       : '';
 
+    // ==================================================
+    // SEND INITIATION EMAIL
+    // ==================================================
+
     await sendInitiationEmail({
       fullName: application.fullName,
       email: application.email,
@@ -560,8 +705,10 @@ export const scheduleAndSendInitiation = async (
       initiationInstructions: application.initiationInstructions || '',
     });
 
-    application.paymentStatus = 'Paid';
-    application.status = 'Paid';
+    // ==================================================
+    // MARK INITIATION AS SCHEDULED
+    // ==================================================
+
     application.initiationStatus = 'Scheduled';
 
     await application.save();
@@ -569,13 +716,14 @@ export const scheduleAndSendInitiation = async (
     res.status(200).json({
       success: true,
       message: 'Initiation scheduled and email sent successfully.',
+      application,
     });
   } catch (error: any) {
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || 'Failed to schedule initiation.',
     });
   }
 };

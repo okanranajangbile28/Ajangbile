@@ -34,6 +34,7 @@ export interface IMembershipApplication extends Document {
   ndaAccepted: boolean;
 
   status:
+    | 'Payment Pending'
     | 'Pending'
     | 'Interview Scheduled'
     | 'Initiation Scheduled'
@@ -44,7 +45,27 @@ export interface IMembershipApplication extends Document {
 
   adminNotes?: string;
 
+  // ==========================================
+  // APPLICATION FEE
+  // ==========================================
+
+  applicationFeeStatus?: 'Pending' | 'Paid';
+
+  applicationFeeAmount?: number;
+
+  applicationFeeReference?: string;
+
+  applicationFeeDate?: Date;
+
+  // ==========================================
+  // INITIATION PACKAGE
+  // ==========================================
+
   initiationPackage?: 'Basic' | 'Standard' | 'Premium';
+
+  // ==========================================
+  // INITIATION PAYMENT
+  // ==========================================
 
   paymentStatus?: 'Pending' | 'Paid';
 
@@ -55,6 +76,10 @@ export interface IMembershipApplication extends Document {
   paymentReference?: string;
 
   paymentDate?: Date;
+
+  // ==========================================
+  // INITIATION DETAILS
+  // ==========================================
 
   initiationDate?: Date;
   initiationTime?: string;
@@ -182,9 +207,14 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       default: false,
     },
 
+    // ==========================================
+    // APPLICATION STATUS
+    // ==========================================
+
     status: {
       type: String,
       enum: [
+        'Payment Pending',
         'Pending',
         'Interview Scheduled',
         'Initiation Scheduled',
@@ -193,7 +223,7 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
         'Rejected',
         'Completed',
       ],
-      default: 'Pending',
+      default: 'Payment Pending',
     },
 
     adminNotes: {
@@ -202,11 +232,45 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       trim: true,
     },
 
+    // ==========================================
+    // APPLICATION FEE
+    // ==========================================
+
+    applicationFeeStatus: {
+      type: String,
+      enum: ['Pending', 'Paid'],
+      default: 'Pending',
+    },
+
+    applicationFeeAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    applicationFeeReference: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    applicationFeeDate: {
+      type: Date,
+      default: null,
+    },
+
+    // ==========================================
+    // INITIATION PACKAGE
+    // ==========================================
+
     initiationPackage: {
       type: String,
       enum: ['Basic', 'Standard', 'Premium'],
       default: null,
     },
+
+    // ==========================================
+    // INITIATION PAYMENT
+    // ==========================================
 
     paymentStatus: {
       type: String,
@@ -235,6 +299,10 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
       type: Date,
       default: null,
     },
+
+    // ==========================================
+    // INITIATION DETAILS
+    // ==========================================
 
     initiationDate: {
       type: Date,
