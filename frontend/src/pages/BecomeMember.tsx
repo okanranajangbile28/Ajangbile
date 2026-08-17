@@ -99,10 +99,6 @@ const BecomeMember = () => {
 
     setError("");
 
-    // ----------------------------------------------------
-    // FRONTEND VALIDATION
-    // ----------------------------------------------------
-
     if (!photo) {
       setError("Please upload your passport photograph.");
       return;
@@ -125,10 +121,6 @@ const BecomeMember = () => {
 
     try {
       setLoading(true);
-
-      // --------------------------------------------------
-      // CREATE APPLICATION
-      // --------------------------------------------------
 
       const formData = new FormData();
 
@@ -158,10 +150,6 @@ const BecomeMember = () => {
         return;
       }
 
-      // --------------------------------------------------
-      // GET APPLICATION ID
-      // --------------------------------------------------
-
       const applicationId = data.application?._id;
 
       if (!applicationId) {
@@ -175,13 +163,9 @@ const BecomeMember = () => {
         return;
       }
 
-      // --------------------------------------------------
+      // ==================================================
       // SEND APPLICANT TO STRIPE
-      // --------------------------------------------------
-      //
-      // The $5 application fee must be paid before the
-      // application process is considered complete.
-      //
+      // ==================================================
 
       window.location.href =
         `${import.meta.env.VITE_SERVER_URL}/api/payments/application-fee` +
@@ -239,27 +223,27 @@ const BecomeMember = () => {
           ================================================== */}
 
           <Section title="Personal Information">
-            <Input
-              name="fullName"
-              placeholder="Full Name"
-              value={form.fullName}
-              onChange={handleChange}
-              required
-            />
+            <Field label="Full Name">
+              <Input
+                name="fullName"
+                placeholder="Enter your full name"
+                value={form.fullName}
+                onChange={handleChange}
+                required
+              />
+            </Field>
 
-            <Select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              placeholder="Gender"
-              options={["Male", "Female"]}
-            />
+            <Field label="Gender">
+              <Select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                placeholder="Select Gender"
+                options={["Male", "Female"]}
+              />
+            </Field>
 
-            <div>
-              <label className="block mb-2 font-semibold text-gray-700">
-                Date of Birth
-              </label>
-
+            <Field label="Date of Birth">
               <Input
                 type="date"
                 name="dateOfBirth"
@@ -267,23 +251,27 @@ const BecomeMember = () => {
                 onChange={handleChange}
                 required
               />
-            </div>
+            </Field>
 
-            <Select
-              name="maritalStatus"
-              value={form.maritalStatus}
-              onChange={handleChange}
-              placeholder="Marital Status"
-              options={["Single", "Married", "Divorced", "Widowed"]}
-            />
+            <Field label="Marital Status">
+              <Select
+                name="maritalStatus"
+                value={form.maritalStatus}
+                onChange={handleChange}
+                placeholder="Select Marital Status"
+                options={["Single", "Married", "Divorced", "Widowed"]}
+              />
+            </Field>
 
-            <Input
-              name="occupation"
-              placeholder="Occupation"
-              value={form.occupation}
-              onChange={handleChange}
-              required
-            />
+            <Field label="Occupation">
+              <Input
+                name="occupation"
+                placeholder="Enter your occupation"
+                value={form.occupation}
+                onChange={handleChange}
+                required
+              />
+            </Field>
           </Section>
 
           {/* ==================================================
@@ -291,9 +279,7 @@ const BecomeMember = () => {
           ================================================== */}
 
           <Section title="Contact Information">
-            <div className="flex flex-col">
-              <label className="font-semibold mb-2">Phone Number</label>
-
+            <Field label="Phone Number">
               <PhoneInput
                 country="ng"
                 enableSearch
@@ -320,71 +306,81 @@ const BecomeMember = () => {
                 }}
                 placeholder="Enter phone number"
               />
-            </div>
+            </Field>
 
-            <Select
-              name="country"
-              value={form.country}
-              onChange={handleChange}
-              placeholder="Select Country"
-              options={[
-                "Nigeria",
-                "Ghana",
-                "South Africa",
-                "United Kingdom",
-                "United States",
-                "Canada",
-                "Germany",
-                "France",
-                "Italy",
-                "Spain",
-                "United Arab Emirates",
-                "Saudi Arabia",
-                "Ireland",
-                "Netherlands",
-                "Australia",
-                "New Zealand",
-                "India",
-                "Brazil",
-                "Kenya",
-                "Other",
-              ]}
-            />
+            <Field label="Email Address">
+              <Input
+                name="email"
+                type="email"
+                placeholder="Enter your email address"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </Field>
 
-            <Input
-              name="email"
-              type="email"
-              placeholder="Email Address"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
+            <Field label="Country">
+              <Select
+                name="country"
+                value={form.country}
+                onChange={handleChange}
+                placeholder="Select Country"
+                options={[
+                  "Nigeria",
+                  "Ghana",
+                  "South Africa",
+                  "United Kingdom",
+                  "United States",
+                  "Canada",
+                  "Germany",
+                  "France",
+                  "Italy",
+                  "Spain",
+                  "United Arab Emirates",
+                  "Saudi Arabia",
+                  "Ireland",
+                  "Netherlands",
+                  "Australia",
+                  "New Zealand",
+                  "India",
+                  "Brazil",
+                  "Kenya",
+                  "Other",
+                ]}
+              />
+            </Field>
 
-            <Input
-              name="city"
-              placeholder="City"
-              value={form.city}
-              onChange={handleChange}
-              required
-            />
+            <Field label="City">
+              <Input
+                name="city"
+                placeholder="Enter your city"
+                value={form.city}
+                onChange={handleChange}
+                required
+              />
+            </Field>
 
-            <Input
-              name="state"
-              placeholder="State"
-              value={form.state}
-              onChange={handleChange}
-              required
-            />
+            <Field label="State">
+              <Input
+                name="state"
+                placeholder="Enter your state"
+                value={form.state}
+                onChange={handleChange}
+                required
+              />
+            </Field>
 
-            <textarea
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Residential Address"
-              rows={3}
-              required
-              className="border rounded-xl p-4 w-full md:col-span-2"
-            />
+            <Field label="Residential Address" className="md:col-span-2">
+              <textarea
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                placeholder="Enter your full residential address"
+                rows={3}
+                required
+                className="border rounded-xl p-4 w-full"
+              />
+            </Field>
           </Section>
 
           {/* ==================================================
@@ -392,19 +388,17 @@ const BecomeMember = () => {
           ================================================== */}
 
           <Section title="Next of Kin">
-            <Input
-              name="nextOfKin"
-              placeholder="Next of Kin Full Name"
-              value={form.nextOfKin}
-              onChange={handleChange}
-              required
-            />
+            <Field label="Next of Kin Full Name">
+              <Input
+                name="nextOfKin"
+                placeholder="Enter next of kin full name"
+                value={form.nextOfKin}
+                onChange={handleChange}
+                required
+              />
+            </Field>
 
-            <div className="flex flex-col">
-              <label className="font-semibold mb-2">
-                Next of Kin Phone Number
-              </label>
-
+            <Field label="Next of Kin Phone Number">
               <PhoneInput
                 country="ng"
                 enableSearch
@@ -429,9 +423,9 @@ const BecomeMember = () => {
                 searchStyle={{
                   width: "100%",
                 }}
-                placeholder="Enter Next of Kin phone number"
+                placeholder="Enter next of kin phone number"
               />
-            </div>
+            </Field>
           </Section>
 
           {/* ==================================================
@@ -439,7 +433,7 @@ const BecomeMember = () => {
           ================================================== */}
 
           <Section title="Passport Photograph">
-            <div className="md:col-span-2">
+            <Field label="Passport Photograph" className="md:col-span-2">
               <p className="text-gray-600 mb-3">
                 Upload a clear passport photograph.
               </p>
@@ -457,7 +451,7 @@ const BecomeMember = () => {
                   Selected: {photo.name}
                 </p>
               )}
-            </div>
+            </Field>
           </Section>
 
           {/* ==================================================
@@ -465,7 +459,7 @@ const BecomeMember = () => {
           ================================================== */}
 
           <Section title="Signature">
-            <div className="md:col-span-2">
+            <Field label="Handwritten Signature" className="md:col-span-2">
               <p className="text-gray-600 mb-3">
                 Upload your handwritten signature.
               </p>
@@ -483,23 +477,28 @@ const BecomeMember = () => {
                   Selected: {signature.name}
                 </p>
               )}
-            </div>
+            </Field>
           </Section>
 
           {/* ==================================================
-              REASON
+              REASON FOR JOINING
           ================================================== */}
 
           <Section title="Reason For Joining">
-            <textarea
-              name="reason"
-              value={form.reason}
-              onChange={handleChange}
-              placeholder="Explain why you wish to become a member."
-              rows={6}
-              required
-              className="border rounded-xl p-4 w-full md:col-span-2"
-            />
+            <Field
+              label="Why do you wish to become a member?"
+              className="md:col-span-2"
+            >
+              <textarea
+                name="reason"
+                value={form.reason}
+                onChange={handleChange}
+                placeholder="Explain why you wish to become a member."
+                rows={6}
+                required
+                className="border rounded-xl p-4 w-full"
+              />
+            </Field>
           </Section>
 
           {/* ==================================================
@@ -626,6 +625,20 @@ const Section = ({ title, children }: SectionProps) => (
     </h2>
 
     <div className="grid md:grid-cols-2 gap-6">{children}</div>
+  </div>
+);
+
+interface FieldProps {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}
+
+const Field = ({ label, children, className = "" }: FieldProps) => (
+  <div className={`flex flex-col ${className}`}>
+    <label className="block mb-2 font-semibold text-gray-700">{label}</label>
+
+    {children}
   </div>
 );
 
