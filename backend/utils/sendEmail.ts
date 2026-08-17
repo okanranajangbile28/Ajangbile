@@ -887,3 +887,352 @@ Iledi Ajangbile
     throw err;
   }
 };
+
+// =====================================================
+// ORDER RECEIPT EMAIL
+// =====================================================
+
+export const sendOrderReceiptEmail = async ({
+  email,
+  fullName,
+  orderId,
+  stripeReference,
+  orderItems,
+  totalAmount,
+}: {
+  email: string;
+  fullName: string;
+  orderId: string;
+  stripeReference: string;
+  orderItems: Array<{
+    productName: string;
+    price: number;
+    quantity?: number;
+  }>;
+  totalAmount: number;
+}) => {
+  try {
+    const itemsHtml = orderItems
+      .map(
+        (item) => `
+          <tr>
+            <td style="
+              padding:14px;
+              border-bottom:1px solid #e5e5e5;
+              color:#333;
+            ">
+              ${item.productName}
+            </td>
+
+            <td style="
+              padding:14px;
+              border-bottom:1px solid #e5e5e5;
+              text-align:center;
+              color:#333;
+            ">
+              ${item.quantity || 1}
+            </td>
+
+            <td style="
+              padding:14px;
+              border-bottom:1px solid #e5e5e5;
+              text-align:right;
+              color:#333;
+              font-weight:bold;
+            ">
+              $${(item.price * (item.quantity || 1)).toFixed(2)}
+            </td>
+          </tr>
+        `,
+      )
+      .join('');
+
+    const { data, error } = await resend.emails.send({
+      from: 'Iledi Ajangbile <admin@ajangbileheritage.com>',
+
+      to: email,
+
+      subject: 'Your Ajangbile Heritage Order Receipt',
+
+      html: `
+<div style="
+  margin:0;
+  padding:40px 20px;
+  background:#f4f1f8;
+  font-family:Arial,Helvetica,sans-serif;
+">
+
+  <div style="
+    max-width:700px;
+    margin:auto;
+    background:#ffffff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.10);
+  ">
+
+    <!-- HEADER -->
+
+    <div style="
+      background:linear-gradient(180deg,#4b0082 0%,#32005c 100%);
+      padding:40px 25px;
+      text-align:center;
+    ">
+
+      <img
+        src="${CREST_URL}"
+        alt="Ajangbile Heritage Crest"
+        style="
+          width:90px;
+          height:auto;
+          margin-bottom:18px;
+        "
+      />
+
+      <h1 style="
+        margin:0;
+        color:#ffffff;
+        font-size:30px;
+        line-height:1.3;
+      ">
+        Payment Successful
+      </h1>
+
+      <p style="
+        color:#FFD700;
+        margin:15px 0 0;
+        font-size:16px;
+        font-weight:bold;
+      ">
+        Your Order Receipt
+      </p>
+
+    </div>
+
+    <!-- BODY -->
+
+    <div style="padding:40px 30px;">
+
+      <h2 style="
+        color:#4b0082;
+        margin-top:0;
+      ">
+        Thank You, ${fullName}
+      </h2>
+
+      <p style="
+        color:#444;
+        font-size:16px;
+        line-height:1.8;
+      ">
+        Your payment has been successfully received and your order has been confirmed.
+      </p>
+
+      <!-- ORDER INFORMATION -->
+
+      <div style="
+        background:#f8f6fb;
+        border-left:5px solid #4b0082;
+        padding:20px;
+        border-radius:8px;
+        margin:30px 0;
+      ">
+
+        <p style="margin:8px 0;color:#444;">
+          <strong>Order ID:</strong>
+          ${orderId}
+        </p>
+
+        <p style="margin:8px 0;color:#444;">
+          <strong>Payment Reference:</strong>
+          ${stripeReference}
+        </p>
+
+        <p style="margin:8px 0;color:#444;">
+          <strong>Payment Status:</strong>
+          <span style="color:#16803c;font-weight:bold;">
+            Paid
+          </span>
+        </p>
+
+      </div>
+
+      <!-- ORDER ITEMS -->
+
+      <h2 style="
+        color:#4b0082;
+        margin-top:35px;
+      ">
+        Order Summary
+      </h2>
+
+      <table style="
+        width:100%;
+        border-collapse:collapse;
+        margin-top:15px;
+      ">
+
+        <thead>
+
+          <tr style="background:#4b0082;color:#ffffff;">
+
+            <th style="
+              padding:14px;
+              text-align:left;
+            ">
+              Product
+            </th>
+
+            <th style="
+              padding:14px;
+              text-align:center;
+            ">
+              Quantity
+            </th>
+
+            <th style="
+              padding:14px;
+              text-align:right;
+            ">
+              Total
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${itemsHtml}
+
+        </tbody>
+
+      </table>
+
+      <!-- TOTAL -->
+
+      <div style="
+        margin-top:30px;
+        padding:22px;
+        background:#fff8dc;
+        border-radius:10px;
+        text-align:right;
+      ">
+
+        <span style="
+          font-size:16px;
+          color:#555;
+        ">
+          Total Paid:
+        </span>
+
+        <strong style="
+          font-size:26px;
+          color:#4b0082;
+          margin-left:10px;
+        ">
+          $${totalAmount.toFixed(2)}
+        </strong>
+
+      </div>
+
+      <!-- NEXT STEP -->
+
+      <div style="
+        margin-top:35px;
+        padding:20px;
+        background:#f4f1f8;
+        border-radius:10px;
+      ">
+
+        <strong style="
+          color:#4b0082;
+          font-size:17px;
+        ">
+          What happens next?
+        </strong>
+
+        <p style="
+          color:#444;
+          line-height:1.8;
+          margin-bottom:0;
+        ">
+          Your order is now being processed. We will contact you if any additional information is required regarding your order.
+        </p>
+
+      </div>
+
+      <div style="
+        text-align:center;
+        margin:40px 0 20px;
+      ">
+
+        <a
+          href="https://www.ajangbileheritage.com"
+          style="
+            background:#4b0082;
+            color:#ffffff;
+            padding:15px 32px;
+            text-decoration:none;
+            border-radius:8px;
+            display:inline-block;
+            font-weight:bold;
+          "
+        >
+          Visit Ajangbile Heritage
+        </a>
+
+      </div>
+
+      <hr style="
+        border:none;
+        border-top:1px solid #ddd;
+        margin:35px 0;
+      ">
+
+      <p style="
+        color:#666;
+        line-height:1.8;
+        font-size:14px;
+        text-align:center;
+      ">
+        Please keep this email as your payment receipt.
+      </p>
+
+      <p style="
+        color:#4b0082;
+        text-align:center;
+        font-weight:bold;
+        line-height:1.7;
+      ">
+        Ajangbile Heritage
+        <br />
+        Confederation of Ogboni Aborigine Fraternity of Nigeria
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+`,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('======================================');
+    console.log('📧 ORDER RECEIPT EMAIL SENT');
+    console.log(`Customer: ${email}`);
+    console.log(`Order ID: ${orderId}`);
+    console.log('======================================');
+
+    return data;
+  } catch (err) {
+    console.error('❌ Failed to send order receipt email:');
+    console.error(err);
+
+    throw err;
+  }
+};

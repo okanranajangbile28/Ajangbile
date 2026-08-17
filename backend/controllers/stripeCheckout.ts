@@ -3,6 +3,7 @@ import Product from '../models/productsModel';
 import Order from '../models/orderModel';
 import catchAsync from '../utils/catchAsync';
 import { CartItem } from '../types';
+import { sendOrderReceiptEmail } from '../utils/sendEmail';
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -617,6 +618,39 @@ export const webhookCheckout = async (req: any, res: any) => {
 
         orderStatus: 'pending',
       });
+
+      // ==================================================
+      // SEND ORDER RECEIPT EMAIL
+      // ==================================================
+
+      try {
+        await sendOrderReceiptEmail({
+          email,
+          fullName: customerName,
+          orderId: String(order._id),
+          stripeReference: session.id,
+
+          orderItems: lineItems.data
+            .filter((item) => item.description)
+            .map((item) => ({
+              productName: item.description || 'Product',
+
+              price:
+                (item.amount_total || 0) /
+                Math.max(1, Number(item.quantity || 1)) /
+                100,
+
+              quantity: Number(item.quantity || 1),
+            })),
+
+          totalAmount,
+        });
+      } catch (emailError) {
+        // Do not fail the already successful payment/order
+        // if the receipt email has a temporary problem.
+        console.error('❌ Order was saved, but receipt email failed:');
+        console.error(emailError);
+      }
 
       console.log('======================================');
 
