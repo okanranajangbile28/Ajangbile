@@ -13,7 +13,7 @@ const router = express.Router();
 // MEMBERSHIP APPLICATION FEE
 // ======================================================
 
-// Start Stripe Checkout for the $5 application fee
+// Start Stripe Checkout for the $0.40 application fee
 router.get('/application-fee', initializeApplicationFeePayment);
 
 // ======================================================

@@ -373,7 +373,7 @@ font-size:34px;
 font-weight:bold;
 color:#4b0082;
 ">
-$224.00
+$0.40
 </p>
 
 <ul style="
@@ -395,7 +395,7 @@ color:#444;
 <div style="text-align:center;margin-top:28px;">
 
 <a
-href="https://ajangbile.onrender.com/api/payments/initiate?applicationId=${applicationId}&package=Basic"
+href="https://ajangbile.onrender.com/api/payments/stripe/initiate?applicationId=${applicationId}&package=Basic"
 style="
 display:inline-block;
 background:#4b0082;
@@ -411,7 +411,7 @@ word-break:keep-all;
 text-align:center;
 box-sizing:border-box;
 ">
-Pay with<br>Paystack
+Pay with<br>Stripe
 </a>
 
 </div>
@@ -449,7 +449,7 @@ font-size:34px;
 font-weight:bold;
 color:#4b0082;
 ">
-$440.00
+$0.40
 </p>
 
 <ul style="
@@ -473,7 +473,7 @@ color:#444;
 <div style="text-align:center;margin-top:28px;">
 
 <a
-href="https://ajangbile.onrender.com/api/payments/initiate?applicationId=${applicationId}&package=Standard"
+href="https://ajangbile.onrender.com/api/payments/stripe/initiate?applicationId=${applicationId}&package=Standard"
 style="
 display:inline-block;
 background:#4b0082;
@@ -489,7 +489,7 @@ word-break:keep-all;
 text-align:center;
 box-sizing:border-box;
 ">
-Pay with<br>Paystack
+Pay with<br>Stripe
 </a>
 
 </div>
@@ -527,7 +527,7 @@ font-size:34px;
 font-weight:bold;
 color:#b8860b;
 ">
-$782.00
+$0.40
 </p>
 
 <ul style="
@@ -555,7 +555,7 @@ color:#444;
 <div style="text-align:center;margin-top:28px;">
 
 <a
-href="https://ajangbile.onrender.com/api/payments/initiate?applicationId=${applicationId}&package=Premium"
+href="https://ajangbile.onrender.com/api/payments/stripe/initiate?applicationId=${applicationId}&package=Premium"
 style="
 display:inline-block;
 background:#4b0082;
@@ -571,7 +571,7 @@ word-break:keep-all;
 text-align:center;
 box-sizing:border-box;
 ">
-Pay with<br>Paystack
+Pay with<br>Stripe
 </a>
 
 </div>
