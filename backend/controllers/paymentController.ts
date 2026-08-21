@@ -145,7 +145,7 @@ export const initializeApplicationFeePayment = async (
       },
 
       success_url:
-        `${process.env.CLIENT_URL}/payment-success` +
+        `${process.env.CLIENT_URL}/application-fee-success` +
         `?session_id={CHECKOUT_SESSION_ID}`,
 
       cancel_url: `${process.env.CLIENT_URL}/become-member`,
@@ -457,6 +457,10 @@ export const stripeInitiationWebhook = async (
         application.applicationFeeReference = paymentReference;
 
         application.applicationFeeDate = new Date();
+
+        // Application fee is complete.
+        // The application can now move to the admin approval queue.
+        application.status = 'Pending';
 
         await application.save();
 

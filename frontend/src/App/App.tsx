@@ -40,7 +40,9 @@ const IlediAjangbile = lazy(() => import("../pages/IlediAjangbile"));
 const BecomeMember = lazy(() => import("../pages/BecomeMember"));
 
 const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
-
+const ApplicationFeeSuccess = lazy(
+  () => import("../pages/ApplicationFeeSuccess"),
+);
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
 
@@ -175,7 +177,10 @@ const App = () => {
 
             {/* Existing payment success route */}
             <Route path="/payment-success" element={<PaymentSuccess />} />
-
+            <Route
+              path="/application-fee-success"
+              element={<ApplicationFeeSuccess />}
+            />
             {/* LEGAL */}
             <Route path="/privacy" element={<Privacy />} />
 
