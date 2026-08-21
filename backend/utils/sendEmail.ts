@@ -395,7 +395,7 @@ color:#444;
 <div style="text-align:center;margin-top:28px;">
 
 <a
-href="https://ajangbile.onrender.com/api/payments/stripe/initiate?applicationId=${applicationId}&package=Basic"
+href="https://ajangbile.onrender.com/api/payments/initiate?applicationId=${applicationId}&package=Basic"
 style="
 display:inline-block;
 background:#4b0082;
@@ -555,7 +555,7 @@ color:#444;
 <div style="text-align:center;margin-top:28px;">
 
 <a
-href="https://ajangbile.onrender.com/api/payments/stripe/initiate?applicationId=${applicationId}&package=Premium"
+href="https://ajangbile.onrender.com/api/payments/initiate?applicationId=${applicationId}&package=Premium"
 style="
 display:inline-block;
 background:#4b0082;
