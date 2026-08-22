@@ -1,5 +1,7 @@
 import { useEffect } from "react";
+
 import Explore from "../components/home/Explore";
+import FAQ from "../components/home/FAQ";
 import FeaturedBlogs from "../components/home/FeaturedBlogs";
 import OgboniFeaturedBlogs from "../components/home/OgboniFeaturedBlogs";
 import FeaturedProducts from "../components/home/FeaturedProducts";
@@ -26,6 +28,9 @@ const HomePage = () => {
       <OgboniFeaturedBlogs />
 
       <Testimonials />
+
+      {/* Frequently Asked Questions */}
+      <FAQ />
     </div>
   );
 };
