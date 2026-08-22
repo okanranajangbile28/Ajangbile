@@ -740,13 +740,13 @@ const BecomeMember = () => {
 
             <p className="text-gray-700 leading-7">
               A non-refundable application processing fee of{" "}
-              <strong>$0.50</strong> is required to complete your membership
+              <strong>$12.00</strong> is required to complete your membership
               application.
             </p>
 
             <p className="mt-3 text-gray-700 leading-7">
               After clicking the button below, you will be securely redirected
-              to Stripe to complete the $0.50 payment.
+              to Stripe to complete the $12.00 payment.
             </p>
 
             <p className="mt-3 font-semibold text-[#4b0082]">
@@ -779,7 +779,7 @@ const BecomeMember = () => {
           >
             {loading
               ? "Preparing Secure Payment..."
-              : "Continue to $0.50 Application Payment"}
+              : "Continue to $12.00 Application Payment"}
           </button>
         </form>
       </div>
