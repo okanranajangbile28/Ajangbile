@@ -1236,3 +1236,288 @@ export const sendOrderReceiptEmail = async ({
     throw err;
   }
 };
+
+// =====================================================
+// CONTACT FORM EMAIL
+// =====================================================
+
+export const sendContactFormEmail = async ({
+  firstName,
+  lastName,
+  email,
+  phone,
+  subject,
+  message,
+}: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  subject?: string;
+  message: string;
+}) => {
+  try {
+    const date = new Date().toLocaleString('en-NG', {
+      dateStyle: 'full',
+      timeStyle: 'long',
+      timeZone: 'Africa/Lagos',
+    });
+
+    const { data, error } = await resend.emails.send({
+      from: 'Ajangbile Heritage <admin@ajangbileheritage.com>',
+      to: 'ajangbileheritage007@gmail.com',
+      replyTo: email,
+      subject: `Website Contact: ${subject || 'New Message'}`,
+
+      html: `
+<div style="background:#f4f1f8;padding:40px;font-family:Arial,Helvetica,sans-serif;">
+
+  <div style="
+    max-width:720px;
+    margin:auto;
+    background:#ffffff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.10);
+  ">
+
+    <div style="
+      background:linear-gradient(180deg,#4b0082 0%,#32005c 100%);
+      padding:35px 25px;
+      text-align:center;
+    ">
+
+      <img
+        src="${CREST_URL}"
+        alt="Ajangbile Heritage Crest"
+        style="
+          width:85px;
+          height:auto;
+          margin-bottom:15px;
+        "
+      />
+
+      <h1 style="
+        margin:0;
+        color:#ffffff;
+        font-size:28px;
+        line-height:1.3;
+      ">
+        New Contact Form Message
+      </h1>
+
+      <p style="
+        margin:12px 0 0;
+        color:#FFD700;
+        font-size:15px;
+        font-weight:bold;
+      ">
+        Ajangbile Heritage
+      </p>
+
+    </div>
+
+    <div style="padding:35px 30px;">
+
+      <h2 style="
+        color:#4b0082;
+        margin-top:0;
+      ">
+        Contact Enquiry
+      </h2>
+
+      <table style="
+        width:100%;
+        border-collapse:collapse;
+        margin-top:20px;
+      ">
+
+        <tr>
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            background:#f8f6fb;
+            font-weight:bold;
+            color:#4b0082;
+          ">
+            First Name
+          </td>
+
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            color:#333;
+          ">
+            ${firstName}
+          </td>
+        </tr>
+
+        <tr>
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            background:#f8f6fb;
+            font-weight:bold;
+            color:#4b0082;
+          ">
+            Last Name
+          </td>
+
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            color:#333;
+          ">
+            ${lastName}
+          </td>
+        </tr>
+
+        <tr>
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            background:#f8f6fb;
+            font-weight:bold;
+            color:#4b0082;
+          ">
+            Email
+          </td>
+
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            color:#333;
+          ">
+            ${email}
+          </td>
+        </tr>
+
+        <tr>
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            background:#f8f6fb;
+            font-weight:bold;
+            color:#4b0082;
+          ">
+            Phone
+          </td>
+
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            color:#333;
+          ">
+            ${phone}
+          </td>
+        </tr>
+
+        <tr>
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            background:#f8f6fb;
+            font-weight:bold;
+            color:#4b0082;
+          ">
+            Subject
+          </td>
+
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            color:#333;
+          ">
+            ${subject || 'No Subject'}
+          </td>
+        </tr>
+
+        <tr>
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            background:#f8f6fb;
+            font-weight:bold;
+            color:#4b0082;
+          ">
+            Date Submitted
+          </td>
+
+          <td style="
+            padding:12px;
+            border:1px solid #ddd;
+            color:#333;
+          ">
+            ${date}
+          </td>
+        </tr>
+
+      </table>
+
+      <h3 style="
+        color:#4b0082;
+        margin-top:35px;
+      ">
+        Message
+      </h3>
+
+      <div style="
+        background:#f8f6fb;
+        border-left:5px solid #4b0082;
+        padding:20px;
+        border-radius:8px;
+        color:#444;
+        line-height:1.8;
+        white-space:pre-wrap;
+      ">
+${message}
+      </div>
+
+      <div style="
+        text-align:center;
+        margin-top:35px;
+      ">
+
+        <a
+          href="https://www.ajangbileheritage.com"
+          style="
+            display:inline-block;
+            background:#4b0082;
+            color:#ffffff;
+            padding:14px 28px;
+            text-decoration:none;
+            border-radius:8px;
+            font-weight:bold;
+          "
+        >
+          Visit Ajangbile Heritage
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+`,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('======================================');
+    console.log('📧 CONTACT FORM EMAIL SENT');
+    console.log(`From: ${email}`);
+    console.log(`To: ajangbileheritage007@gmail.com`);
+    console.log('======================================');
+
+    return data;
+  } catch (err) {
+    console.error('❌ Failed to send contact form email:');
+    console.error(err);
+
+    throw err;
+  }
+};
