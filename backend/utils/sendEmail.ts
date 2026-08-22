@@ -473,7 +473,7 @@ color:#444;
 <div style="text-align:center;margin-top:28px;">
 
 <a
-href="https://ajangbile.onrender.com/api/payments/stripe/initiate?applicationId=${applicationId}&package=Standard"
+href="https://ajangbile.onrender.com/api/payments/initiate?applicationId=${applicationId}&package=Standard"
 style="
 display:inline-block;
 background:#4b0082;
