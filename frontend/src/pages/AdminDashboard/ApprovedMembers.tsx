@@ -33,7 +33,9 @@ interface Application {
   initiationTime?: string;
   initiationVenue?: string;
   initiationInstructions?: string;
-  initiationFee?: number;
+
+  initiationPackage?: "Basic" | "Standard" | "Premium";
+  paymentAmount?: number;
 }
 
 const ApprovedMembers = () => {
@@ -281,8 +283,15 @@ const ApprovedMembers = () => {
                 </p>
 
                 <p>
-                  <strong>Initiation Fee:</strong> ₦
-                  {(selectedMember.initiationFee ?? 50000).toLocaleString()}
+                  <strong>Initiation Package:</strong>{" "}
+                  {selectedMember.initiationPackage || "Not Selected"}
+                </p>
+
+                <p>
+                  <strong>Initiation Fee:</strong>{" "}
+                  {selectedMember.paymentAmount
+                    ? `$${selectedMember.paymentAmount.toLocaleString()}`
+                    : "Not Paid"}
                 </p>
 
                 <p>

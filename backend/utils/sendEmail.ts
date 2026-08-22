@@ -373,7 +373,7 @@ font-size:34px;
 font-weight:bold;
 color:#4b0082;
 ">
-$0.50
+$224.00
 </p>
 
 <ul style="
@@ -449,7 +449,7 @@ font-size:34px;
 font-weight:bold;
 color:#4b0082;
 ">
-$0.50
+$450.00
 </p>
 
 <ul style="
@@ -527,7 +527,7 @@ font-size:34px;
 font-weight:bold;
 color:#b8860b;
 ">
-$0.50
+$750.00
 </p>
 
 <ul style="

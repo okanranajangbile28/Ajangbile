@@ -18,7 +18,7 @@ const stripe = process.env.STRIPE_SECRET_KEY
 // 10000 = $100.00
 // ======================================================
 
-const APPLICATION_FEE_AMOUNT = 50;
+const APPLICATION_FEE_AMOUNT = 500; // $5.00
 
 // ======================================================
 // INITIATION PACKAGE PRICES
@@ -26,21 +26,21 @@ const APPLICATION_FEE_AMOUNT = 50;
 
 const initiationPackages = {
   Basic: {
-    amount: 50, // $0.50
+    amount: 22400, // $224.00
     name: 'Basic Initiation Package',
     description:
       'Irilẹ̀ (Right of Passage), Ikúta (3rd Day Ritual), Ikojá (7th Day Ritual)',
   },
 
   Standard: {
-    amount: 50, // $0.50
+    amount: 45000, // $450.00
     name: 'Standard Initiation Package',
     description:
       'Irilẹ̀ (Right of Passage), Ikúta (3rd Day Ritual), Ikojá (7th Day Ritual), Ibori',
   },
 
   Premium: {
-    amount: 50, // $0.50
+    amount: 75000, // $750.00
     name: 'Premium Initiation Package',
     description:
       'Irilẹ̀ (Right of Passage), Ikúta (3rd Day Ritual), Ikojá (7th Day Ritual), Ibori, Eran Oro, Ikorita',
