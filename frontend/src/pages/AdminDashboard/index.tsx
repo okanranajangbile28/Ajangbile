@@ -20,6 +20,7 @@ import EmailCenter from "./EmailCenter";
 import Announcements from "./Announcements";
 import Settings from "./Settings";
 import BlogCMS from "./BlogCMS";
+import OgboniBlogCMS from "./OgboniBlogCMS";
 
 const AdminDashboard = () => {
   const [active, setActive] = useState("Dashboard");
@@ -58,6 +59,9 @@ const AdminDashboard = () => {
 
       case "Blog CMS":
         return <BlogCMS />;
+
+      case "Ogboni Blog CMS":
+        return <OgboniBlogCMS />;
 
       case "Email Center":
         return <EmailCenter />;

@@ -18,7 +18,7 @@ const stripe = process.env.STRIPE_SECRET_KEY
 // 10000 = $100.00
 // ======================================================
 
-const APPLICATION_FEE_AMOUNT = 500; // $5.00
+const APPLICATION_FEE_AMOUNT = 50; // $0.50
 
 // ======================================================
 // INITIATION PACKAGE PRICES

@@ -71,6 +71,10 @@ const menu = [
     icon: BookOpen,
   },
   {
+    name: "Ogboni Blog CMS",
+    icon: BookOpen,
+  },
+  {
     name: "Email Center",
     icon: Mail,
   },

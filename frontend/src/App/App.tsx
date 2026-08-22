@@ -43,6 +43,11 @@ const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
 const ApplicationFeeSuccess = lazy(
   () => import("../pages/ApplicationFeeSuccess"),
 );
+
+// ======================================================
+// OGBONI MEMBER PAGES
+// ======================================================
+
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
 
@@ -64,10 +69,15 @@ const OgboniEditProfile = lazy(() => import("../pages/OgboniEditProfile"));
 // BLOG
 // ======================================================
 
+// Normal Ajangbile Heritage Blog
 const BlogPageV2 = lazy(() => import("../pages/BlogPageV2"));
 
 const BlogDetails = lazy(() => import("../pages/BlogDetails"));
 
+// Ogboni Blog
+const OgboniBlogDetails = lazy(() => import("../pages/OgboniBlogDetails"));
+
+// Admin Blog
 const AdminBlogForm = lazy(
   () => import("../features/adminFeature/admin/AdminBlog/BlogForm"),
 );
@@ -91,7 +101,10 @@ const App = () => {
             {/* HOME */}
             <Route path="/" element={<HomePage />} />
 
-            {/* ADMIN AUTH */}
+            {/* ==================================================
+                ADMIN AUTH
+            ================================================== */}
+
             <Route path="/admin-login" element={<AdminLogin />} />
 
             <Route
@@ -104,17 +117,32 @@ const App = () => {
               element={<AdminResetPassword />}
             />
 
-            {/* BLOG */}
+            {/* ==================================================
+                NORMAL AJANGBILE HERITAGE BLOG
+            ================================================== */}
+
             <Route path="/blog" element={<BlogPageV2 />} />
 
             <Route path="/blog/:slug" element={<BlogDetails />} />
 
-            {/* SHOP */}
+            {/* ==================================================
+                OGBONI BLOG
+            ================================================== */}
+
+            <Route path="/ogboni-blog/:slug" element={<OgboniBlogDetails />} />
+
+            {/* ==================================================
+                SHOP
+            ================================================== */}
+
             <Route path="/shop" element={<ProductsPage />} />
 
             <Route path="/shop/:id" element={<SingleProductPage />} />
 
-            {/* MAIN PAGES */}
+            {/* ==================================================
+                MAIN PAGES
+            ================================================== */}
+
             <Route path="/about" element={<AboutPage />} />
 
             <Route path="/contact" element={<ContactPage />} />
@@ -130,7 +158,7 @@ const App = () => {
             <Route path="/become-member" element={<BecomeMember />} />
 
             {/* ==================================================
-                MEMBER
+                OGBONI MEMBER PORTAL
             ================================================== */}
 
             <Route path="/signup" element={<OgboniSignupPage />} />
@@ -162,26 +190,22 @@ const App = () => {
             <Route path="/checkout/:params" element={<CheckoutPage />} />
 
             {/* ==================================================
-                STRIPE SUCCESS PAGE
-            ==================================================
-
-                Stripe sends customers here after payment:
-
-                /order-success?session_id=...
-
-                OrderPage is currently being used as the
-                success page.
-            */}
+                STRIPE SUCCESS
+            ================================================== */}
 
             <Route path="/order-success" element={<OrderPage />} />
 
-            {/* Existing payment success route */}
             <Route path="/payment-success" element={<PaymentSuccess />} />
+
             <Route
               path="/application-fee-success"
               element={<ApplicationFeeSuccess />}
             />
-            {/* LEGAL */}
+
+            {/* ==================================================
+                LEGAL
+            ================================================== */}
+
             <Route path="/privacy" element={<Privacy />} />
 
             <Route path="/terms-of-use" element={<TermsAndCondition />} />
@@ -208,10 +232,7 @@ const App = () => {
               element={<CreateProductPage />}
             />
 
-            {/* ==================================================
-                ADMIN ORDERS
-            ================================================== */}
-
+            {/* ADMIN ORDERS */}
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
 
             {/* ==================================================

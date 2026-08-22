@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import BlogCard from "../components/blog/BlogCard";
+import OgboniBlogSection from "../components/blog/OgboniBlogSection";
 
 interface Blog {
   _id: string;
@@ -42,30 +43,40 @@ const BlogPageV2 = () => {
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16">
-      <div className="text-center mb-14">
-        <h1 className="text-5xl font-bold text-[#4b0082] mb-4">
-          Ajangbile Heritage Blog
-        </h1>
+    <>
+      {/* =====================================================
+          NORMAL AJANGBILE HERITAGE BLOG
+      ===================================================== */}
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <div className="text-center mb-14">
+          <h1 className="text-5xl font-bold text-[#4b0082] mb-4">
+            Ajangbile Heritage Blog
+          </h1>
 
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Discover articles on Ifa, Ogboni, Yoruba history, African
-          spirituality, culture, and traditional wisdom.
-        </p>
-      </div>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Discover articles on Ifa, Ogboni, Yoruba history, African
+            spirituality, culture, and traditional wisdom.
+          </p>
+        </div>
 
-      {blogs.length === 0 ? (
-        <div className="text-center py-20 text-gray-500 text-lg">
-          No articles have been published yet.
-        </div>
-      ) : (
-        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {blogs.map((blog) => (
-            <BlogCard key={blog._id} blog={blog} />
-          ))}
-        </div>
-      )}
-    </section>
+        {blogs.length === 0 ? (
+          <div className="text-center py-20 text-gray-500 text-lg">
+            No articles have been published yet.
+          </div>
+        ) : (
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {blogs.map((blog) => (
+              <BlogCard key={blog._id} blog={blog} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* =====================================================
+          OGBONI BLOG
+      ===================================================== */}
+      <OgboniBlogSection />
+    </>
   );
 };
 

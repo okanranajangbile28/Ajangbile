@@ -18,6 +18,7 @@ import productRouter from './routes/productRoutes';
 import userRouter from './routes/userRoutes';
 import blogRouter from './routes/blogRoute';
 import blogV2Router from './routes/blogV2Routes';
+import ogboniBlogRouter from './routes/ogboniBlogRoutes';
 import membershipApplicationRouter from './routes/membershipApplicationRoutes';
 import memberSignupRouter from './routes/memberSignupRoutes';
 import orderRouter from './routes/orderRoute';
@@ -249,6 +250,9 @@ app.use('/api/payments', paymentRoutes);
 
 // Blog CMS
 app.use('/api/blog-v2', blogV2Router);
+
+// Ogboni Blog CMS
+app.use('/api/ogboni-blog', ogboniBlogRouter);
 
 // Member Signup
 app.use('/api/member-signup', memberSignupRouter);

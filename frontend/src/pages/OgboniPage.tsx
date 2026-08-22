@@ -1,8 +1,22 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Landmark, UserPlus } from "lucide-react";
+import { Landmark, UserPlus, ArrowRight } from "lucide-react";
 
 import ogboniLogo from "../assets/Ogboni-logo.png";
 import eldersImage from "../assets/Ogboni-elders.jpg";
+
+interface OgboniBlog {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverImage: string;
+  category: string;
+  featured: boolean;
+  published: boolean;
+  createdAt: string;
+}
 
 const values = [
   {
@@ -38,10 +52,40 @@ const values = [
 ];
 
 function OgboniPage() {
+  const [blogs, setBlogs] = useState<OgboniBlog[]>([]);
+  const [blogsLoading, setBlogsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadOgboniBlogs = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/api/ogboni-blog`,
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to load Ogboni blogs");
+        }
+
+        const data = await res.json();
+
+        setBlogs(data.blogs || []);
+      } catch (error) {
+        console.error("Failed to load Ogboni blogs:", error);
+      } finally {
+        setBlogsLoading(false);
+      }
+    };
+
+    loadOgboniBlogs();
+  }, []);
+
   return (
     <div className="min-h-screen bg-purple-950 text-white py-16 px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
+
         <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
           <img
             src={ogboniLogo}
@@ -61,7 +105,10 @@ function OgboniPage() {
           </div>
         </div>
 
-        {/* About */}
+        {/* =====================================================
+            ABOUT
+        ===================================================== */}
+
         <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
           <div>
             <h2 className="text-4xl font-bold text-yellow-400 mb-6">
@@ -94,7 +141,10 @@ function OgboniPage() {
           </div>
         </div>
 
-        {/* Core Values */}
+        {/* =====================================================
+            CORE VALUES
+        ===================================================== */}
+
         <div className="mb-24">
           <h2 className="text-4xl text-center font-bold text-yellow-400 mb-12">
             Our Core Values
@@ -116,7 +166,118 @@ function OgboniPage() {
           </div>
         </div>
 
-        {/* Portal Options */}
+        {/* =====================================================
+            OGBONI ARTICLES
+        ===================================================== */}
+
+        <section className="mb-24">
+          <div className="text-center mb-12">
+            <p className="text-yellow-400 uppercase tracking-[4px] font-semibold">
+              Ogboni Knowledge
+            </p>
+
+            <h2 className="text-4xl md:text-5xl font-bold text-yellow-400 mt-3">
+              Ogboni Articles
+            </h2>
+
+            <p className="text-gray-300 max-w-3xl mx-auto mt-5 text-lg">
+              Explore articles about Ogboni history, tradition, spirituality,
+              culture, teachings and important developments.
+            </p>
+          </div>
+
+          {blogsLoading ? (
+            <div className="text-center py-16 text-gray-300 text-lg">
+              Loading Ogboni articles...
+            </div>
+          ) : blogs.length === 0 ? (
+            <div className="text-center py-16 bg-purple-900 rounded-3xl border border-purple-800">
+              <h3 className="text-2xl font-bold text-yellow-300 mb-3">
+                Ogboni Articles Coming Soon
+              </h3>
+
+              <p className="text-gray-300">
+                New articles and teachings will appear here when published.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+              {blogs.slice(0, 6).map((blog) => (
+                <article
+                  key={blog._id}
+                  className="bg-purple-900 border border-yellow-500/50 rounded-3xl overflow-hidden shadow-xl hover:-translate-y-1 transition duration-300"
+                >
+                  {/* Cover Image */}
+
+                  {blog.coverImage ? (
+                    <img
+                      src={blog.coverImage}
+                      alt={blog.title}
+                      className="w-full h-56 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-56 bg-purple-800 flex items-center justify-center">
+                      <img
+                        src={ogboniLogo}
+                        alt="Ogboni"
+                        className="w-28 h-28 object-contain opacity-60"
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-7">
+                    {/* Category */}
+
+                    <p className="text-yellow-400 text-sm uppercase tracking-wider font-semibold mb-3">
+                      {blog.category}
+                    </p>
+
+                    {/* Title */}
+
+                    <h3 className="text-2xl font-bold text-yellow-300 mb-4">
+                      {blog.title}
+                    </h3>
+
+                    {/* Excerpt */}
+
+                    <p className="text-gray-300 leading-7 mb-6">
+                      {blog.excerpt}
+                    </p>
+
+                    {/* Read Article */}
+
+                    <Link
+                      to={`/ogboni-blog/${blog.slug}`}
+                      className="inline-flex items-center gap-2 bg-yellow-500 text-purple-950 px-6 py-3 rounded-full font-bold hover:bg-yellow-400 transition"
+                    >
+                      Read Article
+                      <ArrowRight size={18} />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {/* View All */}
+
+          {blogs.length > 6 && (
+            <div className="text-center mt-12">
+              <Link
+                to="/ogboni-blog"
+                className="inline-flex items-center gap-2 border-2 border-yellow-500 text-yellow-300 px-8 py-3 rounded-full font-bold hover:bg-yellow-500 hover:text-purple-950 transition"
+              >
+                View All Ogboni Articles
+                <ArrowRight size={18} />
+              </Link>
+            </div>
+          )}
+        </section>
+
+        {/* =====================================================
+            PORTAL OPTIONS
+        ===================================================== */}
+
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-yellow-400 mb-5">
             Begin Your Journey
@@ -131,6 +292,7 @@ function OgboniPage() {
 
         <div className="grid md:grid-cols-2 gap-10">
           {/* Iledi */}
+
           <Link
             to="/iledi-ajangbile"
             className="group bg-purple-900 border border-yellow-500 rounded-3xl p-10 text-center shadow-xl hover:scale-105 hover:bg-purple-800 transition duration-300"
@@ -157,6 +319,7 @@ function OgboniPage() {
           </Link>
 
           {/* Become Member */}
+
           <Link
             to="/become-member"
             className="group bg-purple-900 border border-yellow-500 rounded-3xl p-10 text-center shadow-xl hover:scale-105 hover:bg-purple-800 transition duration-300"
