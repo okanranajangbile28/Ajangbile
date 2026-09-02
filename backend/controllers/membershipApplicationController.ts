@@ -61,6 +61,20 @@ const uploadToCloudinary = (
   });
 };
 
+// ======================================================
+// GET CURRENT APPLICATION FEE
+// ======================================================
+
+const getCurrentApplicationFee = async (): Promise<number> => {
+  let pricing = await Pricing.findOne();
+
+  if (!pricing) {
+    pricing = await Pricing.create({});
+  }
+
+  return pricing.applicationFee;
+};
+
 // =======================
 // CREATE APPLICATION
 // =======================
@@ -97,6 +111,7 @@ export const createApplication = async (
         success: false,
         message: 'Passport photograph is required.',
       });
+
       return;
     }
 
@@ -105,13 +120,18 @@ export const createApplication = async (
         success: false,
         message: 'Signature is required.',
       });
+
       return;
     }
 
     // ==================================================
+    // GET CURRENT CENTRAL APPLICATION FEE
+    // ==================================================
+
+    const currentApplicationFee = await getCurrentApplicationFee();
+
+    // ==================================================
     // CREATE APPLICATION
-    // PAYMENT MUST BE COMPLETED BEFORE APPLICATION
-    // BECOMES A NORMAL PENDING APPLICATION
     // ==================================================
 
     const application = await MembershipApplication.create({
@@ -124,7 +144,7 @@ export const createApplication = async (
 
       applicationFeeStatus: 'Pending',
 
-      applicationFeeAmount: 12,
+      applicationFeeAmount: currentApplicationFee,
 
       applicationFeeReference: '',
 
@@ -139,7 +159,7 @@ export const createApplication = async (
       application,
     });
   } catch (error: any) {
-    console.error(error);
+    console.error('❌ Create membership application error:', error);
 
     res.status(500).json({
       success: false,
@@ -223,13 +243,7 @@ export const submitApplicationFeeBankTransfer = async (
     // GET CURRENT CENTRAL APPLICATION FEE
     // ==================================================
 
-    let pricing = await Pricing.findOne();
-
-    if (!pricing) {
-      pricing = await Pricing.create({});
-    }
-
-    const currentApplicationFee = pricing.applicationFee;
+    const currentApplicationFee = await getCurrentApplicationFee();
 
     // ==================================================
     // UPLOAD RECEIPT
@@ -248,7 +262,6 @@ export const submitApplicationFeeBankTransfer = async (
 
     application.applicationFeeBankTransferStatus = 'Pending';
 
-    // No customer-facing transfer reference is required.
     application.applicationFeeBankTransferReference = '';
 
     application.applicationFeeBankTransferDate = new Date();
@@ -334,11 +347,24 @@ export const verifyBankTransfer = async (
       return;
     }
 
+    // ==================================================
+    // PRESERVE THE ORIGINAL APPLICATION FEE AMOUNT
+    // ==================================================
+
+    if (
+      application.applicationFeeAmount === undefined ||
+      application.applicationFeeAmount === null
+    ) {
+      application.applicationFeeAmount = await getCurrentApplicationFee();
+    }
+
+    // ==================================================
+    // VERIFY PAYMENT
+    // ==================================================
+
     application.applicationFeeBankTransferStatus = 'Verified';
 
     application.applicationFeeStatus = 'Paid';
-
-    application.applicationFeeAmount = 12;
 
     application.applicationFeeDate = new Date();
 
@@ -356,7 +382,7 @@ export const verifyBankTransfer = async (
     console.log(
       `Reference: ${application.applicationFeeBankTransferReference}`,
     );
-    console.log('Amount: $12.00');
+    console.log(`Amount: $${application.applicationFeeAmount.toFixed(2)}`);
     console.log('======================================');
 
     res.status(200).json({
@@ -506,7 +532,7 @@ export const approveApplication = async (
       res.status(400).json({
         success: false,
         message:
-          'This application cannot be approved because the $12 application fee has not been paid.',
+          'This application cannot be approved because the application fee has not been paid.',
       });
 
       return;
@@ -849,7 +875,7 @@ export const deleteApplication = async (
 // MARK MEMBER AS PAID
 // =======================================================
 // This is for the INITIATION payment stage.
-// The $12 application fee must already have been paid.
+// The application fee must already have been paid.
 
 export const markAsPaid = catchAsync(
   async (req: Request, res: Response, next) => {
@@ -859,11 +885,11 @@ export const markAsPaid = catchAsync(
       return next(new AppError('Application not found.', 404));
     }
 
-    // The $12 application fee must be paid first
+    // Application fee must be paid first
     if (application.applicationFeeStatus !== 'Paid') {
       return next(
         new AppError(
-          'The $12 application fee must be paid before this member can be marked as Paid.',
+          'The application fee must be paid before this member can be marked as Paid.',
           400,
         ),
       );
@@ -880,7 +906,9 @@ export const markAsPaid = catchAsync(
     }
 
     application.status = 'Paid';
+
     application.paymentStatus = 'Paid';
+
     application.paymentDate = new Date();
 
     await application.save();
@@ -901,7 +929,9 @@ export const getPaidApplications = catchAsync(
   async (req: Request, res: Response) => {
     const applications = await MembershipApplication.find({
       status: 'Paid',
-    }).sort({ createdAt: -1 });
+    }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       status: 'success',
@@ -946,7 +976,7 @@ export const scheduleAndSendInitiation = async (
     }
 
     // ==================================================
-    // APPLICATION MUST BE ACCEPTED
+    // APPLICATION MUST BE PAID
     // ==================================================
 
     if (application.status !== 'Paid') {
@@ -963,8 +993,11 @@ export const scheduleAndSendInitiation = async (
     // ==================================================
 
     application.initiationDate = req.body.initiationDate;
+
     application.initiationTime = req.body.initiationTime;
+
     application.initiationVenue = req.body.initiationVenue;
+
     application.initiationInstructions = req.body.initiationInstructions;
 
     // ==================================================
