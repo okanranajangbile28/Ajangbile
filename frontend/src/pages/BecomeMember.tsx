@@ -643,8 +643,7 @@ const BecomeMember = () => {
       if (paymentMethod === "stripe") {
         window.location.href =
           `${serverUrl}/api/payments/application-fee` +
-          `?applicationId=${encodeURIComponent(applicationId)}` +
-          `&package=${encodeURIComponent("Application Fee")}`;
+          `?applicationId=${encodeURIComponent(applicationId)}`;
 
         return;
       }
