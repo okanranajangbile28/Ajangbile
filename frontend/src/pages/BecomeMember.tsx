@@ -312,7 +312,6 @@ const BecomeMember = () => {
     "stripe" | "bank_transfer"
   >("stripe");
 
-  const [bankTransferReference, setBankTransferReference] = useState("");
   const [bankTransferReceipt, setBankTransferReceipt] = useState<File | null>(
     null,
   );
@@ -552,16 +551,9 @@ const BecomeMember = () => {
     // BANK TRANSFER VALIDATION
     // ====================================================
 
-    if (paymentMethod === "bank_transfer") {
-      if (!bankTransferReference.trim()) {
-        setError("Please enter your bank transfer reference.");
-        return;
-      }
-
-      if (!bankTransferReceipt) {
-        setError("Please upload your bank transfer payment receipt.");
-        return;
-      }
+    if (paymentMethod === "bank_transfer" && !bankTransferReceipt) {
+      setError("Please upload your bank transfer payment receipt.");
+      return;
     }
 
     try {
@@ -658,7 +650,6 @@ const BecomeMember = () => {
         const transferFormData = new FormData();
 
         transferFormData.append("applicationId", applicationId);
-        transferFormData.append("reference", bankTransferReference.trim());
 
         if (!bankTransferReceipt) {
           setError("Please upload your bank transfer payment receipt.");
@@ -702,8 +693,6 @@ const BecomeMember = () => {
 
         setPhoto(null);
         setSignature(null);
-
-        setBankTransferReference("");
         setBankTransferReceipt(null);
 
         setPaymentMethod("stripe");
@@ -1236,9 +1225,17 @@ const BecomeMember = () => {
 
                       <div className="mt-5 rounded-lg bg-yellow-50 border border-yellow-300 p-4">
                         <p className="text-sm text-gray-700 leading-6">
-                          After completing the transfer, enter your transfer
-                          reference and upload the payment receipt. Your payment
-                          will be manually verified by the Membership Committee.
+                          Please send the current Naira equivalent of the USD
+                          amount shown above. Exchange rates may change, so
+                          confirm the current equivalent before making your
+                          transfer.
+                        </p>
+
+                        <p className="mt-2 text-sm text-gray-700 leading-6">
+                          After completing the transfer, upload your payment
+                          receipt. Your payment will be manually verified by the
+                          Membership Committee before your application is
+                          approved.
                         </p>
                       </div>
 
@@ -1326,7 +1323,7 @@ const BecomeMember = () => {
                     : `Continue to $${applicationFee.toFixed(2)} Application Payment`
                   : bankTransferSubmitting
                     ? "Submitting Transfer & Receipt..."
-                    : "Submit Bank Transfer & Receipt"}
+                    : "Pay with Transfer"}
           </button>
         </form>
       </div>
