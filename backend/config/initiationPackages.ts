@@ -1,7 +1,6 @@
 export const initiationPackages = {
   Basic: {
     name: 'Basic',
-    amount: 0.4,
     description: 'Entry into the Ogboni Fraternity',
 
     benefits: [
@@ -13,7 +12,6 @@ export const initiationPackages = {
 
   Standard: {
     name: 'Standard',
-    amount: 0.4,
     description: 'Includes Basic Initiation plus Ibori',
 
     benefits: [
@@ -24,7 +22,6 @@ export const initiationPackages = {
 
   Premium: {
     name: 'Premium',
-    amount: 0.4,
     description: 'Complete Initiation Package',
 
     benefits: [

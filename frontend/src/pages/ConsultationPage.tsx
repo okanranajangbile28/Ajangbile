@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CreditCard,
   Landmark,
@@ -41,33 +41,49 @@ const services = [
   },
 ];
 
-const consultations = [
+const consultationDetails = [
   {
     type: "Opele" as const,
     name: "Opele Consultation",
-    amount: 10,
     description:
       "A traditional Opele consultation for spiritual guidance, clarity and insight.",
   },
   {
     type: "Ikin" as const,
     name: "Ikin Consultation",
-    amount: 15,
     description:
       "A deeper Ikin consultation for those seeking comprehensive spiritual guidance.",
   },
   {
     type: "OneHour" as const,
     name: "1-Hour Consultation & Discussion",
-    amount: 100,
     description:
       "A private one-hour consultation and discussion for detailed spiritual guidance, questions and personal matters.",
   },
 ];
 
-type ConsultationType = (typeof consultations)[number]["type"];
+type ConsultationType = (typeof consultationDetails)[number]["type"];
+
+interface PricingResponse {
+  success: boolean;
+  pricing: {
+    opeleConsultation: number;
+    ikinConsultation: number;
+    oneHourConsultation: number;
+    currency: "USD";
+  };
+}
+
+interface ConsultationOption {
+  type: ConsultationType;
+  name: string;
+  amount: number;
+  description: string;
+}
 
 const ConsultationPage = () => {
+  const [consultations, setConsultations] = useState<ConsultationOption[]>([]);
+
   const [selectedConsultation, setSelectedConsultation] =
     useState<ConsultationType | null>(null);
 
@@ -77,7 +93,71 @@ const ConsultationPage = () => {
   );
 
   const [loading, setLoading] = useState(false);
+  const [pricingLoading, setPricingLoading] = useState(true);
   const [message, setMessage] = useState("");
+
+  // ======================================================
+  // LOAD CENTRAL PRICING
+  // ======================================================
+
+  const loadPricing = useCallback(async () => {
+    try {
+      setPricingLoading(true);
+      setMessage("");
+
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+
+      if (!serverUrl) {
+        setMessage("Payment server is not configured.");
+        return;
+      }
+
+      const response = await fetch(`${serverUrl}/api/pricing`);
+
+      const data: PricingResponse = await response.json();
+
+      if (!response.ok || !data.success || !data.pricing) {
+        throw new Error(
+          data?.pricing
+            ? "Unable to load consultation pricing."
+            : "Unable to load current consultation pricing.",
+        );
+      }
+
+      const pricing = data.pricing;
+
+      setConsultations([
+        {
+          ...consultationDetails[0],
+          amount: pricing.opeleConsultation,
+        },
+        {
+          ...consultationDetails[1],
+          amount: pricing.ikinConsultation,
+        },
+        {
+          ...consultationDetails[2],
+          amount: pricing.oneHourConsultation,
+        },
+      ]);
+    } catch (error) {
+      console.error("❌ Load consultation pricing error:", error);
+
+      setConsultations([]);
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to load current consultation pricing.",
+      );
+    } finally {
+      setPricingLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadPricing();
+  }, [loadPricing]);
 
   // ======================================================
   // SELECT CONSULTATION
@@ -329,47 +409,68 @@ Thank you.`,
               CONSULTATION TYPES
           ==================================================== */}
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
-            {consultations.map((consultation) => {
-              const isSelected = selectedConsultation === consultation.type;
+          {pricingLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center gap-3 text-yellow-400 text-lg font-semibold">
+                <div className="w-6 h-6 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
+                Loading current consultation prices...
+              </div>
+            </div>
+          ) : consultations.length === 0 ? (
+            <div className="max-w-2xl mx-auto mb-12 bg-red-900/40 border border-red-500 text-red-200 rounded-2xl p-6 text-center">
+              {message || "Unable to load current consultation prices."}
 
-              return (
-                <button
-                  key={consultation.type}
-                  type="button"
-                  onClick={() => handleSelectConsultation(consultation.type)}
-                  className={`text-left rounded-3xl p-8 border-2 transition duration-300 ${
-                    isSelected
-                      ? "border-yellow-400 bg-purple-800 shadow-2xl scale-[1.02]"
-                      : "border-purple-600 bg-purple-950 hover:border-yellow-500 hover:bg-purple-900"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4 mb-5">
-                    <div>
-                      <h3 className="text-2xl font-bold text-yellow-400">
-                        {consultation.name}
-                      </h3>
+              <button
+                type="button"
+                onClick={() => void loadPricing()}
+                className="block mx-auto mt-4 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-xl font-bold transition"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+              {consultations.map((consultation) => {
+                const isSelected = selectedConsultation === consultation.type;
 
-                      {isSelected && (
-                        <div className="flex items-center gap-2 text-green-400 font-semibold mt-3">
-                          <CheckCircle size={20} />
-                          Selected
-                        </div>
-                      )}
+                return (
+                  <button
+                    key={consultation.type}
+                    type="button"
+                    onClick={() => handleSelectConsultation(consultation.type)}
+                    className={`text-left rounded-3xl p-8 border-2 transition duration-300 ${
+                      isSelected
+                        ? "border-yellow-400 bg-purple-800 shadow-2xl scale-[1.02]"
+                        : "border-purple-600 bg-purple-950 hover:border-yellow-500 hover:bg-purple-900"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-5">
+                      <div>
+                        <h3 className="text-2xl font-bold text-yellow-400">
+                          {consultation.name}
+                        </h3>
+
+                        {isSelected && (
+                          <div className="flex items-center gap-2 text-green-400 font-semibold mt-3">
+                            <CheckCircle size={20} />
+                            Selected
+                          </div>
+                        )}
+                      </div>
+
+                      <span className="text-3xl font-bold text-white whitespace-nowrap">
+                        ${consultation.amount.toFixed(2)}
+                      </span>
                     </div>
 
-                    <span className="text-3xl font-bold text-white whitespace-nowrap">
-                      ${consultation.amount}
-                    </span>
-                  </div>
-
-                  <p className="text-gray-300 leading-7">
-                    {consultation.description}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+                    <p className="text-gray-300 leading-7">
+                      {consultation.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* ====================================================
               SELECTED CONSULTATION SUMMARY
@@ -406,7 +507,9 @@ Thank you.`,
               <button
                 type="button"
                 onClick={handleStripePayment}
-                disabled={loading}
+                disabled={
+                  loading || pricingLoading || consultations.length === 0
+                }
                 className="group flex items-center justify-center gap-3 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed text-black px-8 py-5 rounded-2xl font-bold text-lg transition duration-300 shadow-lg hover:shadow-yellow-500/30"
               >
                 <CreditCard
@@ -422,8 +525,10 @@ Thank you.`,
               <button
                 type="button"
                 onClick={handleBankTransfer}
-                disabled={loading}
-                className="group flex items-center justify-center gap-3 border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black disabled:opacity-60 px-8 py-5 rounded-2xl font-bold text-lg transition duration-300"
+                disabled={
+                  loading || pricingLoading || consultations.length === 0
+                }
+                className="group flex items-center justify-center gap-3 border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black disabled:opacity-60 disabled:cursor-not-allowed px-8 py-5 rounded-2xl font-bold text-lg transition duration-300"
               >
                 <Landmark
                   size={26}
@@ -437,7 +542,7 @@ Thank you.`,
                 MESSAGE
             ================================================== */}
 
-            {message && (
+            {message && consultations.length > 0 && (
               <div
                 className={`mt-6 rounded-xl p-4 text-center ${
                   message.toLowerCase().includes("successfully") ||

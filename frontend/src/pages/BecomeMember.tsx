@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
@@ -160,7 +160,6 @@ const countries = [
   "Singapore",
   "Slovakia",
   "Slovenia",
-  "Solomon Islands",
   "Somalia",
   "South Africa",
   "South Korea",
@@ -200,9 +199,69 @@ const countries = [
   "Zimbabwe",
 ];
 
+interface PricingResponse {
+  success: boolean;
+  pricing?: {
+    applicationFee: number;
+    currency: "USD";
+  };
+  message?: string;
+}
+
 const BecomeMember = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ======================================================
+  // CENTRAL PRICING
+  // ======================================================
+
+  const [applicationFee, setApplicationFee] = useState<number | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(true);
+
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
+
+  const loadPricing = useCallback(async () => {
+    try {
+      setPricingLoading(true);
+      setError("");
+
+      if (!serverUrl) {
+        throw new Error("Payment server is not configured.");
+      }
+
+      const response = await fetch(`${serverUrl}/api/pricing`);
+      const data: PricingResponse = await response.json();
+
+      if (!response.ok || !data.success || !data.pricing) {
+        throw new Error(
+          data.message || "Unable to load the current application fee.",
+        );
+      }
+
+      setApplicationFee(data.pricing.applicationFee);
+    } catch (err) {
+      console.error("❌ Load membership pricing error:", err);
+
+      setApplicationFee(null);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load the current application fee.",
+      );
+    } finally {
+      setPricingLoading(false);
+    }
+  }, [serverUrl]);
+
+  useEffect(() => {
+    void loadPricing();
+  }, [loadPricing]);
+
+  // ======================================================
+  // APPLICATION FILES
+  // ======================================================
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [signature, setSignature] = useState<File | null>(null);
@@ -298,7 +357,6 @@ const BecomeMember = () => {
       return;
     }
 
-    // 10MB maximum
     if (file.size > 10 * 1024 * 1024) {
       setError("The uploaded image must be smaller than 10MB.");
       return;
@@ -340,7 +398,6 @@ const BecomeMember = () => {
       return;
     }
 
-    // 10MB maximum
     if (file.size > 10 * 1024 * 1024) {
       setError("Payment receipt must be smaller than 10MB.");
 
@@ -360,6 +417,17 @@ const BecomeMember = () => {
     e.preventDefault();
 
     setError("");
+
+    // ====================================================
+    // PRICING VALIDATION
+    // ====================================================
+
+    if (pricingLoading || applicationFee === null) {
+      setError(
+        "The current application fee is still loading. Please wait a moment and try again.",
+      );
+      return;
+    }
 
     // ====================================================
     // BASIC VALIDATION
@@ -417,13 +485,10 @@ const BecomeMember = () => {
       formData.append("passportPhoto", photo);
       formData.append("signature", signature);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/membership-applications`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(`${serverUrl}/api/membership-applications`, {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
 
@@ -459,7 +524,7 @@ const BecomeMember = () => {
 
       if (paymentMethod === "stripe") {
         window.location.href =
-          `${import.meta.env.VITE_SERVER_URL}/api/payments/application-fee` +
+          `${serverUrl}/api/payments/application-fee` +
           `?applicationId=${encodeURIComponent(applicationId)}`;
 
         return;
@@ -473,11 +538,6 @@ const BecomeMember = () => {
         setBankTransferSubmitting(true);
 
         const transferFormData = new FormData();
-
-        // Backend expects:
-        // applicationId
-        // reference
-        // receipt
 
         transferFormData.append("applicationId", applicationId);
 
@@ -493,7 +553,7 @@ const BecomeMember = () => {
         transferFormData.append("applicationFeeReceipt", bankTransferReceipt);
 
         const transferResponse = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/application-fee/bank-transfer`,
+          `${serverUrl}/api/membership-applications/application-fee/bank-transfer`,
           {
             method: "POST",
             body: transferFormData,
@@ -555,6 +615,17 @@ const BecomeMember = () => {
   };
 
   // ======================================================
+  // DISPLAY PRICE
+  // ======================================================
+
+  const displayApplicationFee =
+    applicationFee !== null
+      ? `$${applicationFee.toFixed(2)}`
+      : pricingLoading
+        ? "Loading..."
+        : "Unavailable";
+
+  // ======================================================
   // RENDER
   // ======================================================
 
@@ -587,6 +658,16 @@ const BecomeMember = () => {
             <h3 className="font-bold text-xl mb-2">Unable to Continue</h3>
 
             <p>{error}</p>
+
+            {applicationFee === null && !pricingLoading && (
+              <button
+                type="button"
+                onClick={() => void loadPricing()}
+                className="mt-4 rounded-lg bg-[#4b0082] px-5 py-2 text-white font-semibold hover:bg-[#360061]"
+              >
+                Retry Loading Price
+              </button>
+            )}
           </div>
         )}
 
@@ -918,8 +999,8 @@ const BecomeMember = () => {
 
             <p className="text-gray-700 leading-7">
               A non-refundable application processing fee of{" "}
-              <strong>$12.00</strong> is required to complete your membership
-              application.
+              <strong>{displayApplicationFee}</strong> is required to complete
+              your membership application.
             </p>
 
             <p className="mt-3 text-gray-700 leading-7">
@@ -963,8 +1044,8 @@ const BecomeMember = () => {
                   </h3>
 
                   <p className="mt-2 text-gray-600">
-                    Securely pay the $12.00 application processing fee using
-                    your debit or credit card.
+                    Securely pay the {displayApplicationFee} application
+                    processing fee using your debit or credit card.
                   </p>
                 </div>
               </div>
@@ -997,8 +1078,8 @@ const BecomeMember = () => {
                   </h3>
 
                   <p className="mt-2 text-gray-600">
-                    Transfer the $12.00 application fee to the account below and
-                    upload your payment receipt.
+                    Transfer the {displayApplicationFee} application fee to the
+                    account below and upload your payment receipt.
                   </p>
 
                   {paymentMethod === "bank_transfer" && (
@@ -1024,7 +1105,8 @@ const BecomeMember = () => {
                         </div>
 
                         <div>
-                          <span className="font-semibold">Amount:</span> $12.00
+                          <span className="font-semibold">Amount:</span>{" "}
+                          {displayApplicationFee}
                         </div>
                       </div>
 
@@ -1070,8 +1152,8 @@ const BecomeMember = () => {
                         </label>
 
                         <p className="text-sm text-gray-600 mb-3">
-                          Upload a screenshot, image or PDF showing your $12.00
-                          bank transfer.
+                          Upload a screenshot, image or PDF showing your{" "}
+                          {displayApplicationFee} bank transfer.
                         </p>
 
                         <input
@@ -1126,16 +1208,25 @@ const BecomeMember = () => {
 
           <button
             type="submit"
-            disabled={loading || bankTransferSubmitting}
+            disabled={
+              loading ||
+              bankTransferSubmitting ||
+              pricingLoading ||
+              applicationFee === null
+            }
             className="w-full bg-[#4b0082] hover:bg-[#360061] text-white py-5 rounded-xl text-xl font-bold transition disabled:opacity-50"
           >
-            {paymentMethod === "stripe"
-              ? loading
-                ? "Preparing Secure Payment..."
-                : "Continue to $12.00 Application Payment"
-              : bankTransferSubmitting
-                ? "Submitting Transfer & Receipt..."
-                : "Submit Bank Transfer & Receipt"}
+            {pricingLoading
+              ? "Loading Application Fee..."
+              : applicationFee === null
+                ? "Application Fee Unavailable"
+                : paymentMethod === "stripe"
+                  ? loading
+                    ? "Preparing Secure Payment..."
+                    : `Continue to $${applicationFee.toFixed(2)} Application Payment`
+                  : bankTransferSubmitting
+                    ? "Submitting Transfer & Receipt..."
+                    : "Submit Bank Transfer & Receipt"}
           </button>
         </form>
       </div>

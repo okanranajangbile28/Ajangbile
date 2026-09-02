@@ -1,38 +1,34 @@
 import Stripe from 'stripe';
 import { Request, Response } from 'express';
 import MembershipApplication from '../models/membershipApplicationModel';
+import Pricing from '../models/pricingModel';
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
 // ======================================================
-// MEMBERSHIP APPLICATION FEE
+// INITIATION PACKAGE INFORMATION
 // ======================================================
-
-const APPLICATION_FEE_AMOUNT = 1200; // $12.00
-
-// ======================================================
-// INITIATION PACKAGE PRICES
-// ======================================================
+//
+// Prices are now loaded from the central Pricing model.
+// Names and descriptions remain here.
+//
 
 const initiationPackages = {
   Basic: {
-    amount: 22400, // $224.00
     name: 'Basic Initiation Package',
     description:
       'Irilẹ̀ (Right of Passage), Ikúta (3rd Day Ritual), Ikojá (7th Day Ritual)',
   },
 
   Standard: {
-    amount: 45000, // $450.00
     name: 'Standard Initiation Package',
     description:
       'Irilẹ̀ (Right of Passage), Ikúta (3rd Day Ritual), Ikojá (7th Day Ritual), Ibori',
   },
 
   Premium: {
-    amount: 75000, // $750.00
     name: 'Premium Initiation Package',
     description:
       'Irilẹ̀ (Right of Passage), Ikúta (3rd Day Ritual), Ikojá (7th Day Ritual), Ibori, Eran Oro, Ikorita',
@@ -40,6 +36,20 @@ const initiationPackages = {
 } as const;
 
 type PackageName = keyof typeof initiationPackages;
+
+// ======================================================
+// GET CURRENT PRICING
+// ======================================================
+
+const getCurrentPricing = async () => {
+  let pricing = await Pricing.findOne();
+
+  if (!pricing) {
+    pricing = await Pricing.create({});
+  }
+
+  return pricing;
+};
 
 // ======================================================
 // BANK TRANSFER DETAILS
@@ -97,6 +107,12 @@ export const initializeApplicationFeePayment = async (
       return;
     }
 
+    // Get current central pricing
+    const pricing = await getCurrentPricing();
+
+    // Convert USD to Stripe cents
+    const applicationFeeAmount = Math.round(pricing.applicationFee * 100);
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
 
@@ -121,7 +137,7 @@ export const initializeApplicationFeePayment = async (
               },
             },
 
-            unit_amount: APPLICATION_FEE_AMOUNT,
+            unit_amount: applicationFeeAmount,
           },
 
           quantity: 1,
@@ -155,7 +171,7 @@ export const initializeApplicationFeePayment = async (
     }
 
     application.applicationFeeReference = session.id;
-    application.applicationFeeAmount = APPLICATION_FEE_AMOUNT / 100;
+    application.applicationFeeAmount = pricing.applicationFee;
 
     await application.save();
 
@@ -209,8 +225,6 @@ export const initializeInitiationPayment = async (
       return;
     }
 
-    const selectedPackage = initiationPackages[packageName];
-
     const application = await MembershipApplication.findById(applicationId);
 
     if (!application) {
@@ -238,6 +252,22 @@ export const initializeInitiationPayment = async (
       return;
     }
 
+    // Get current central pricing
+    const pricing = await getCurrentPricing();
+
+    const packagePrices = {
+      Basic: pricing.basicInitiation,
+      Standard: pricing.standardInitiation,
+      Premium: pricing.premiumInitiation,
+    };
+
+    const selectedPackage = initiationPackages[packageName];
+
+    const amountUSD = packagePrices[packageName];
+
+    // Convert USD to Stripe cents
+    const amountInCents = Math.round(amountUSD * 100);
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
 
@@ -262,7 +292,7 @@ export const initializeInitiationPayment = async (
               },
             },
 
-            unit_amount: selectedPackage.amount,
+            unit_amount: amountInCents,
           },
 
           quantity: 1,
@@ -297,7 +327,7 @@ export const initializeInitiationPayment = async (
     }
 
     application.initiationPackage = packageName;
-    application.paymentAmount = selectedPackage.amount / 100;
+    application.paymentAmount = amountUSD;
     application.paymentReference = session.id;
     application.paymentMethod = 'stripe';
 
@@ -324,12 +354,6 @@ export const initializeInitiationPayment = async (
 //
 // It does NOT set paymentMethod to bank_transfer.
 //
-// This prevents simply opening the bank-transfer page
-// from changing a Stripe payment into a bank transfer.
-//
-// paymentMethod is only changed when the customer actually
-// submits a bank-transfer receipt.
-// ======================================================
 
 export const getInitiationBankTransferDetails = async (
   req: Request,
@@ -382,13 +406,18 @@ export const getInitiationBankTransferDetails = async (
       return;
     }
 
+    // Get current central pricing
+    const pricing = await getCurrentPricing();
+
+    const packagePrices = {
+      Basic: pricing.basicInitiation,
+      Standard: pricing.standardInitiation,
+      Premium: pricing.premiumInitiation,
+    };
+
     const selectedPackage = initiationPackages[packageName];
 
-    // IMPORTANT:
-    // Do not save paymentMethod here.
-    //
-    // Merely viewing bank-transfer details must not turn
-    // a Stripe payment into a bank-transfer payment.
+    const amountUSD = packagePrices[packageName];
 
     res.status(200).json({
       success: true,
@@ -397,7 +426,7 @@ export const getInitiationBankTransferDetails = async (
         applicationId: String(application._id),
         packageName,
         packageDisplayName: selectedPackage.name,
-        amountUSD: selectedPackage.amount / 100,
+        amountUSD,
       },
 
       bankDetails: BANK_TRANSFER_DETAILS,
@@ -428,7 +457,7 @@ export const getInitiationBankTransferDetails = async (
 // payer only when they submit their transfer receipt.
 //
 // Payment remains Pending until an admin verifies it.
-// ======================================================
+//
 
 export const submitInitiationBankTransfer = async (
   req: Request,
@@ -481,11 +510,20 @@ export const submitInitiationBankTransfer = async (
       return;
     }
 
-    const selectedPackage = initiationPackages[packageName as PackageName];
+    // Get current central pricing
+    const pricing = await getCurrentPricing();
+
+    const packagePrices = {
+      Basic: pricing.basicInitiation,
+      Standard: pricing.standardInitiation,
+      Premium: pricing.premiumInitiation,
+    };
+
+    const amountUSD = packagePrices[packageName as PackageName];
 
     application.initiationPackage = packageName;
 
-    application.paymentAmount = selectedPackage.amount / 100;
+    application.paymentAmount = amountUSD;
 
     // The payment is now officially a bank transfer.
     application.paymentMethod = 'bank_transfer';
@@ -748,6 +786,10 @@ export const stripeInitiationWebhook = async (
       return;
     }
 
+    // IMPORTANT:
+    // Always use the amount actually paid by Stripe.
+    // This keeps historical payments accurate even if
+    // pricing changes later.
     const amountPaid = (session.amount_total || 0) / 100;
 
     const paymentReference = session.payment_intent
@@ -903,6 +945,7 @@ export const verifyPayment = async (
       return;
     }
 
+    // Always record the actual Stripe amount paid.
     const amountPaid = (session.amount_total || 0) / 100;
 
     const paymentReference = session.payment_intent

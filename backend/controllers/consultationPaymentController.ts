@@ -2,45 +2,76 @@ import Stripe from 'stripe';
 import { Request, Response } from 'express';
 
 import Consultation from '../models/consultationModel';
+import Pricing from '../models/pricingModel';
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
 // ======================================================
-// CONSULTATION PRICES
+// CONSULTATION DETAILS
+// Prices now come from the central Pricing model.
 // ======================================================
 
-const consultationPrices = {
+const consultationDetails = {
   Opele: {
-    amount: 1000, // $10.00
     name: 'Opele Consultation',
     description:
       'A traditional Opele consultation for spiritual guidance, clarity and insight.',
   },
 
   Ikin: {
-    amount: 1500, // $15.00
     name: 'Ikin Consultation',
     description:
       'A deeper Ikin consultation for those seeking comprehensive spiritual guidance.',
   },
 
   OneHour: {
-    amount: 10000, // $100.00
     name: '1-Hour Consultation & Discussion',
     description:
       'A private one-hour consultation and discussion for detailed spiritual guidance, questions and personal matters.',
   },
 } as const;
 
-type ConsultationType = keyof typeof consultationPrices;
+type ConsultationType = keyof typeof consultationDetails;
 
 // ======================================================
 // WHATSAPP NUMBER
 // ======================================================
 
 const WHATSAPP_NUMBER = '2349023323697';
+
+// ======================================================
+// GET CURRENT CENTRAL PRICING
+// ======================================================
+
+const getCurrentPricing = async () => {
+  let pricing = await Pricing.findOne();
+
+  if (!pricing) {
+    pricing = await Pricing.create({});
+  }
+
+  return pricing;
+};
+
+// ======================================================
+// GET CONSULTATION PRICE
+// ======================================================
+
+const getConsultationPrice = async (
+  consultationType: ConsultationType,
+): Promise<number> => {
+  const pricing = await getCurrentPricing();
+
+  const prices: Record<ConsultationType, number> = {
+    Opele: pricing.opeleConsultation,
+    Ikin: pricing.ikinConsultation,
+    OneHour: pricing.oneHourConsultation,
+  };
+
+  return prices[consultationType];
+};
 
 // ======================================================
 // START STRIPE CONSULTATION PAYMENT
@@ -62,7 +93,7 @@ export const initializeConsultationPayment = async (
 
     const consultationType = req.query.type as ConsultationType;
 
-    if (!consultationType || !(consultationType in consultationPrices)) {
+    if (!consultationType || !(consultationType in consultationDetails)) {
       res.status(400).json({
         success: false,
         message: 'Invalid consultation type.',
@@ -71,7 +102,15 @@ export const initializeConsultationPayment = async (
       return;
     }
 
-    const consultation = consultationPrices[consultationType];
+    const consultation = consultationDetails[consultationType];
+
+    // ==================================================
+    // GET CURRENT PRICE FROM CENTRAL PRICING
+    // ==================================================
+
+    const amountUSD = await getConsultationPrice(consultationType);
+
+    const amountInCents = Math.round(amountUSD * 100);
 
     // ==================================================
     // CREATE STRIPE CHECKOUT SESSION
@@ -98,7 +137,7 @@ export const initializeConsultationPayment = async (
               },
             },
 
-            unit_amount: consultation.amount,
+            unit_amount: amountInCents,
           },
 
           quantity: 1,
@@ -141,7 +180,7 @@ export const initializeConsultationPayment = async (
 
       consultationName: consultation.name,
 
-      amount: consultation.amount / 100,
+      amount: amountUSD,
 
       currency: 'USD',
 
@@ -153,6 +192,7 @@ export const initializeConsultationPayment = async (
     });
 
     console.log('✅ Consultation request created:', session.id);
+    console.log(`💰 Consultation amount: $${amountUSD.toFixed(2)}`);
 
     // ==================================================
     // REDIRECT CUSTOMER TO STRIPE
@@ -230,7 +270,7 @@ export const verifyConsultationPayment = async (
       return;
     }
 
-    if (!(consultationType in consultationPrices)) {
+    if (!(consultationType in consultationDetails)) {
       res.status(400).json({
         success: false,
         message: 'Invalid consultation type.',
@@ -239,7 +279,11 @@ export const verifyConsultationPayment = async (
       return;
     }
 
-    const consultation = consultationPrices[consultationType];
+    const consultation = consultationDetails[consultationType];
+
+    // ==================================================
+    // USE ACTUAL STRIPE AMOUNT PAID
+    // ==================================================
 
     const amountPaid = (session.amount_total || 0) / 100;
 
@@ -269,6 +313,9 @@ export const verifyConsultationPayment = async (
         email: session.customer_details?.email || undefined,
 
         phone: session.customer_details?.phone || undefined,
+
+        // Keep the actual amount paid for historical accuracy.
+        amount: amountPaid,
       },
       {
         new: true,
@@ -406,7 +453,7 @@ export const consultationStripeWebhook = async (
       return;
     }
 
-    if (!consultationType || !(consultationType in consultationPrices)) {
+    if (!consultationType || !(consultationType in consultationDetails)) {
       console.error('❌ Invalid consultation type in Stripe webhook.');
 
       res.status(200).json({
@@ -417,12 +464,18 @@ export const consultationStripeWebhook = async (
       return;
     }
 
-    const consultation = consultationPrices[consultationType];
+    const consultation = consultationDetails[consultationType];
 
     const paymentIntentId =
       typeof session.payment_intent === 'string'
         ? session.payment_intent
         : undefined;
+
+    // ==================================================
+    // ACTUAL AMOUNT PAID BY STRIPE
+    // ==================================================
+
+    const amountPaid = (session.amount_total || 0) / 100;
 
     // ==================================================
     // UPDATE CONSULTATION RECORD
@@ -443,7 +496,7 @@ export const consultationStripeWebhook = async (
 
         phone: session.customer_details?.phone || undefined,
 
-        amount: (session.amount_total || 0) / 100,
+        amount: amountPaid,
       },
       {
         new: true,
@@ -466,7 +519,7 @@ export const consultationStripeWebhook = async (
 
         phone: session.customer_details?.phone || undefined,
 
-        amount: (session.amount_total || 0) / 100,
+        amount: amountPaid,
 
         currency: 'USD',
 
@@ -484,7 +537,7 @@ export const consultationStripeWebhook = async (
     console.log('✅ CONSULTATION PAYMENT CONFIRMED');
     console.log(`Stripe Session: ${session.id}`);
     console.log(`Consultation: ${consultation.name}`);
-    console.log(`Amount: $${((session.amount_total || 0) / 100).toFixed(2)}`);
+    console.log(`Amount: $${amountPaid.toFixed(2)}`);
     console.log(`Customer: ${session.customer_details?.email || 'Unknown'}`);
     console.log('Payment Status: PAID');
     console.log('======================================');
@@ -526,7 +579,7 @@ export const bankTransferConsultation = async (
   try {
     const consultationType = req.body.type as ConsultationType;
 
-    if (!consultationType || !(consultationType in consultationPrices)) {
+    if (!consultationType || !(consultationType in consultationDetails)) {
       res.status(400).json({
         success: false,
         message: 'Invalid consultation type.',
@@ -535,9 +588,13 @@ export const bankTransferConsultation = async (
       return;
     }
 
-    const consultation = consultationPrices[consultationType];
+    const consultation = consultationDetails[consultationType];
 
-    const amount = consultation.amount / 100;
+    // ==================================================
+    // GET CURRENT CENTRAL PRICE
+    // ==================================================
+
+    const amount = await getConsultationPrice(consultationType);
 
     // ==================================================
     // RECEIPT
@@ -583,6 +640,8 @@ export const bankTransferConsultation = async (
       '🏦 Bank transfer consultation created:',
       consultationRecord._id,
     );
+
+    console.log(`💰 Consultation amount: $${amount.toFixed(2)}`);
 
     console.log('🧾 Consultation receipt:', receipt);
 

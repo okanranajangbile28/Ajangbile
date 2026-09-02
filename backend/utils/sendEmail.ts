@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import Pricing from '../models/pricingModel';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -6,6 +7,20 @@ const CREST_URL = 'https://www.ajangbileheritage.com/images/crest.png';
 
 const BANK_TRANSFER_PAGE =
   'https://www.ajangbileheritage.com/bank-transfer-payment';
+
+// =====================================================
+// CENTRAL PRICING
+// =====================================================
+
+const getCurrentPricing = async () => {
+  let pricing = await Pricing.findOne();
+
+  if (!pricing) {
+    pricing = await Pricing.create({});
+  }
+
+  return pricing;
+};
 
 // =====================================================
 // OGBONI ACCOUNT APPROVAL EMAIL
@@ -36,7 +51,7 @@ export const sendApprovalEmail = async (email: string, fullName: string) => {
 >
 
   <img
-    src="https://www.ajangbileheritage.com/images/crest.png"
+    src="${CREST_URL}"
     alt="Iledi Ajangbile Crest"
     style="
       width:90px;
@@ -223,6 +238,16 @@ export const sendMembershipApprovalEmail = async ({
   applicationId: string;
 }) => {
   try {
+    // ==================================================
+    // GET CURRENT CENTRAL PRICING
+    // ==================================================
+
+    const pricing = await getCurrentPricing();
+
+    const basicPrice = pricing.basicInitiation;
+    const standardPrice = pricing.standardInitiation;
+    const premiumPrice = pricing.premiumInitiation;
+
     const { data, error } = await resend.emails.send({
       from: 'Iledi Ajangbile <admin@ajangbileheritage.com>',
       to: email,
@@ -378,7 +403,7 @@ font-size:34px;
 font-weight:bold;
 color:#4b0082;
 ">
-$224.00
+$${basicPrice.toFixed(2)}
 </p>
 
 <ul style="
@@ -418,7 +443,7 @@ Pay with Card / Stripe
 </a>
 
 <a
-href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Basic&amount=224.00"
+href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Basic&amount=${basicPrice.toFixed(2)}"
 style="
 display:inline-block;
 background:#b8860b;
@@ -470,7 +495,7 @@ font-size:34px;
 font-weight:bold;
 color:#4b0082;
 ">
-$450.00
+$${standardPrice.toFixed(2)}
 </p>
 
 <ul style="
@@ -512,7 +537,7 @@ Pay with Card / Stripe
 </a>
 
 <a
-href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Standard&amount=450.00"
+href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Standard&amount=${standardPrice.toFixed(2)}"
 style="
 display:inline-block;
 background:#b8860b;
@@ -564,7 +589,7 @@ font-size:34px;
 font-weight:bold;
 color:#b8860b;
 ">
-$750.00
+$${premiumPrice.toFixed(2)}
 </p>
 
 <ul style="
@@ -610,7 +635,7 @@ Pay with Card / Stripe
 </a>
 
 <a
-href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Premium&amount=750.00"
+href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Premium&amount=${premiumPrice.toFixed(2)}"
 style="
 display:inline-block;
 background:#b8860b;
@@ -705,7 +730,6 @@ Ogun State Chapter
 <span style="color:#555;">
 Iledi Ajangbile
 </span>
-
 </div>
 
 </div>
@@ -1071,7 +1095,6 @@ export const sendOrderReceiptEmail = async ({
       ">
         Your Order Receipt
       </p>
-
     </div>
 
     <!-- BODY -->
