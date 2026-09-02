@@ -18,7 +18,6 @@ const PendingApplications = () => {
   const [loading, setLoading] = useState(true);
 
   const [selectedId, setSelectedId] = useState("");
-
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [approvalForm] = useState({});
@@ -27,11 +26,14 @@ const PendingApplications = () => {
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/pending`,
+        {
+          withCredentials: true,
+        },
       );
 
       setApplications(res.data.applications || []);
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error fetching pending applications:", err);
     } finally {
       setLoading(false);
     }
@@ -43,7 +45,6 @@ const PendingApplications = () => {
 
   const openApprovalModal = (id: string) => {
     setSelectedId(id);
-
     setShowApprovalModal(true);
   };
 
@@ -52,17 +53,19 @@ const PendingApplications = () => {
       await axios.patch(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/approve/${selectedId}`,
         approvalForm,
+        {
+          withCredentials: true,
+        },
       );
 
       setShowApprovalModal(false);
-
       setSelectedId("");
 
       await fetchApplications();
 
       alert("Application approved successfully.");
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error approving application:", err);
       alert("Unable to approve application.");
     }
   };
@@ -73,13 +76,17 @@ const PendingApplications = () => {
     try {
       await axios.patch(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/reject/${id}`,
+        {},
+        {
+          withCredentials: true,
+        },
       );
 
       await fetchApplications();
 
       alert("Application rejected.");
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error rejecting application:", err);
       alert("Unable to reject application.");
     }
   };
@@ -198,6 +205,7 @@ const PendingApplications = () => {
                 </p>
               </div>
             </div>
+
             <div className="flex justify-end gap-4 mt-8">
               <button
                 onClick={() => setShowApprovalModal(false)}
