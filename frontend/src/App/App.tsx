@@ -88,6 +88,8 @@ const OgboniForgotPassword = lazy(
 
 const OgboniResetPassword = lazy(() => import("../pages/OgboniResetPassword"));
 
+const MembershipPending = lazy(() => import("../pages/MembershipPending"));
+
 const OgboniDashboard = lazy(() => import("../pages/OgboniDashboard"));
 
 const OgboniAdminDashboard = lazy(
@@ -199,12 +201,16 @@ const App = () => {
 
             <Route path="/login" element={<OgboniLoginPage />} />
 
+            <Route path="/ogboni-login" element={<OgboniLoginPage />} />
+
             <Route path="/forgot-password" element={<OgboniForgotPassword />} />
 
             <Route
               path="/ogboni-reset-password/:token"
               element={<OgboniResetPassword />}
             />
+
+            <Route path="/membership-pending" element={<MembershipPending />} />
 
             <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 
