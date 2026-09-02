@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import MembershipApplication from '../models/membershipApplicationModel';
+import Pricing from '../models/pricingModel';
 import { v2 as cloudinary } from 'cloudinary';
 import crypto from 'crypto';
 import { sendMembershipApprovalEmail } from '../utils/sendEmail';
@@ -156,7 +157,11 @@ export const submitApplicationFeeBankTransfer = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { applicationId, reference } = req.body;
+    const { applicationId } = req.body;
+
+    // ==================================================
+    // APPLICATION ID
+    // ==================================================
 
     if (!applicationId) {
       res.status(400).json({
@@ -167,14 +172,9 @@ export const submitApplicationFeeBankTransfer = async (
       return;
     }
 
-    if (!reference || !reference.trim()) {
-      res.status(400).json({
-        success: false,
-        message: 'Bank transfer reference is required.',
-      });
-
-      return;
-    }
+    // ==================================================
+    // RECEIPT FILE
+    // ==================================================
 
     const files = req.files as {
       applicationFeeReceipt?: Express.Multer.File[];
@@ -191,6 +191,10 @@ export const submitApplicationFeeBankTransfer = async (
       return;
     }
 
+    // ==================================================
+    // FIND APPLICATION
+    // ==================================================
+
     const application = await MembershipApplication.findById(applicationId);
 
     if (!application) {
@@ -202,6 +206,10 @@ export const submitApplicationFeeBankTransfer = async (
       return;
     }
 
+    // ==================================================
+    // PREVENT DUPLICATE PAYMENT
+    // ==================================================
+
     if (application.applicationFeeStatus === 'Paid') {
       res.status(400).json({
         success: false,
@@ -211,16 +219,37 @@ export const submitApplicationFeeBankTransfer = async (
       return;
     }
 
+    // ==================================================
+    // GET CURRENT CENTRAL APPLICATION FEE
+    // ==================================================
+
+    let pricing = await Pricing.findOne();
+
+    if (!pricing) {
+      pricing = await Pricing.create({});
+    }
+
+    const currentApplicationFee = pricing.applicationFee;
+
+    // ==================================================
+    // UPLOAD RECEIPT
+    // ==================================================
+
     const receipt = await uploadToCloudinary(
       receiptFile,
       'membership/application-fee-receipts',
     );
 
+    // ==================================================
+    // SAVE BANK TRANSFER PAYMENT
+    // ==================================================
+
     application.applicationFeePaymentMethod = 'bank_transfer';
 
     application.applicationFeeBankTransferStatus = 'Pending';
 
-    application.applicationFeeBankTransferReference = reference.trim();
+    // No customer-facing transfer reference is required.
+    application.applicationFeeBankTransferReference = '';
 
     application.applicationFeeBankTransferDate = new Date();
 
@@ -230,24 +259,30 @@ export const submitApplicationFeeBankTransfer = async (
 
     application.applicationFeeStatus = 'Pending';
 
-    application.applicationFeeAmount = 12;
+    application.applicationFeeAmount = currentApplicationFee;
 
     application.status = 'Payment Pending';
 
     await application.save();
+
+    // ==================================================
+    // SUCCESS
+    // ==================================================
 
     res.status(200).json({
       success: true,
       message:
         'Bank transfer receipt submitted successfully. Your payment is awaiting verification.',
       application,
+      redirectUrl: '/bank-transfer-success',
     });
   } catch (error: any) {
-    console.error('❌ Bank transfer submission error:', error);
+    console.error('❌ Application fee bank transfer submission error:');
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Unable to submit bank transfer details.',
+      message: error.message || 'Unable to submit your bank transfer receipt.',
     });
   }
 };

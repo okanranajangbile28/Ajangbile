@@ -2,203 +2,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-const countries = [
-  "Afghanistan",
-  "Albania",
-  "Algeria",
-  "Andorra",
-  "Angola",
-  "Antigua and Barbuda",
-  "Argentina",
-  "Armenia",
-  "Australia",
-  "Austria",
-  "Azerbaijan",
-  "Bahamas",
-  "Bahrain",
-  "Bangladesh",
-  "Barbados",
-  "Belarus",
-  "Belgium",
-  "Belize",
-  "Benin",
-  "Bhutan",
-  "Bolivia",
-  "Bosnia and Herzegovina",
-  "Botswana",
-  "Brazil",
-  "Brunei",
-  "Bulgaria",
-  "Burkina Faso",
-  "Burundi",
-  "Cabo Verde",
-  "Cambodia",
-  "Cameroon",
-  "Canada",
-  "Central African Republic",
-  "Chad",
-  "Chile",
-  "China",
-  "Colombia",
-  "Comoros",
-  "Congo",
-  "Costa Rica",
-  "Croatia",
-  "Cuba",
-  "Cyprus",
-  "Czech Republic",
-  "Democratic Republic of the Congo",
-  "Denmark",
-  "Djibouti",
-  "Dominica",
-  "Dominican Republic",
-  "Ecuador",
-  "Egypt",
-  "El Salvador",
-  "Equatorial Guinea",
-  "Eritrea",
-  "Estonia",
-  "Eswatini",
-  "Ethiopia",
-  "Fiji",
-  "Finland",
-  "France",
-  "Gabon",
-  "Gambia",
-  "Georgia",
-  "Germany",
-  "Ghana",
-  "Greece",
-  "Grenada",
-  "Guatemala",
-  "Guinea",
-  "Guinea-Bissau",
-  "Guyana",
-  "Haiti",
-  "Honduras",
-  "Hungary",
-  "Iceland",
-  "India",
-  "Indonesia",
-  "Iran",
-  "Iraq",
-  "Ireland",
-  "Israel",
-  "Italy",
-  "Ivory Coast",
-  "Jamaica",
-  "Japan",
-  "Jordan",
-  "Kazakhstan",
-  "Kenya",
-  "Kiribati",
-  "Kuwait",
-  "Laos",
-  "Latvia",
-  "Lebanon",
-  "Lesotho",
-  "Liberia",
-  "Libya",
-  "Liechtenstein",
-  "Lithuania",
-  "Luxembourg",
-  "Madagascar",
-  "Malawi",
-  "Malaysia",
-  "Maldives",
-  "Mali",
-  "Malta",
-  "Marshall Islands",
-  "Mauritania",
-  "Mauritius",
-  "Mexico",
-  "Micronesia",
-  "Moldova",
-  "Monaco",
-  "Mongolia",
-  "Montenegro",
-  "Morocco",
-  "Mozambique",
-  "Myanmar",
-  "Namibia",
-  "Nauru",
-  "Nepal",
-  "Netherlands",
-  "New Zealand",
-  "Nicaragua",
-  "Niger",
-  "Nigeria",
-  "North Korea",
-  "North Macedonia",
-  "Norway",
-  "Oman",
-  "Pakistan",
-  "Palau",
-  "Palestine",
-  "Panama",
-  "Papua New Guinea",
-  "Paraguay",
-  "Peru",
-  "Philippines",
-  "Poland",
-  "Portugal",
-  "Qatar",
-  "Romania",
-  "Russia",
-  "Rwanda",
-  "Saint Kitts and Nevis",
-  "Saint Lucia",
-  "Saint Vincent and the Grenadines",
-  "Samoa",
-  "San Marino",
-  "Sao Tome and Principe",
-  "Saudi Arabia",
-  "Senegal",
-  "Serbia",
-  "Seychelles",
-  "Sierra Leone",
-  "Singapore",
-  "Slovakia",
-  "Slovenia",
-  "Somalia",
-  "South Africa",
-  "South Korea",
-  "South Sudan",
-  "Spain",
-  "Sri Lanka",
-  "Sudan",
-  "Suriname",
-  "Sweden",
-  "Switzerland",
-  "Syria",
-  "Taiwan",
-  "Tajikistan",
-  "Tanzania",
-  "Thailand",
-  "Timor-Leste",
-  "Togo",
-  "Tonga",
-  "Trinidad and Tobago",
-  "Tunisia",
-  "Turkey",
-  "Turkmenistan",
-  "Tuvalu",
-  "Uganda",
-  "Ukraine",
-  "United Arab Emirates",
-  "United Kingdom",
-  "United States",
-  "Uruguay",
-  "Uzbekistan",
-  "Vanuatu",
-  "Vatican City",
-  "Venezuela",
-  "Vietnam",
-  "Yemen",
-  "Zambia",
-  "Zimbabwe",
-];
-
 interface PricingResponse {
   success: boolean;
   pricing?: {
@@ -208,18 +11,57 @@ interface PricingResponse {
   message?: string;
 }
 
-const BecomeMember = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+const countries = [
+  "Nigeria",
+  "Ghana",
+  "United Kingdom",
+  "United States",
+  "Canada",
+  "South Africa",
+  "Kenya",
+  "Other",
+];
 
-  // ======================================================
-  // CENTRAL PRICING
-  // ======================================================
+const BecomeMember = () => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
 
   const [applicationFee, setApplicationFee] = useState<number | null>(null);
   const [pricingLoading, setPricingLoading] = useState(true);
 
-  const serverUrl = import.meta.env.VITE_SERVER_URL;
+  const [form, setForm] = useState({
+    fullName: "",
+    gender: "",
+    dateOfBirth: "",
+    occupation: "",
+    phone: "",
+    email: "",
+    address: "",
+    state: "",
+    country: "Nigeria",
+    nextOfKin: "",
+    reason: "",
+    previousFraternity: "",
+  });
+
+  const [passportPhoto, setPassportPhoto] = useState<File | null>(null);
+  const [signature, setSignature] = useState<File | null>(null);
+
+  const [declarationAccepted, setDeclarationAccepted] = useState(false);
+  const [ndaAccepted, setNdaAccepted] = useState(false);
+
+  const [paymentMethod, setPaymentMethod] = useState<
+    "stripe" | "bank_transfer"
+  >("stripe");
+
+  const [bankTransferReceipt, setBankTransferReceipt] = useState<File | null>(
+    null,
+  );
+
+  const [bankTransferSubmitting, setBankTransferSubmitting] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const loadPricing = useCallback(async () => {
     try {
@@ -259,128 +101,84 @@ const BecomeMember = () => {
     void loadPricing();
   }, [loadPricing]);
 
-  // ======================================================
-  // APPLICATION FILES
-  // ======================================================
-
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [signature, setSignature] = useState<File | null>(null);
-
-  // ======================================================
-  // APPLICATION PAYMENT
-  // ======================================================
-
-  const [paymentMethod, setPaymentMethod] = useState<
-    "stripe" | "bank_transfer"
-  >("stripe");
-
-  const [bankTransferReference, setBankTransferReference] = useState("");
-  const [bankTransferReceipt, setBankTransferReceipt] = useState<File | null>(
-    null,
-  );
-
-  const [bankTransferSubmitting, setBankTransferSubmitting] = useState(false);
-
-  // ======================================================
-  // INITIAL FORM
-  // ======================================================
-
-  const initialForm = {
-    fullName: "",
-    gender: "",
-    dateOfBirth: "",
-    maritalStatus: "",
-    occupation: "",
-
-    phone: "",
-    email: "",
-
-    address: "",
-    city: "",
-    state: "",
-    country: "",
-
-    nextOfKin: "",
-    nextOfKinPhone: "",
-
-    reason: "",
-
-    declarationAccepted: false,
-    ndaAccepted: false,
-  };
-
-  const [form, setForm] = useState(initialForm);
-
-  // ======================================================
-  // HANDLE INPUT
-  // ======================================================
-
   const handleChange = (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-      | React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
 
-    setForm((prev) => ({
-      ...prev,
+    setForm((previous) => ({
+      ...previous,
       [name]: value,
     }));
   };
 
-  // ======================================================
-  // HANDLE CHECKBOX
-  // ======================================================
+  const handlePassportPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
 
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.checked,
-    }));
-  };
+    if (!file) {
+      setPassportPhoto(null);
+      return;
+    }
 
-  // ======================================================
-  // HANDLE APPLICATION FILES
-  // ======================================================
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-  const handleFile = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "photo" | "signature",
-  ) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setError("Please upload an image file.");
+    if (!allowedTypes.includes(file.type)) {
+      setError("Passport photo must be JPG, PNG, or WEBP.");
+      e.target.value = "";
+      setPassportPhoto(null);
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError("The uploaded image must be smaller than 10MB.");
+      setError("Passport photo must not exceed 10MB.");
+      e.target.value = "";
+      setPassportPhoto(null);
       return;
     }
 
-    if (type === "photo") {
-      setPhoto(file);
-    } else {
-      setSignature(file);
+    setError("");
+    setPassportPhoto(file);
+  };
+
+  const handleSignature = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+
+    if (!file) {
+      setSignature(null);
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Signature must be JPG, PNG, or WEBP.");
+      e.target.value = "";
+      setSignature(null);
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Signature must not exceed 10MB.");
+      e.target.value = "";
+      setSignature(null);
+      return;
     }
 
     setError("");
+    setSignature(file);
   };
-
-  // ======================================================
-  // HANDLE BANK TRANSFER RECEIPT
-  // ======================================================
 
   const handleBankTransferReceipt = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0] || null;
 
-    if (!file) return;
+    if (!file) {
+      setBankTransferReceipt(null);
+      return;
+    }
 
     const allowedTypes = [
       "image/jpeg",
@@ -390,50 +188,42 @@ const BecomeMember = () => {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      setError(
-        "Please upload your payment receipt as a JPG, PNG, WEBP image or PDF.",
-      );
-
+      setError("Payment receipt must be JPG, PNG, WEBP, or PDF.");
       e.target.value = "";
+      setBankTransferReceipt(null);
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError("Payment receipt must be smaller than 10MB.");
-
+      setError("Payment receipt must not exceed 10MB.");
       e.target.value = "";
+      setBankTransferReceipt(null);
       return;
     }
 
-    setBankTransferReceipt(file);
     setError("");
+    setBankTransferReceipt(file);
   };
 
-  // ======================================================
-  // SUBMIT APPLICATION
-  // ======================================================
-
-  const submitApplication = async (e: React.FormEvent) => {
+  const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setError("");
+    setSuccess(false);
 
-    // ====================================================
-    // PRICING VALIDATION
-    // ====================================================
+    if (!serverUrl) {
+      setError("Payment server is not configured.");
+      return;
+    }
 
-    if (pricingLoading || applicationFee === null) {
+    if (applicationFee === null) {
       setError(
-        "The current application fee is still loading. Please wait a moment and try again.",
+        "The current application fee could not be loaded. Please refresh the page and try again.",
       );
       return;
     }
 
-    // ====================================================
-    // BASIC VALIDATION
-    // ====================================================
-
-    if (!photo) {
+    if (!passportPhoto) {
       setError("Please upload your passport photograph.");
       return;
     }
@@ -443,47 +233,51 @@ const BecomeMember = () => {
       return;
     }
 
-    if (!form.declarationAccepted) {
-      setError("Please accept the declaration.");
+    if (!declarationAccepted) {
+      setError("Please accept the declaration before continuing.");
       return;
     }
 
-    if (!form.ndaAccepted) {
-      setError("Please accept the confidentiality agreement.");
+    if (!ndaAccepted) {
+      setError(
+        "Please accept the confidentiality and NDA agreement before continuing.",
+      );
       return;
     }
 
-    // ====================================================
-    // BANK TRANSFER VALIDATION
-    // ====================================================
-
-    if (paymentMethod === "bank_transfer") {
-      if (!bankTransferReference.trim()) {
-        setError("Please enter your bank transfer reference.");
-        return;
-      }
-
-      if (!bankTransferReceipt) {
-        setError("Please upload your bank transfer payment receipt.");
-        return;
-      }
+    if (paymentMethod === "bank_transfer" && !bankTransferReceipt) {
+      setError("Please upload your bank transfer payment receipt.");
+      return;
     }
 
     try {
-      setLoading(true);
-
-      // ==================================================
-      // CREATE APPLICATION
-      // ==================================================
+      setSubmitting(true);
 
       const formData = new FormData();
 
-      Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, String(value));
-      });
+      formData.append("fullName", form.fullName);
+      formData.append("gender", form.gender);
+      formData.append("dateOfBirth", form.dateOfBirth);
+      formData.append("occupation", form.occupation);
+      formData.append("phone", form.phone);
+      formData.append("email", form.email);
+      formData.append("address", form.address);
+      formData.append("state", form.state);
+      formData.append("country", form.country);
+      formData.append("nextOfKin", form.nextOfKin);
+      formData.append("reason", form.reason);
+      formData.append("previousFraternity", form.previousFraternity);
 
-      formData.append("passportPhoto", photo);
+      formData.append("applicationFeeAmount", String(applicationFee));
+
+      formData.append("applicationFeePaymentMethod", paymentMethod);
+
+      formData.append("passportPhoto", passportPhoto);
       formData.append("signature", signature);
+
+      formData.append("declarationAccepted", String(declarationAccepted));
+
+      formData.append("ndaAccepted", String(ndaAccepted));
 
       const response = await fetch(`${serverUrl}/api/membership-applications`, {
         method: "POST",
@@ -493,130 +287,68 @@ const BecomeMember = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(
-          data.message || "Unable to create your membership application.",
+        throw new Error(
+          data.message || "Unable to submit your membership application.",
         );
-
-        setLoading(false);
-        return;
       }
-
-      // ==================================================
-      // GET APPLICATION ID
-      // ==================================================
 
       const applicationId = data.application?._id || data.applicationId;
 
       if (!applicationId) {
-        console.error("Application ID missing:", data);
-
-        setError(
-          "Your application was created, but we could not continue with payment.",
+        throw new Error(
+          "Your application was created, but the application ID was not returned.",
         );
-
-        setLoading(false);
-        return;
       }
-
-      // ==================================================
-      // STRIPE PAYMENT
-      // ==================================================
 
       if (paymentMethod === "stripe") {
-        window.location.href =
-          `${serverUrl}/api/payments/application-fee` +
-          `?applicationId=${encodeURIComponent(applicationId)}`;
+        window.location.href = `${serverUrl}/api/payments/application-fee?applicationId=${applicationId}`;
 
         return;
       }
 
-      // ==================================================
-      // BANK TRANSFER PAYMENT
-      // ==================================================
+      const transferFormData = new FormData();
 
-      try {
-        setBankTransferSubmitting(true);
+      transferFormData.append("applicationId", applicationId);
 
-        const transferFormData = new FormData();
-
-        transferFormData.append("applicationId", applicationId);
-
-        transferFormData.append("reference", bankTransferReference.trim());
-
-        if (!bankTransferReceipt) {
-          setError("Please upload your bank transfer payment receipt.");
-          setBankTransferSubmitting(false);
-          setLoading(false);
-          return;
-        }
-
-        transferFormData.append("applicationFeeReceipt", bankTransferReceipt);
-
-        const transferResponse = await fetch(
-          `${serverUrl}/api/membership-applications/application-fee/bank-transfer`,
-          {
-            method: "POST",
-            body: transferFormData,
-          },
-        );
-
-        const transferData = await transferResponse.json();
-
-        if (!transferResponse.ok || !transferData.success) {
-          setError(
-            transferData.message ||
-              "Unable to submit your bank transfer details.",
-          );
-
-          setBankTransferSubmitting(false);
-          setLoading(false);
-          return;
-        }
-
-        // ==================================================
-        // SUCCESS
-        // ==================================================
-
-        alert(
-          "Your application has been submitted successfully. Your bank transfer receipt is now awaiting verification by the Membership Committee.",
-        );
-
-        setForm(initialForm);
-
-        setPhoto(null);
-        setSignature(null);
-
-        setBankTransferReference("");
-        setBankTransferReceipt(null);
-
-        setPaymentMethod("stripe");
-
-        setBankTransferSubmitting(false);
-        setLoading(false);
-      } catch (err) {
-        console.error("Bank transfer submission error:", err);
-
-        setError(
-          "Your application was created, but we could not submit the bank transfer details. Please contact support.",
-        );
-
-        setBankTransferSubmitting(false);
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error("Membership application error:", err);
-
-      setError(
-        "Something went wrong while creating your application. Please try again.",
+      transferFormData.append(
+        "applicationFeeReceipt",
+        bankTransferReceipt as File,
       );
 
-      setLoading(false);
+      setBankTransferSubmitting(true);
+
+      const transferResponse = await fetch(
+        `${serverUrl}/api/membership-applications/application-fee/bank-transfer`,
+        {
+          method: "POST",
+          body: transferFormData,
+        },
+      );
+
+      const transferData = await transferResponse.json();
+
+      if (!transferResponse.ok || !transferData.success) {
+        throw new Error(
+          transferData.message ||
+            "Unable to submit your bank transfer receipt.",
+        );
+      }
+
+      window.location.href =
+        transferData.redirectUrl || "/bank-transfer-success";
+    } catch (err) {
+      console.error("❌ Membership application submission error:", err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+      setBankTransferSubmitting(false);
     }
   };
-
-  // ======================================================
-  // DISPLAY PRICE
-  // ======================================================
 
   const displayApplicationFee =
     applicationFee !== null
@@ -625,711 +357,570 @@ const BecomeMember = () => {
         ? "Loading..."
         : "Unavailable";
 
-  // ======================================================
-  // RENDER
-  // ======================================================
-
   return (
-    <section className="min-h-screen bg-gray-100 py-16 px-6">
-      <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* ==================================================
-            HEADER
-        ================================================== */}
+    <div className="min-h-screen bg-gray-50 px-4 py-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
+          <div className="bg-[#4b0082] px-6 py-8 text-center text-white">
+            <h1 className="text-3xl font-bold">Become a Member</h1>
 
-        <div className="bg-[#4b0082] text-white px-10 py-12 text-center">
-          <h1 className="text-5xl font-bold mb-4">Become a Member</h1>
+            <p className="mt-2 text-sm text-purple-100">
+              Membership Application – Ajangbile Heritage
+            </p>
+          </div>
 
-          <p className="max-w-3xl mx-auto text-lg leading-8 text-gray-200">
-            Thank you for your interest in joining the Confederation of Ogboni
-            Aborigine Fraternity of Nigeria, Ogun State Chapter.
-          </p>
+          <form onSubmit={submitApplication} className="space-y-8 p-6 md:p-10">
+            {error && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                <p className="font-semibold">Unable to Continue</p>
 
-          <p className="mt-6 text-yellow-300 font-semibold">
-            Every application is carefully reviewed before membership approval.
-          </p>
-        </div>
-
-        {/* ==================================================
-            ERROR MESSAGE
-        ================================================== */}
-
-        {error && (
-          <div className="m-8 rounded-xl border border-red-400 bg-red-50 p-6 text-red-800">
-            <h3 className="font-bold text-xl mb-2">Unable to Continue</h3>
-
-            <p>{error}</p>
-
-            {applicationFee === null && !pricingLoading && (
-              <button
-                type="button"
-                onClick={() => void loadPricing()}
-                className="mt-4 rounded-lg bg-[#4b0082] px-5 py-2 text-white font-semibold hover:bg-[#360061]"
-              >
-                Retry Loading Price
-              </button>
+                <p className="mt-1 text-sm">{error}</p>
+              </div>
             )}
-          </div>
-        )}
 
-        {/* ==================================================
-            APPLICATION FORM
-        ================================================== */}
-
-        <form onSubmit={submitApplication} className="p-10 space-y-10">
-          {/* ==================================================
-              PERSONAL INFORMATION
-          ================================================== */}
-
-          <Section title="Personal Information">
-            <Field label="Full Name">
-              <Input
-                name="fullName"
-                placeholder="Enter your full name"
-                value={form.fullName}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-
-            <Field label="Gender">
-              <Select
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                placeholder="Select Gender"
-                options={["Male", "Female"]}
-              />
-            </Field>
-
-            <Field label="Date of Birth">
-              <Input
-                type="date"
-                name="dateOfBirth"
-                value={form.dateOfBirth}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-
-            <Field label="Marital Status">
-              <Select
-                name="maritalStatus"
-                value={form.maritalStatus}
-                onChange={handleChange}
-                placeholder="Select Marital Status"
-                options={["Single", "Married", "Divorced", "Widowed"]}
-              />
-            </Field>
-
-            <Field label="Occupation">
-              <Input
-                name="occupation"
-                placeholder="Enter your occupation"
-                value={form.occupation}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-          </Section>
-
-          {/* ==================================================
-              CONTACT INFORMATION
-          ================================================== */}
-
-          <Section title="Contact Information">
-            <Field label="Phone Number">
-              <PhoneInput
-                country="ng"
-                enableSearch
-                value={form.phone}
-                onChange={(phone) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    phone: "+" + phone,
-                  }))
-                }
-                inputStyle={{
-                  width: "100%",
-                  height: "56px",
-                  borderRadius: "12px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "16px",
-                }}
-                buttonStyle={{
-                  borderTopLeftRadius: "12px",
-                  borderBottomLeftRadius: "12px",
-                }}
-                searchStyle={{
-                  width: "100%",
-                }}
-                placeholder="Enter phone number"
-              />
-            </Field>
-
-            <Field label="Email Address">
-              <Input
-                name="email"
-                type="email"
-                placeholder="Enter your email address"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-
-            <Field label="Country">
-              <Select
-                name="country"
-                value={form.country}
-                onChange={handleChange}
-                placeholder="Select Country"
-                options={countries}
-              />
-            </Field>
-
-            <Field label="City">
-              <Input
-                name="city"
-                placeholder="Enter your city"
-                value={form.city}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-
-            <Field label="State">
-              <Input
-                name="state"
-                placeholder="Enter your state"
-                value={form.state}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-
-            <Field label="Residential Address" className="md:col-span-2">
-              <textarea
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-                placeholder="Enter your full residential address"
-                rows={3}
-                required
-                className="border rounded-xl p-4 w-full"
-              />
-            </Field>
-          </Section>
-
-          {/* ==================================================
-              NEXT OF KIN
-          ================================================== */}
-
-          <Section title="Next of Kin">
-            <Field label="Next of Kin Full Name">
-              <Input
-                name="nextOfKin"
-                placeholder="Enter next of kin full name"
-                value={form.nextOfKin}
-                onChange={handleChange}
-                required
-              />
-            </Field>
-
-            <Field label="Next of Kin Phone Number">
-              <PhoneInput
-                country="ng"
-                enableSearch
-                value={form.nextOfKinPhone}
-                onChange={(phone) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    nextOfKinPhone: "+" + phone,
-                  }))
-                }
-                inputStyle={{
-                  width: "100%",
-                  height: "56px",
-                  borderRadius: "12px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "16px",
-                }}
-                buttonStyle={{
-                  borderTopLeftRadius: "12px",
-                  borderBottomLeftRadius: "12px",
-                }}
-                searchStyle={{
-                  width: "100%",
-                }}
-                placeholder="Enter next of kin phone number"
-              />
-            </Field>
-          </Section>
-
-          {/* ==================================================
-              PASSPORT PHOTO
-          ================================================== */}
-
-          <Section title="Passport Photograph">
-            <Field label="Passport Photograph" className="md:col-span-2">
-              <p className="text-gray-600 mb-3">
-                Upload a clear passport photograph.
-              </p>
-
-              <input
-                type="file"
-                accept="image/*"
-                required
-                onChange={(e) => handleFile(e, "photo")}
-                className="border rounded-xl p-3 w-full"
-              />
-
-              {photo && (
-                <p className="mt-2 text-green-600 font-semibold">
-                  Selected: {photo.name}
+            {success && (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
+                <p className="font-semibold">
+                  Application Submitted Successfully
                 </p>
-              )}
-            </Field>
-          </Section>
 
-          {/* ==================================================
-              SIGNATURE
-          ================================================== */}
-
-          <Section title="Signature">
-            <Field label="Handwritten Signature" className="md:col-span-2">
-              <p className="text-gray-600 mb-3">
-                Upload your handwritten signature.
-              </p>
-
-              <input
-                type="file"
-                accept="image/*"
-                required
-                onChange={(e) => handleFile(e, "signature")}
-                className="border rounded-xl p-3 w-full"
-              />
-
-              {signature && (
-                <p className="mt-2 text-green-600 font-semibold">
-                  Selected: {signature.name}
+                <p className="mt-1 text-sm">
+                  Your application has been received.
                 </p>
-              )}
-            </Field>
-          </Section>
+              </div>
+            )}
 
-          {/* ==================================================
-              REASON FOR JOINING
-          ================================================== */}
+            <Section title="Personal Information">
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field label="Full Name" required>
+                  <Input
+                    name="fullName"
+                    value={form.fullName}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </Field>
 
-          <Section title="Reason For Joining">
-            <Field
-              label="Why do you wish to become a member?"
-              className="md:col-span-2"
-            >
-              <textarea
-                name="reason"
-                value={form.reason}
-                onChange={handleChange}
-                placeholder="Explain why you wish to become a member."
-                rows={6}
-                required
-                className="border rounded-xl p-4 w-full"
-              />
-            </Field>
-          </Section>
+                <Field label="Gender" required>
+                  <Select
+                    name="gender"
+                    value={form.gender}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select gender</option>
 
-          {/* ==================================================
-              AGREEMENTS
-          ================================================== */}
+                    <option value="Male">Male</option>
 
-          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6 space-y-6">
-            <h2 className="text-2xl font-bold text-[#4b0082]">
-              Declaration & Confidentiality Agreement
-            </h2>
+                    <option value="Female">Female</option>
+                  </Select>
+                </Field>
 
-            <p className="text-gray-700 leading-7">
-              Please read and accept the following agreements before continuing
-              to payment.
-            </p>
+                <Field label="Date of Birth" required>
+                  <Input
+                    type="date"
+                    name="dateOfBirth"
+                    value={form.dateOfBirth}
+                    onChange={handleChange}
+                    required
+                  />
+                </Field>
 
-            <label className="flex items-start gap-4">
-              <input
-                type="checkbox"
-                name="declarationAccepted"
-                checked={form.declarationAccepted}
-                onChange={handleCheckbox}
-                className="mt-2 w-5 h-5"
-              />
+                <Field label="Occupation" required>
+                  <Input
+                    name="occupation"
+                    value={form.occupation}
+                    onChange={handleChange}
+                    placeholder="Enter your occupation"
+                    required
+                  />
+                </Field>
 
-              <span className="leading-7 text-gray-700">
-                <strong>Declaration</strong>
-                <br />I declare that the information provided in this
-                application is true and correct to the best of my knowledge and
-                I voluntarily agree to uphold the values and dignity of the
-                fraternity.
-              </span>
-            </label>
+                <Field label="Phone Number" required>
+                  <PhoneInput
+                    country="ng"
+                    value={form.phone}
+                    onChange={(value) =>
+                      setForm((previous) => ({
+                        ...previous,
+                        phone: value,
+                      }))
+                    }
+                    enableSearch
+                    inputClass="!h-[42px] !w-full !rounded-lg"
+                    containerClass="!w-full"
+                    buttonClass="!rounded-l-lg"
+                  />
+                </Field>
 
-            <label className="flex items-start gap-4">
-              <input
-                type="checkbox"
-                name="ndaAccepted"
-                checked={form.ndaAccepted}
-                onChange={handleCheckbox}
-                className="mt-2 w-5 h-5"
-              />
+                <Field label="Email Address" required>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </Field>
+              </div>
+            </Section>
 
-              <span className="leading-7 text-gray-700">
-                <strong>Confidentiality Agreement</strong>
-                <br />I agree that every confidential knowledge, teachings,
-                ceremonies, discussions and activities of the fraternity shall
-                remain private and shall never be disclosed to non-members.
-              </span>
-            </label>
-          </div>
+            <Section title="Address Information">
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field label="Address" required>
+                  <textarea
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Enter your full address"
+                    rows={3}
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#4b0082] focus:ring-2 focus:ring-purple-100"
+                  />
+                </Field>
 
-          {/* ==================================================
-              APPLICATION FEE
-          ================================================== */}
+                <Field label="State" required>
+                  <Input
+                    name="state"
+                    value={form.state}
+                    onChange={handleChange}
+                    placeholder="Enter your state"
+                    required
+                  />
+                </Field>
 
-          <div className="bg-yellow-50 border border-yellow-300 rounded-2xl p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
-              Application Processing Fee
-            </h2>
+                <Field label="Country" required>
+                  <Select
+                    name="country"
+                    value={form.country}
+                    onChange={handleChange}
+                    required
+                  >
+                    {countries.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
 
-            <p className="text-gray-700 leading-7">
-              A non-refundable application processing fee of{" "}
-              <strong>{displayApplicationFee}</strong> is required to complete
-              your membership application.
-            </p>
+                <Field label="Next of Kin" required>
+                  <Input
+                    name="nextOfKin"
+                    value={form.nextOfKin}
+                    onChange={handleChange}
+                    placeholder="Enter next of kin"
+                    required
+                  />
+                </Field>
+              </div>
+            </Section>
 
-            <p className="mt-3 text-gray-700 leading-7">
-              Please select your preferred payment method below.
-            </p>
-          </div>
+            <Section title="Membership Information">
+              <div className="space-y-5">
+                <Field label="Why do you want to become a member?" required>
+                  <textarea
+                    name="reason"
+                    value={form.reason}
+                    onChange={handleChange}
+                    placeholder="Tell us why you want to become a member"
+                    rows={5}
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#4b0082] focus:ring-2 focus:ring-purple-100"
+                  />
+                </Field>
 
-          {/* ==================================================
-              PAYMENT METHOD
-          ================================================== */}
+                <Field label="Have you previously belonged to another fraternity or organisation?">
+                  <textarea
+                    name="previousFraternity"
+                    value={form.previousFraternity}
+                    onChange={handleChange}
+                    placeholder="If applicable, provide details"
+                    rows={4}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#4b0082] focus:ring-2 focus:ring-purple-100"
+                  />
+                </Field>
+              </div>
+            </Section>
 
-          <div className="space-y-5">
-            <h2 className="text-2xl font-bold text-[#4b0082]">
-              Choose Payment Method
-            </h2>
+            <Section title="Required Documents">
+              <div className="grid gap-6 md:grid-cols-2">
+                <Field label="Passport Photograph" required>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handlePassportPhoto}
+                    required
+                    className="block w-full rounded-lg border border-gray-300 p-3 text-sm"
+                  />
 
-            {/* ==================================================
-                STRIPE
-            ================================================== */}
-
-            <label
-              className={`block cursor-pointer rounded-2xl border-2 p-6 transition ${
-                paymentMethod === "stripe"
-                  ? "border-[#4b0082] bg-purple-50"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="stripe"
-                  checked={paymentMethod === "stripe"}
-                  onChange={() => setPaymentMethod("stripe")}
-                  className="mt-1 w-5 h-5"
-                />
-
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Pay Online with Stripe
-                  </h3>
-
-                  <p className="mt-2 text-gray-600">
-                    Securely pay the {displayApplicationFee} application
-                    processing fee using your debit or credit card.
+                  <p className="mt-2 text-xs text-gray-500">
+                    JPG, PNG, or WEBP. Maximum 10MB.
                   </p>
+
+                  {passportPhoto && (
+                    <p className="mt-2 text-sm text-green-600">
+                      Selected: {passportPhoto.name}
+                    </p>
+                  )}
+                </Field>
+
+                <Field label="Signature" required>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleSignature}
+                    required
+                    className="block w-full rounded-lg border border-gray-300 p-3 text-sm"
+                  />
+
+                  <p className="mt-2 text-xs text-gray-500">
+                    JPG, PNG, or WEBP. Maximum 10MB.
+                  </p>
+
+                  {signature && (
+                    <p className="mt-2 text-sm text-green-600">
+                      Selected: {signature.name}
+                    </p>
+                  )}
+                </Field>
+              </div>
+            </Section>
+
+            <Section title="Declaration & Agreement">
+              <div className="space-y-4">
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={declarationAccepted}
+                    onChange={(e) => setDeclarationAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4"
+                  />
+
+                  <span className="text-sm text-gray-700">
+                    I declare that the information provided in this application
+                    is true and accurate to the best of my knowledge.
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={ndaAccepted}
+                    onChange={(e) => setNdaAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4"
+                  />
+
+                  <span className="text-sm text-gray-700">
+                    I agree to maintain the confidentiality of the
+                    organisation's information and accept the applicable
+                    confidentiality and NDA requirements.
+                  </span>
+                </label>
+              </div>
+            </Section>
+
+            <Section title="Application Fee">
+              <div className="rounded-xl border border-purple-200 bg-purple-50 p-5">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">
+                      Current Application Fee
+                    </p>
+
+                    <p className="mt-1 text-3xl font-bold text-[#4b0082]">
+                      {displayApplicationFee}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm">
+                    USD
+                  </div>
                 </div>
               </div>
-            </label>
 
-            {/* ==================================================
-                BANK TRANSFER
-            ================================================== */}
-
-            <label
-              className={`block cursor-pointer rounded-2xl border-2 p-6 transition ${
-                paymentMethod === "bank_transfer"
-                  ? "border-[#4b0082] bg-purple-50"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="bank_transfer"
-                  checked={paymentMethod === "bank_transfer"}
-                  onChange={() => setPaymentMethod("bank_transfer")}
-                  className="mt-1 w-5 h-5"
-                />
-
-                <div className="w-full">
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Pay by Bank Transfer
-                  </h3>
-
-                  <p className="mt-2 text-gray-600">
-                    Transfer the {displayApplicationFee} application fee to the
-                    account below and upload your payment receipt.
+              <div className="mt-6 space-y-4">
+                <div>
+                  <p className="mb-3 text-sm font-semibold text-gray-800">
+                    Choose Payment Method
                   </p>
 
-                  {paymentMethod === "bank_transfer" && (
-                    <div className="mt-5 rounded-xl border border-purple-200 bg-white p-5">
-                      <h4 className="text-lg font-bold text-[#4b0082] mb-4">
-                        Bank Transfer Details
-                      </h4>
-
-                      <div className="space-y-3 text-gray-800">
-                        <div>
-                          <span className="font-semibold">Bank:</span> Zenith
-                          Bank
-                        </div>
-
-                        <div>
-                          <span className="font-semibold">Account Name:</span>{" "}
-                          ARUN-UN-TAN LIMITED
-                        </div>
-
-                        <div>
-                          <span className="font-semibold">Account Number:</span>{" "}
-                          1229796653
-                        </div>
-
-                        <div>
-                          <span className="font-semibold">Amount:</span>{" "}
-                          {displayApplicationFee}
-                        </div>
-                      </div>
-
-                      {/* ==================================================
-                          TRANSFER NOTICE
-                      ================================================== */}
-
-                      <div className="mt-5 rounded-lg bg-yellow-50 border border-yellow-300 p-4">
-                        <p className="text-sm text-gray-700 leading-6">
-                          After completing the transfer, enter your transfer
-                          reference and upload the payment receipt. Your payment
-                          will be manually verified by the Membership Committee.
-                        </p>
-                      </div>
-
-                      {/* ==================================================
-                          TRANSFER REFERENCE
-                      ================================================== */}
-
-                      <div className="mt-5">
-                        <label className="block mb-2 font-semibold text-gray-700">
-                          Bank Transfer Reference
-                        </label>
-
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label
+                      className={`cursor-pointer rounded-xl border p-5 transition ${
+                        paymentMethod === "stripe"
+                          ? "border-[#4b0082] bg-purple-50"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
                         <input
-                          type="text"
-                          value={bankTransferReference}
-                          onChange={(e) =>
-                            setBankTransferReference(e.target.value)
-                          }
-                          placeholder="Enter your transfer reference"
-                          className="border rounded-xl p-4 w-full"
-                        />
-                      </div>
-
-                      {/* ==================================================
-                          RECEIPT UPLOAD
-                      ================================================== */}
-
-                      <div className="mt-6">
-                        <label className="block mb-2 font-semibold text-gray-700">
-                          Payment Receipt
-                        </label>
-
-                        <p className="text-sm text-gray-600 mb-3">
-                          Upload a screenshot, image or PDF showing your{" "}
-                          {displayApplicationFee} bank transfer.
-                        </p>
-
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp,application/pdf"
-                          onChange={handleBankTransferReceipt}
-                          className="border rounded-xl p-3 w-full bg-white"
+                          type="radio"
+                          name="paymentMethod"
+                          value="stripe"
+                          checked={paymentMethod === "stripe"}
+                          onChange={() => setPaymentMethod("stripe")}
+                          className="mt-1"
                         />
 
-                        {bankTransferReceipt && (
-                          <div className="mt-3 rounded-lg border border-green-300 bg-green-50 p-4">
-                            <p className="text-green-700 font-semibold">
-                              ✓ Receipt selected
-                            </p>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            Pay Online with Stripe
+                          </p>
 
-                            <p className="text-sm text-green-700 mt-1 break-all">
-                              {bankTransferReceipt.name}
-                            </p>
+                          <p className="mt-1 text-sm text-gray-600">
+                            Pay securely online using your debit or credit card.
+                          </p>
+                        </div>
+                      </div>
+                    </label>
 
-                            <p className="text-xs text-green-600 mt-1">
-                              {(bankTransferReceipt.size / 1024 / 1024).toFixed(
-                                2,
-                              )}{" "}
-                              MB
-                            </p>
-                          </div>
-                        )}
+                    <label
+                      className={`cursor-pointer rounded-xl border p-5 transition ${
+                        paymentMethod === "bank_transfer"
+                          ? "border-[#4b0082] bg-purple-50"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="bank_transfer"
+                          checked={paymentMethod === "bank_transfer"}
+                          onChange={() => setPaymentMethod("bank_transfer")}
+                          className="mt-1"
+                        />
+
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            Pay by Bank Transfer
+                          </p>
+
+                          <p className="mt-1 text-sm text-gray-600">
+                            Transfer the application fee and upload your payment
+                            receipt.
+                          </p>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {paymentMethod === "stripe" && (
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                    <p className="font-semibold text-gray-900">
+                      Pay Online with Stripe
+                    </p>
+
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                      After submitting your application, you will be redirected
+                      to Stripe's secure payment page to complete your
+                      application fee payment.
+                    </p>
+
+                    <p className="mt-3 font-semibold text-[#4b0082]">
+                      Amount: {displayApplicationFee}
+                    </p>
+                  </div>
+                )}
+
+                {paymentMethod === "bank_transfer" && (
+                  <div className="space-y-5 rounded-xl border border-gray-200 bg-gray-50 p-5">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Pay by Bank Transfer
+                      </h3>
+
+                      <p className="mt-2 text-sm leading-6 text-gray-600">
+                        Transfer the {displayApplicationFee} application fee to
+                        the account below and upload the payment receipt.
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl bg-white p-5 shadow-sm">
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            Bank
+                          </p>
+
+                          <p className="mt-1 font-semibold text-gray-900">
+                            Zenith Bank
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            Account Name
+                          </p>
+
+                          <p className="mt-1 font-semibold text-gray-900">
+                            ARUN-UN-TAN LIMITED
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            Account Number
+                          </p>
+
+                          <p className="mt-1 font-semibold text-gray-900">
+                            1229796653
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            Amount
+                          </p>
+
+                          <p className="mt-1 text-xl font-bold text-[#4b0082]">
+                            {displayApplicationFee}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  )}
-                </div>
+
+                    <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+                      <p className="text-sm font-medium leading-6 text-yellow-900">
+                        Please send the current Naira equivalent of the USD
+                        amount shown above. Exchange rates may change, so
+                        confirm the current equivalent before making your
+                        transfer.
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                      <p className="text-sm leading-6 text-blue-900">
+                        After completing the transfer, upload your payment
+                        receipt. Your payment will be manually verified by the
+                        Membership Committee.
+                      </p>
+                    </div>
+
+                    <Field label="Payment Receipt" required>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        onChange={handleBankTransferReceipt}
+                        required
+                        className="block w-full rounded-lg border border-gray-300 bg-white p-3 text-sm"
+                      />
+
+                      <p className="mt-2 text-xs text-gray-500">
+                        JPG, PNG, WEBP, or PDF. Maximum 10MB.
+                      </p>
+
+                      {bankTransferReceipt && (
+                        <p className="mt-2 text-sm text-green-600">
+                          Selected: {bankTransferReceipt.name}
+                        </p>
+                      )}
+                    </Field>
+                  </div>
+                )}
               </div>
-            </label>
-          </div>
+            </Section>
 
-          {/* ==================================================
-              FINAL NOTICE
-          ================================================== */}
-
-          <div className="bg-gray-50 border-l-4 border-[#4b0082] rounded-xl p-6">
-            <p className="text-gray-700 leading-8">
-              Payment of the application processing fee does not guarantee
-              membership. Every application will be reviewed carefully by the
-              Membership Committee. Successful applicants will be contacted
-              through the details provided.
-            </p>
-          </div>
-
-          {/* ==================================================
-              SUBMIT BUTTON
-          ================================================== */}
-
-          <button
-            type="submit"
-            disabled={
-              loading ||
-              bankTransferSubmitting ||
-              pricingLoading ||
-              applicationFee === null
-            }
-            className="w-full bg-[#4b0082] hover:bg-[#360061] text-white py-5 rounded-xl text-xl font-bold transition disabled:opacity-50"
-          >
-            {pricingLoading
-              ? "Loading Application Fee..."
-              : applicationFee === null
-                ? "Application Fee Unavailable"
-                : paymentMethod === "stripe"
-                  ? loading
+            <div className="border-t border-gray-200 pt-6">
+              <button
+                type="submit"
+                disabled={
+                  submitting ||
+                  bankTransferSubmitting ||
+                  pricingLoading ||
+                  applicationFee === null
+                }
+                className="w-full rounded-xl bg-[#4b0082] px-6 py-4 text-base font-bold text-white transition hover:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {paymentMethod === "stripe"
+                  ? submitting
                     ? "Preparing Secure Payment..."
-                    : `Continue to $${applicationFee.toFixed(2)} Application Payment`
+                    : "Continue to Stripe"
                   : bankTransferSubmitting
                     ? "Submitting Transfer & Receipt..."
-                    : "Submit Bank Transfer & Receipt"}
-          </button>
-        </form>
+                    : "Pay with Transfer"}
+              </button>
+
+              <p className="mt-3 text-center text-xs text-gray-500">
+                By submitting this application, you confirm that the information
+                provided is accurate.
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
-
-// ======================================================
-// REUSABLE COMPONENTS
-// ======================================================
 
 interface SectionProps {
   title: string;
   children: ReactNode;
 }
 
-const Section = ({ title, children }: SectionProps) => (
-  <div>
-    <h2 className="text-2xl font-bold text-[#4b0082] mb-6 border-b pb-3">
-      {title}
-    </h2>
+const Section = ({ title, children }: SectionProps) => {
+  return (
+    <section>
+      <div className="mb-5 border-b border-gray-200 pb-3">
+        <h2 className="text-xl font-bold text-[#4b0082]">{title}</h2>
+      </div>
 
-    <div className="grid md:grid-cols-2 gap-6">{children}</div>
-  </div>
-);
+      {children}
+    </section>
+  );
+};
 
 interface FieldProps {
   label: string;
-  children: ReactNode;
-  className?: string;
-}
-
-const Field = ({ label, children, className = "" }: FieldProps) => (
-  <div className={`flex flex-col ${className}`}>
-    <label className="block mb-2 font-semibold text-gray-700">{label}</label>
-
-    {children}
-  </div>
-);
-
-interface InputProps {
-  name: string;
-  value: string;
-  onChange: (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-      | React.ChangeEvent<HTMLSelectElement>,
-  ) => void;
-  placeholder?: string;
-  type?: string;
   required?: boolean;
+  children: ReactNode;
 }
+
+const Field = ({ label, required = false, children }: FieldProps) => {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-gray-700">
+        {label}
+
+        {required && <span className="ml-1 text-red-500">*</span>}
+      </label>
+
+      {children}
+    </div>
+  );
+};
 
 const Input = ({
-  name,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  required = false,
-}: InputProps) => (
-  <input
-    name={name}
-    value={value}
-    onChange={onChange}
-    placeholder={placeholder}
-    type={type}
-    required={required}
-    className="border rounded-xl p-4 w-full"
-  />
-);
-
-interface SelectProps {
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: string[];
-  placeholder: string;
-}
+  className = "",
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) => {
+  return (
+    <input
+      {...props}
+      className={`w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#4b0082] focus:ring-2 focus:ring-purple-100 ${className}`}
+    />
+  );
+};
 
 const Select = ({
-  name,
-  value,
-  onChange,
-  options,
-  placeholder,
-}: SelectProps) => (
-  <select
-    name={name}
-    value={value}
-    onChange={onChange}
-    required
-    className="border rounded-xl p-4 w-full"
-  >
-    <option value="">{placeholder}</option>
-
-    {options.map((option) => (
-      <option key={option} value={option}>
-        {option}
-      </option>
-    ))}
-  </select>
-);
+  className = "",
+  children,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+  children: ReactNode;
+}) => {
+  return (
+    <select
+      {...props}
+      className={`w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#4b0082] focus:ring-2 focus:ring-purple-100 ${className}`}
+    >
+      {children}
+    </select>
+  );
+};
 
 export default BecomeMember;
