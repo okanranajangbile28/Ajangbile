@@ -22,6 +22,8 @@ import {
 
 import { multiplePhotos } from '../controllers/imageHandler';
 
+import { protect, restrictTo } from '../controllers/authControllers';
+
 const router = express.Router();
 
 // ==========================================
@@ -55,6 +57,16 @@ router.post(
   ]),
   submitApplicationFeeBankTransfer,
 );
+
+// ==========================================
+// ADMIN / DEVELOPER ONLY
+// ==========================================
+
+// Everything below this point requires:
+// 1. Authentication
+// 2. Admin or Developer role
+
+router.use(protect, restrictTo('admin', 'developer'));
 
 // ==========================================
 // ADMIN

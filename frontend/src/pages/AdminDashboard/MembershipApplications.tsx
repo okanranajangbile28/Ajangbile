@@ -48,6 +48,15 @@ interface Application {
   applicationFeeDate?: string;
   applicationFeePaymentMethod?: "stripe" | "bank_transfer";
 
+  // ======================================================
+  // APPLICATION FEE - BANK TRANSFER
+  // ======================================================
+
+  applicationFeeBankTransferReceipt?: string;
+  applicationFeeBankTransferStatus?: "Pending" | "Verified" | "Rejected";
+  applicationFeeBankTransferReference?: string;
+  applicationFeeBankTransferDate?: string;
+
   adminNotes?: string;
 
   createdAt: string;
@@ -87,7 +96,25 @@ const MembershipApplications = () => {
       const data = await response.json();
 
       if (data.success) {
-        setApplications(data.applications || []);
+        const fetchedApplications: Application[] = data.applications || [];
+
+        setApplications(fetchedApplications);
+
+        // ==================================================
+        // KEEP OPEN MODAL IN SYNC WITH FRESH DATA
+        // ==================================================
+
+        setSelected((currentSelected) => {
+          if (!currentSelected) {
+            return null;
+          }
+
+          const updatedApplication = fetchedApplications.find(
+            (application) => application._id === currentSelected._id,
+          );
+
+          return updatedApplication || currentSelected;
+        });
       }
     } catch (error) {
       console.error(error);
@@ -103,12 +130,20 @@ const MembershipApplications = () => {
   }, []);
 
   // ======================================================
-  // VERIFY BANK TRANSFER
+  // VERIFY APPLICATION FEE BANK TRANSFER
   // ======================================================
 
   const verifyBankTransfer = async (id: string) => {
+    const applicationToVerify = applications.find(
+      (application) => application._id === id,
+    );
+
+    const amount = applicationToVerify?.applicationFeeAmount ?? 0;
+
     const confirmVerification = window.confirm(
-      "Confirm that you have received the $12 application fee by bank transfer?",
+      `Confirm that you have received the $${amount.toFixed(
+        2,
+      )} application fee by bank transfer?`,
     );
 
     if (!confirmVerification) return;
@@ -134,8 +169,6 @@ const MembershipApplications = () => {
       }
 
       alert("Bank transfer verified successfully.");
-
-      setSelected(null);
 
       await fetchApplications();
     } catch (error) {
@@ -173,7 +206,7 @@ const MembershipApplications = () => {
       if (data.success) {
         alert("Application status updated.");
 
-        fetchApplications();
+        await fetchApplications();
       }
     } catch (error) {
       console.error(error);
@@ -208,7 +241,7 @@ const MembershipApplications = () => {
 
         setSelected(null);
 
-        fetchApplications();
+        await fetchApplications();
       }
     } catch (error) {
       console.error(error);
@@ -279,9 +312,15 @@ const MembershipApplications = () => {
                     isBankTransfer &&
                     application.applicationFeeStatus !== "Paid";
 
+                  const hasReceipt = Boolean(
+                    application.applicationFeeBankTransferReceipt,
+                  );
+
                   return (
                     <tr key={application._id} className="border-b">
-                      {/* APPLICANT */}
+                      {/* ==================================================
+                          APPLICANT
+                          ================================================== */}
 
                       <td className="p-4">
                         <div className="flex items-center gap-4">
@@ -301,7 +340,9 @@ const MembershipApplications = () => {
                         </div>
                       </td>
 
-                      {/* CONTACT */}
+                      {/* ==================================================
+                          CONTACT
+                          ================================================== */}
 
                       <td className="p-4">
                         <p>{application.email}</p>
@@ -309,15 +350,15 @@ const MembershipApplications = () => {
                         <p>{application.phone}</p>
                       </td>
 
-                      {/* APPLICATION FEE */}
+                      {/* ==================================================
+                          APPLICATION FEE
+                          ================================================== */}
 
                       <td className="p-4">
                         <div className="space-y-1">
                           <p className="font-semibold">
                             $
-                            {(application.applicationFeeAmount ?? 12).toFixed(
-                              2,
-                            )}
+                            {(application.applicationFeeAmount ?? 0).toFixed(2)}
                           </p>
 
                           {isBankTransfer ? (
@@ -336,9 +377,9 @@ const MembershipApplications = () => {
                                 </p>
                               )}
 
-                              {application.applicationFeeReference && (
-                                <p className="text-xs text-gray-600">
-                                  Ref: {application.applicationFeeReference}
+                              {hasReceipt && (
+                                <p className="text-xs text-green-600 font-semibold">
+                                  Receipt Submitted
                                 </p>
                               )}
                             </>
@@ -358,7 +399,9 @@ const MembershipApplications = () => {
                         </div>
                       </td>
 
-                      {/* STATUS */}
+                      {/* ==================================================
+                          STATUS
+                          ================================================== */}
 
                       <td className="p-4">
                         <select
@@ -379,7 +422,9 @@ const MembershipApplications = () => {
                         </select>
                       </td>
 
-                      {/* ACTIONS */}
+                      {/* ==================================================
+                          ACTIONS
+                          ================================================== */}
 
                       <td className="p-4">
                         <div className="flex flex-wrap gap-2">
@@ -428,6 +473,10 @@ const MembershipApplications = () => {
       {selected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8">
+            {/* ==================================================
+                MODAL HEADER
+                ================================================== */}
+
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-3xl font-bold text-purple-950">
                 Applicant Details
@@ -441,7 +490,9 @@ const MembershipApplications = () => {
               </button>
             </div>
 
-            {/* PHOTOS */}
+            {/* ==================================================
+                PHOTOS
+                ================================================== */}
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
@@ -465,7 +516,9 @@ const MembershipApplications = () => {
               </div>
             </div>
 
-            {/* DETAILS */}
+            {/* ==================================================
+                DETAILS
+                ================================================== */}
 
             <div className="mt-8 space-y-4">
               <p>
@@ -520,7 +573,9 @@ const MembershipApplications = () => {
                 <b>Next of Kin Phone:</b> {selected.nextOfKinPhone}
               </p>
 
-              {/* APPLICATION FEE */}
+              {/* ==================================================
+                  APPLICATION FEE
+                  ================================================== */}
 
               <div className="border rounded-2xl p-5 bg-gray-50">
                 <h3 className="text-xl font-bold text-purple-950 mb-4">
@@ -530,7 +585,7 @@ const MembershipApplications = () => {
                 <div className="space-y-2">
                   <p>
                     <b>Amount:</b> $
-                    {(selected.applicationFeeAmount ?? 12).toFixed(2)}
+                    {(selected.applicationFeeAmount ?? 0).toFixed(2)}
                   </p>
 
                   <p>
@@ -545,19 +600,110 @@ const MembershipApplications = () => {
                     {selected.applicationFeeStatus || "Pending"}
                   </p>
 
-                  {selected.applicationFeeReference && (
-                    <p>
-                      <b>Reference:</b> {selected.applicationFeeReference}
-                    </p>
-                  )}
-
                   {selected.applicationFeeDate && (
                     <p>
                       <b>Payment Date:</b>{" "}
                       {new Date(selected.applicationFeeDate).toLocaleString()}
                     </p>
                   )}
+
+                  {selected.applicationFeeBankTransferDate && (
+                    <p>
+                      <b>Transfer Submitted:</b>{" "}
+                      {new Date(
+                        selected.applicationFeeBankTransferDate,
+                      ).toLocaleString()}
+                    </p>
+                  )}
+
+                  {selected.applicationFeeBankTransferStatus && (
+                    <p>
+                      <b>Bank Transfer Status:</b>{" "}
+                      <span
+                        className={
+                          selected.applicationFeeBankTransferStatus ===
+                          "Verified"
+                            ? "text-green-600 font-semibold"
+                            : selected.applicationFeeBankTransferStatus ===
+                                "Rejected"
+                              ? "text-red-600 font-semibold"
+                              : "text-orange-600 font-semibold"
+                        }
+                      >
+                        {selected.applicationFeeBankTransferStatus}
+                      </span>
+                    </p>
+                  )}
                 </div>
+
+                {/* ==================================================
+                    APPLICATION FEE BANK TRANSFER RECEIPT
+                    ================================================== */}
+
+                {selected.applicationFeeBankTransferReceipt && (
+                  <div className="mt-6 border-t pt-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-lg font-bold text-purple-950">
+                        Application Fee Bank Transfer Receipt
+                      </h4>
+
+                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                        Receipt Submitted
+                      </span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="bg-white border rounded-xl p-4">
+                        <p className="text-sm text-gray-600 mb-3">
+                          The applicant submitted this receipt as proof of the
+                          application fee bank transfer.
+                        </p>
+
+                        <p className="text-sm text-gray-600 mb-4">
+                          Please verify the actual payment received in the bank
+                          account before approving or accepting the application.
+                        </p>
+
+                        <a
+                          href={selected.applicationFeeBankTransferReceipt}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center bg-purple-950 hover:bg-purple-900 text-white px-5 py-3 rounded-lg font-semibold transition"
+                        >
+                          View Payment Receipt
+                        </a>
+                      </div>
+
+                      <div className="bg-gray-100 rounded-xl p-3">
+                        <img
+                          src={selected.applicationFeeBankTransferReceipt}
+                          className="max-h-96 w-full object-contain rounded-lg bg-white border"
+                          alt="Application fee bank transfer payment receipt"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ==================================================
+                    NO RECEIPT NOTICE
+                    ================================================== */}
+
+                {selected.applicationFeePaymentMethod === "bank_transfer" &&
+                  !selected.applicationFeeBankTransferReceipt && (
+                    <div className="mt-6 border-t pt-5">
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                        <p className="text-red-700 font-medium">
+                          No application fee bank transfer receipt was submitted
+                          with this application.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                {/* ==================================================
+                    VERIFY APPLICATION FEE BANK TRANSFER
+                    ================================================== */}
 
                 {selected.applicationFeePaymentMethod === "bank_transfer" &&
                   selected.applicationFeeStatus !== "Paid" && (
@@ -573,7 +719,9 @@ const MembershipApplications = () => {
                   )}
               </div>
 
-              {/* REASON */}
+              {/* ==================================================
+                  REASON
+                  ================================================== */}
 
               <div>
                 <p className="font-bold mb-2">Reason for joining:</p>
@@ -581,21 +729,27 @@ const MembershipApplications = () => {
                 <p className="bg-gray-100 p-4 rounded-xl">{selected.reason}</p>
               </div>
 
-              {/* DECLARATION */}
+              {/* ==================================================
+                  DECLARATION
+                  ================================================== */}
 
               <p>
                 <b>Declaration:</b>{" "}
                 {selected.declarationAccepted ? "Accepted" : "Not accepted"}
               </p>
 
-              {/* NDA */}
+              {/* ==================================================
+                  NDA
+                  ================================================== */}
 
               <p>
                 <b>Confidentiality Agreement:</b>{" "}
                 {selected.ndaAccepted ? "Accepted" : "Not accepted"}
               </p>
 
-              {/* CLOSE */}
+              {/* ==================================================
+                  CLOSE
+                  ================================================== */}
 
               <div className="pt-4 border-t">
                 <button
