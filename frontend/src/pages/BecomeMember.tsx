@@ -685,20 +685,9 @@ const BecomeMember = () => {
         // SUCCESS
         // ==================================================
 
-        alert(
-          "Your application has been submitted successfully. Your bank transfer receipt is now awaiting verification by the Membership Committee.",
-        );
+        window.location.href = "/application-success";
 
-        setForm(initialForm);
-
-        setPhoto(null);
-        setSignature(null);
-        setBankTransferReceipt(null);
-
-        setPaymentMethod("stripe");
-
-        setBankTransferSubmitting(false);
-        setLoading(false);
+        return;
       } catch (err) {
         console.error("Bank transfer submission error:", err);
 

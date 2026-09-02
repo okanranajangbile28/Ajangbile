@@ -70,6 +70,12 @@ const ApplicationFeeSuccess = lazy(
 );
 
 // ======================================================
+// MEMBERSHIP APPLICATION SUCCESS
+// ======================================================
+
+const ApplicationSuccess = lazy(() => import("../pages/ApplicationSuccess"));
+
+// ======================================================
 // OGBONI MEMBER PAGES
 // ======================================================
 
@@ -297,6 +303,15 @@ const App = () => {
             <Route
               path="/application-fee-success"
               element={<ApplicationFeeSuccess />}
+            />
+
+            {/* ==================================================
+                MEMBERSHIP APPLICATION SUCCESS
+            ================================================== */}
+
+            <Route
+              path="/application-success"
+              element={<ApplicationSuccess />}
             />
 
             {/* ==================================================
