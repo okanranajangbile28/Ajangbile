@@ -361,7 +361,9 @@ export const getInitiationBankTransferDetails = async (
 ): Promise<void> => {
   try {
     const applicationId = req.query.applicationId as string;
-    const packageName = req.query.packageName as PackageName;
+
+    const packageName = (req.query.packageName ||
+      req.query.package) as PackageName;
 
     if (!applicationId || !packageName) {
       res.status(400).json({
