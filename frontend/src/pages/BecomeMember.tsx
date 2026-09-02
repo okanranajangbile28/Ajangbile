@@ -643,7 +643,8 @@ const BecomeMember = () => {
       if (paymentMethod === "stripe") {
         window.location.href =
           `${serverUrl}/api/payments/application-fee` +
-          `?applicationId=${encodeURIComponent(applicationId)}`;
+          `?applicationId=${encodeURIComponent(applicationId)}` +
+          `&package=${encodeURIComponent("Application Fee")}`;
 
         return;
       }
@@ -1193,12 +1194,13 @@ const BecomeMember = () => {
 
                 <div className="w-full">
                   <h3 className="text-lg font-bold text-gray-900">
-                    Pay by Bank Transfer
+                    Pay with Bank Transfer
                   </h3>
 
                   <p className="mt-2 text-gray-600">
-                    Transfer the {displayApplicationFee} application fee to the
-                    account below and upload your payment receipt.
+                    Transfer the naira equivalent of the {displayApplicationFee}{" "}
+                    application fee to the account below and upload your payment
+                    receipt.
                   </p>
 
                   {paymentMethod === "bank_transfer" && (
@@ -1239,26 +1241,6 @@ const BecomeMember = () => {
                           reference and upload the payment receipt. Your payment
                           will be manually verified by the Membership Committee.
                         </p>
-                      </div>
-
-                      {/* ==================================================
-                          TRANSFER REFERENCE
-                      ================================================== */}
-
-                      <div className="mt-5">
-                        <label className="block mb-2 font-semibold text-gray-700">
-                          Bank Transfer Reference
-                        </label>
-
-                        <input
-                          type="text"
-                          value={bankTransferReference}
-                          onChange={(e) =>
-                            setBankTransferReference(e.target.value)
-                          }
-                          placeholder="Enter your transfer reference"
-                          className="border rounded-xl p-4 w-full"
-                        />
                       </div>
 
                       {/* ==================================================

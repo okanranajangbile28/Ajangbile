@@ -300,7 +300,7 @@ const ConsultationPage = () => {
       // ==================================================
 
       const whatsappMessage = encodeURIComponent(
-        `Hello, I have completed a bank transfer for a ${consultation.name}.
+        `Hello, I have completed a bank transfer for ${consultation.name}.
 
 Consultation Type: ${consultation.name}
 Amount: $${consultation.amount.toFixed(2)}
