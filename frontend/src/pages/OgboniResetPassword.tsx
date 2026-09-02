@@ -37,7 +37,7 @@ const OgboniResetPassword = () => {
       const data = await response.json();
 
       if (response.ok) {
-        navigate("/ogboni-login", {
+        navigate("/login", {
           replace: true,
           state: {
             message:

@@ -202,7 +202,7 @@ const App = () => {
             <Route path="/forgot-password" element={<OgboniForgotPassword />} />
 
             <Route
-              path="/reset-password/:token"
+              path="/ogboni-reset-password/:token"
               element={<OgboniResetPassword />}
             />
 
