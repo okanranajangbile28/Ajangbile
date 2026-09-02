@@ -57,6 +57,10 @@ const ShopBankTransferPayment = lazy(
   () => import("../pages/ShopBankTransferPayment"),
 );
 
+const ShopBankTransferSuccess = lazy(
+  () => import("../pages/ShopBankTransferSuccess"),
+);
+
 const ConsultationPaymentSuccess = lazy(
   () => import("../pages/ConsultationPaymentSuccess"),
 );
@@ -241,6 +245,11 @@ const App = () => {
             <Route
               path="/shop-bank-transfer-payment"
               element={<ShopBankTransferPayment />}
+            />
+
+            <Route
+              path="/shop-bank-transfer-success"
+              element={<ShopBankTransferSuccess />}
             />
 
             {/* ==================================================

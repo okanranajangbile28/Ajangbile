@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import axios, { AxiosError } from "axios";
 
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+
 import { useAppDispatch, useAppSelector } from "../App/hooks";
 import { countCartTotal, clearCart } from "../features/cartFeature/cartSlice";
 import { priceFormat } from "../utils/constants";
@@ -626,14 +629,36 @@ const ShopBankTransferPayment = () => {
                       Phone Number *
                     </label>
 
-                    <input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      type="tel"
+                    <PhoneInput
+                      country="ng"
                       value={form.phoneNumber}
-                      onChange={handleChange}
+                      onChange={(value, country) => {
+                        setForm((previous) => ({
+                          ...previous,
+                          phoneNumber: value,
+                          countryCode:
+                            typeof country === "object" &&
+                            country &&
+                            "countryCode" in country
+                              ? String(country.countryCode).toUpperCase()
+                              : previous.countryCode,
+                        }));
+
+                        setError("");
+                      }}
+                      enableSearch
+                      searchPlaceholder="Search country..."
+                      countryCodeEditable={false}
+                      inputProps={{
+                        id: "phoneNumber",
+                        name: "phoneNumber",
+                        required: true,
+                      }}
                       placeholder="Enter your phone number"
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-purple-700"
+                      containerClass="w-full"
+                      inputClass="!w-full !h-[50px] !border-gray-300 !rounded-xl !bg-white !text-gray-900 !pl-[48px]"
+                      buttonClass="!border-gray-300 !rounded-l-xl !bg-white"
+                      dropdownClass="!text-gray-900"
                     />
                   </div>
                 </div>
