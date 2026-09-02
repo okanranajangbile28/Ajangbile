@@ -15,6 +15,9 @@ import {
   markAsPaid,
   scheduleAndSendInitiation,
   resendInitiationEmail,
+  resendApprovalEmail,
+  submitApplicationFeeBankTransfer,
+  verifyBankTransfer,
 } from '../controllers/membershipApplicationController';
 
 import { multiplePhotos } from '../controllers/imageHandler';
@@ -41,6 +44,18 @@ router.post(
   createApplication,
 );
 
+// Submit Application Fee by Bank Transfer
+router.post(
+  '/application-fee/bank-transfer',
+  multiplePhotos([
+    {
+      name: 'applicationFeeReceipt',
+      maxCount: 1,
+    },
+  ]),
+  submitApplicationFeeBankTransfer,
+);
+
 // ==========================================
 // ADMIN
 // ==========================================
@@ -60,11 +75,17 @@ router.get('/paid', getPaidApplications);
 // Rejected Applicants
 router.get('/rejected', getRejectedApplications);
 
+// Verify Application Fee Bank Transfer
+router.patch('/verify-application-fee-transfer/:id', verifyBankTransfer);
+
 // Single Application
 router.get('/:id', getApplication);
 
 // Approve Application
 router.patch('/approve/:id', approveApplication);
+
+// Resend Approval Email
+router.post('/resend-approval-email/:id', resendApprovalEmail);
 
 // Mark Applicant as Paid
 router.patch('/mark-paid/:id', markAsPaid);

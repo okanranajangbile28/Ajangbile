@@ -40,6 +40,27 @@ const IlediAjangbile = lazy(() => import("../pages/IlediAjangbile"));
 const BecomeMember = lazy(() => import("../pages/BecomeMember"));
 
 const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
+
+// ======================================================
+// MEMBERSHIP BANK TRANSFER PAYMENT
+// ======================================================
+
+const BankTransferPayment = lazy(() => import("../pages/BankTransferPayment"));
+
+const BankTransferSuccess = lazy(() => import("../pages/BankTransferSuccess"));
+
+// ======================================================
+// SHOP BANK TRANSFER PAYMENT
+// ======================================================
+
+const ShopBankTransferPayment = lazy(
+  () => import("../pages/ShopBankTransferPayment"),
+);
+
+const ConsultationPaymentSuccess = lazy(
+  () => import("../pages/ConsultationPaymentSuccess"),
+);
+
 const ApplicationFeeSuccess = lazy(
   () => import("../pages/ApplicationFeeSuccess"),
 );
@@ -98,7 +119,10 @@ const App = () => {
           ================================================== */}
 
           <Route element={<UserRoutes />}>
-            {/* HOME */}
+            {/* ==================================================
+                HOME
+            ================================================== */}
+
             <Route path="/" element={<HomePage />} />
 
             {/* ==================================================
@@ -187,15 +211,79 @@ const App = () => {
 
             <Route path="/cart" element={<CartPage />} />
 
-            <Route path="/checkout/:params" element={<CheckoutPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
 
             {/* ==================================================
-                STRIPE SUCCESS
+                SHOP BANK TRANSFER PAYMENT
+            ==================================================
+            
+                This is for SHOP ORDERS only.
+
+                Flow:
+
+                Cart
+                  ↓
+                Checkout
+                  ↓
+                Pay with Bank Transfer
+                  ↓
+                ShopBankTransferPayment
+                  ↓
+                Upload receipt
+                  ↓
+                Submit order
+                  ↓
+                /api/order/bank-transfer
+                  ↓
+                Shop bank transfer success
+            ================================================== */}
+
+            <Route
+              path="/shop-bank-transfer-payment"
+              element={<ShopBankTransferPayment />}
+            />
+
+            {/* ==================================================
+                STRIPE / ORDER SUCCESS
             ================================================== */}
 
             <Route path="/order-success" element={<OrderPage />} />
 
             <Route path="/payment-success" element={<PaymentSuccess />} />
+
+            {/* ==================================================
+                MEMBERSHIP BANK TRANSFER PAYMENT
+            ==================================================
+            
+                This remains separate from the shop payment.
+
+                Membership flow uses:
+
+                /bank-transfer-payment
+            ================================================== */}
+
+            <Route
+              path="/bank-transfer-payment"
+              element={<BankTransferPayment />}
+            />
+
+            <Route
+              path="/bank-transfer-success"
+              element={<BankTransferSuccess />}
+            />
+
+            {/* ==================================================
+                CONSULTATION PAYMENT
+            ================================================== */}
+
+            <Route
+              path="/consultation-payment-success"
+              element={<ConsultationPaymentSuccess />}
+            />
+
+            {/* ==================================================
+                APPLICATION FEE PAYMENT
+            ================================================== */}
 
             <Route
               path="/application-fee-success"
@@ -216,10 +304,16 @@ const App = () => {
           ================================================== */}
 
           <Route element={<AdminRoutes />}>
-            {/* ADMIN DASHBOARD */}
+            {/* ==================================================
+                ADMIN DASHBOARD
+            ================================================== */}
+
             <Route path="/admin" element={<AdminDashboard />} />
 
-            {/* ADMIN PRODUCTS */}
+            {/* ==================================================
+                ADMIN PRODUCTS
+            ================================================== */}
+
             <Route path="/admin/products" element={<AdminProductsPage />} />
 
             <Route
@@ -232,7 +326,10 @@ const App = () => {
               element={<CreateProductPage />}
             />
 
-            {/* ADMIN ORDERS */}
+            {/* ==================================================
+                ADMIN ORDERS
+            ================================================== */}
+
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
 
             {/* ==================================================

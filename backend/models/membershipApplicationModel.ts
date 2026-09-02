@@ -58,6 +58,26 @@ export interface IMembershipApplication extends Document {
   applicationFeeDate?: Date;
 
   // ==========================================
+  // APPLICATION FEE - PAYMENT METHOD
+  // ==========================================
+
+  applicationFeePaymentMethod?: 'stripe' | 'bank_transfer';
+
+  // ==========================================
+  // APPLICATION FEE - BANK TRANSFER
+  // ==========================================
+
+  applicationFeeBankTransferStatus?: 'Pending' | 'Verified' | 'Rejected';
+
+  applicationFeeBankTransferReference?: string;
+
+  applicationFeeBankTransferDate?: Date;
+
+  applicationFeeBankTransferReceipt?: string;
+
+  applicationFeeBankTransferReceiptPublicId?: string;
+
+  // ==========================================
   // INITIATION PACKAGE
   // ==========================================
 
@@ -78,13 +98,37 @@ export interface IMembershipApplication extends Document {
   paymentDate?: Date;
 
   // ==========================================
+  // INITIATION PAYMENT - PAYMENT METHOD
+  // ==========================================
+
+  paymentMethod?: 'stripe' | 'bank_transfer';
+
+  // ==========================================
+  // INITIATION PAYMENT - BANK TRANSFER
+  // ==========================================
+
+  bankTransferStatus?: 'Pending' | 'Verified' | 'Rejected';
+
+  bankTransferReference?: string;
+
+  bankTransferDate?: Date;
+
+  bankTransferReceipt?: string;
+
+  bankTransferReceiptPublicId?: string;
+
+  // ==========================================
   // INITIATION DETAILS
   // ==========================================
 
   initiationDate?: Date;
+
   initiationTime?: string;
+
   initiationVenue?: string;
+
   initiationInstructions?: string;
+
   initiationFee?: number;
 
   createdAt: Date;
@@ -93,6 +137,10 @@ export interface IMembershipApplication extends Document {
 
 const membershipApplicationSchema = new Schema<IMembershipApplication>(
   {
+    // ==========================================
+    // PERSONAL INFORMATION
+    // ==========================================
+
     fullName: {
       type: String,
       required: true,
@@ -259,6 +307,47 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
     },
 
     // ==========================================
+    // APPLICATION FEE - PAYMENT METHOD
+    // ==========================================
+
+    applicationFeePaymentMethod: {
+      type: String,
+      enum: ['stripe', 'bank_transfer'],
+      default: undefined,
+    },
+
+    // ==========================================
+    // APPLICATION FEE - BANK TRANSFER
+    // ==========================================
+
+    applicationFeeBankTransferStatus: {
+      type: String,
+      enum: ['Pending', 'Verified', 'Rejected'],
+      default: undefined,
+    },
+
+    applicationFeeBankTransferReference: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    applicationFeeBankTransferDate: {
+      type: Date,
+      default: null,
+    },
+
+    applicationFeeBankTransferReceipt: {
+      type: String,
+      default: '',
+    },
+
+    applicationFeeBankTransferReceiptPublicId: {
+      type: String,
+      default: '',
+    },
+
+    // ==========================================
     // INITIATION PACKAGE
     // ==========================================
 
@@ -298,6 +387,47 @@ const membershipApplicationSchema = new Schema<IMembershipApplication>(
     paymentDate: {
       type: Date,
       default: null,
+    },
+
+    // ==========================================
+    // INITIATION PAYMENT - PAYMENT METHOD
+    // ==========================================
+
+    paymentMethod: {
+      type: String,
+      enum: ['stripe', 'bank_transfer'],
+      default: undefined,
+    },
+
+    // ==========================================
+    // INITIATION PAYMENT - BANK TRANSFER
+    // ==========================================
+
+    bankTransferStatus: {
+      type: String,
+      enum: ['Pending', 'Verified', 'Rejected'],
+      default: undefined,
+    },
+
+    bankTransferReference: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    bankTransferDate: {
+      type: Date,
+      default: null,
+    },
+
+    bankTransferReceipt: {
+      type: String,
+      default: '',
+    },
+
+    bankTransferReceiptPublicId: {
+      type: String,
+      default: '',
     },
 
     // ==========================================

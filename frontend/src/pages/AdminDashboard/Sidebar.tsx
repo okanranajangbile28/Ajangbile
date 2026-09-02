@@ -11,6 +11,8 @@ import {
   Bell,
   LogOut,
   ClipboardList,
+  CalendarDays,
+  CreditCard,
 } from "lucide-react";
 
 import axios from "axios";
@@ -61,6 +63,18 @@ const menu = [
   {
     name: "Orders",
     icon: ClipboardList,
+  },
+  {
+    name: "Consultations",
+    icon: CalendarDays,
+  },
+  {
+    name: "Initiation Payments",
+    icon: CreditCard,
+  },
+  {
+    name: "All Pricing",
+    icon: CreditCard,
   },
   {
     name: "Announcements & Updates",

@@ -8,14 +8,6 @@ const stripe = process.env.STRIPE_SECRET_KEY
 
 // ======================================================
 // MEMBERSHIP APPLICATION FEE
-//
-// Amount is in cents because Stripe expects the smallest
-// currency unit.
-//
-// CHANGE THIS VALUE TO YOUR ACTUAL APPLICATION FEE.
-// Example:
-// 5000 = $50.00
-// 10000 = $100.00
 // ======================================================
 
 const APPLICATION_FEE_AMOUNT = 1200; // $12.00
@@ -50,10 +42,18 @@ const initiationPackages = {
 type PackageName = keyof typeof initiationPackages;
 
 // ======================================================
-// INITIALIZE MEMBERSHIP APPLICATION FEE PAYMENT
-//
-// The application must already exist before this endpoint
-// is called.
+// BANK TRANSFER DETAILS
+// ======================================================
+
+const BANK_TRANSFER_DETAILS = {
+  bankName: process.env.BANK_TRANSFER_BANK_NAME || '',
+  accountName: process.env.BANK_TRANSFER_ACCOUNT_NAME || '',
+  accountNumber: process.env.BANK_TRANSFER_ACCOUNT_NUMBER || '',
+  additionalInfo: process.env.BANK_TRANSFER_ADDITIONAL_INFO || '',
+};
+
+// ======================================================
+// INITIALIZE MEMBERSHIP APPLICATION FEE - STRIPE
 // ======================================================
 
 export const initializeApplicationFeePayment = async (
@@ -66,7 +66,6 @@ export const initializeApplicationFeePayment = async (
         success: false,
         message: 'Stripe is not configured.',
       });
-
       return;
     }
 
@@ -77,7 +76,6 @@ export const initializeApplicationFeePayment = async (
         success: false,
         message: 'Missing application ID.',
       });
-
       return;
     }
 
@@ -88,17 +86,14 @@ export const initializeApplicationFeePayment = async (
         success: false,
         message: 'Membership application not found.',
       });
-
       return;
     }
 
-    // Prevent unnecessary new payment sessions
     if (application.applicationFeeStatus === 'Paid') {
       res.status(400).json({
         success: false,
         message: 'The membership application fee has already been paid.',
       });
-
       return;
     }
 
@@ -156,13 +151,10 @@ export const initializeApplicationFeePayment = async (
         success: false,
         message: 'Stripe checkout URL was not created.',
       });
-
       return;
     }
 
-    // Save the Stripe Checkout Session ID temporarily
     application.applicationFeeReference = session.id;
-
     application.applicationFeeAmount = APPLICATION_FEE_AMOUNT / 100;
 
     await application.save();
@@ -182,7 +174,7 @@ export const initializeApplicationFeePayment = async (
 };
 
 // ======================================================
-// INITIALIZE MEMBERSHIP INITIATION PAYMENT
+// INITIALIZE MEMBERSHIP INITIATION PAYMENT - STRIPE
 // ======================================================
 
 export const initializeInitiationPayment = async (
@@ -195,7 +187,6 @@ export const initializeInitiationPayment = async (
         success: false,
         message: 'Stripe is not configured.',
       });
-
       return;
     }
 
@@ -207,7 +198,6 @@ export const initializeInitiationPayment = async (
         success: false,
         message: 'Missing applicationId or package.',
       });
-
       return;
     }
 
@@ -216,7 +206,6 @@ export const initializeInitiationPayment = async (
         success: false,
         message: 'Invalid initiation package.',
       });
-
       return;
     }
 
@@ -229,18 +218,15 @@ export const initializeInitiationPayment = async (
         success: false,
         message: 'Membership application not found.',
       });
-
       return;
     }
 
-    // Application must be approved before initiation payment
     if (application.status !== 'Accepted') {
       res.status(400).json({
         success: false,
         message:
           'This membership application has not been approved for initiation payment.',
       });
-
       return;
     }
 
@@ -249,7 +235,6 @@ export const initializeInitiationPayment = async (
         success: false,
         message: 'Initiation payment has already been completed.',
       });
-
       return;
     }
 
@@ -308,15 +293,13 @@ export const initializeInitiationPayment = async (
         success: false,
         message: 'Stripe checkout URL was not created.',
       });
-
       return;
     }
 
     application.initiationPackage = packageName;
-
     application.paymentAmount = selectedPackage.amount / 100;
-
     application.paymentReference = session.id;
+    application.paymentMethod = 'stripe';
 
     await application.save();
 
@@ -333,10 +316,349 @@ export const initializeInitiationPayment = async (
 };
 
 // ======================================================
+// GET BANK TRANSFER DETAILS FOR INITIATION
+// ======================================================
+//
+// IMPORTANT:
+// This endpoint only displays bank-transfer information.
+//
+// It does NOT set paymentMethod to bank_transfer.
+//
+// This prevents simply opening the bank-transfer page
+// from changing a Stripe payment into a bank transfer.
+//
+// paymentMethod is only changed when the customer actually
+// submits a bank-transfer receipt.
+// ======================================================
+
+export const getInitiationBankTransferDetails = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const applicationId = req.query.applicationId as string;
+    const packageName = req.query.package as PackageName;
+
+    if (!applicationId || !packageName) {
+      res.status(400).json({
+        success: false,
+        message: 'Missing applicationId or package.',
+      });
+      return;
+    }
+
+    if (!(packageName in initiationPackages)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid initiation package.',
+      });
+      return;
+    }
+
+    const application = await MembershipApplication.findById(applicationId);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Membership application not found.',
+      });
+      return;
+    }
+
+    if (application.status !== 'Accepted') {
+      res.status(400).json({
+        success: false,
+        message:
+          'This membership application has not been approved for initiation payment.',
+      });
+      return;
+    }
+
+    if (application.paymentStatus === 'Paid') {
+      res.status(400).json({
+        success: false,
+        message: 'Initiation payment has already been completed.',
+      });
+      return;
+    }
+
+    const selectedPackage = initiationPackages[packageName];
+
+    // IMPORTANT:
+    // Do not save paymentMethod here.
+    //
+    // Merely viewing bank-transfer details must not turn
+    // a Stripe payment into a bank-transfer payment.
+
+    res.status(200).json({
+      success: true,
+
+      payment: {
+        applicationId: String(application._id),
+        packageName,
+        packageDisplayName: selectedPackage.name,
+        amountUSD: selectedPackage.amount / 100,
+      },
+
+      bankDetails: BANK_TRANSFER_DETAILS,
+
+      notice:
+        'Please send the current Naira equivalent of the USD amount shown above. Exchange rates may change, so confirm the current equivalent before making your transfer.',
+
+      receiptNotice:
+        'Please save a screenshot of your payment receipt. The payment receipt will be required when you submit your transfer confirmation.',
+    });
+  } catch (error: any) {
+    console.error('❌ Bank transfer details error:');
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message:
+        error?.message || 'Unable to load bank transfer payment details.',
+    });
+  }
+};
+
+// ======================================================
+// SUBMIT INITIATION BANK TRANSFER
+// ======================================================
+//
+// The customer is officially classified as a bank-transfer
+// payer only when they submit their transfer receipt.
+//
+// Payment remains Pending until an admin verifies it.
+// ======================================================
+
+export const submitInitiationBankTransfer = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { applicationId, packageName, receiptUrl, transferReference } =
+      req.body;
+
+    if (!applicationId || !packageName || !receiptUrl) {
+      res.status(400).json({
+        success: false,
+        message: 'Application ID, package and payment receipt are required.',
+      });
+      return;
+    }
+
+    if (!(packageName in initiationPackages)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid initiation package.',
+      });
+      return;
+    }
+
+    const application = await MembershipApplication.findById(applicationId);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Membership application not found.',
+      });
+      return;
+    }
+
+    if (application.status !== 'Accepted') {
+      res.status(400).json({
+        success: false,
+        message:
+          'This membership application has not been approved for initiation payment.',
+      });
+      return;
+    }
+
+    if (application.paymentStatus === 'Paid') {
+      res.status(400).json({
+        success: false,
+        message: 'Initiation payment has already been completed.',
+      });
+      return;
+    }
+
+    const selectedPackage = initiationPackages[packageName as PackageName];
+
+    application.initiationPackage = packageName;
+
+    application.paymentAmount = selectedPackage.amount / 100;
+
+    // The payment is now officially a bank transfer.
+    application.paymentMethod = 'bank_transfer';
+
+    application.bankTransferStatus = 'Pending';
+
+    application.bankTransferReference = transferReference || '';
+
+    application.bankTransferReceipt = receiptUrl;
+
+    application.bankTransferDate = new Date();
+
+    application.paymentStatus = 'Pending';
+
+    // Do not leave a previous Stripe Checkout Session ID
+    // in the main paymentReference field.
+    application.paymentReference = '';
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+
+      message: 'Your transfer receipt has been submitted successfully.',
+
+      redirectUrl: '/bank-transfer-success',
+    });
+  } catch (error: any) {
+    console.error('❌ Bank transfer submission error:');
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error?.message || 'Unable to submit your bank transfer receipt.',
+    });
+  }
+};
+
+// ======================================================
+// ADMIN VERIFY INITIATION BANK TRANSFER
+// ======================================================
+
+export const verifyInitiationBankTransfer = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const applicationId = req.params.applicationId;
+
+    if (!applicationId) {
+      res.status(400).json({
+        success: false,
+        message: 'Missing application ID.',
+      });
+      return;
+    }
+
+    const application = await MembershipApplication.findById(applicationId);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Membership application not found.',
+      });
+      return;
+    }
+
+    if (
+      application.paymentMethod !== 'bank_transfer' ||
+      application.bankTransferStatus !== 'Pending'
+    ) {
+      res.status(400).json({
+        success: false,
+        message: 'There is no pending bank transfer awaiting verification.',
+      });
+      return;
+    }
+
+    application.bankTransferStatus = 'Verified';
+
+    application.paymentStatus = 'Paid';
+
+    application.paymentReference =
+      application.bankTransferReference || 'BANK_TRANSFER';
+
+    application.paymentDate = new Date();
+
+    application.status = 'Paid';
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Bank transfer verified successfully.',
+      application,
+    });
+  } catch (error: any) {
+    console.error('❌ Bank transfer verification error:');
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error?.message || 'Unable to verify bank transfer.',
+    });
+  }
+};
+
+// ======================================================
+// ADMIN REJECT INITIATION BANK TRANSFER
+// ======================================================
+
+export const rejectInitiationBankTransfer = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const applicationId = req.params.applicationId;
+
+    if (!applicationId) {
+      res.status(400).json({
+        success: false,
+        message: 'Missing application ID.',
+      });
+      return;
+    }
+
+    const application = await MembershipApplication.findById(applicationId);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Membership application not found.',
+      });
+      return;
+    }
+
+    if (
+      application.paymentMethod !== 'bank_transfer' ||
+      application.bankTransferStatus !== 'Pending'
+    ) {
+      res.status(400).json({
+        success: false,
+        message: 'There is no pending bank transfer awaiting rejection.',
+      });
+      return;
+    }
+
+    application.bankTransferStatus = 'Rejected';
+
+    application.paymentStatus = 'Pending';
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Bank transfer rejected.',
+      application,
+    });
+  } catch (error: any) {
+    console.error('❌ Bank transfer rejection error:');
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error?.message || 'Unable to reject bank transfer.',
+    });
+  }
+};
+
+// ======================================================
 // STRIPE MEMBERSHIP PAYMENT WEBHOOK
 //
-// Handles BOTH:
-//
+// Handles:
 // 1. application_fee
 // 2. initiation_fee
 // ======================================================
@@ -350,7 +672,6 @@ export const stripeInitiationWebhook = async (
       success: false,
       message: 'Stripe is not configured.',
     });
-
     return;
   }
 
@@ -361,7 +682,6 @@ export const stripeInitiationWebhook = async (
       success: false,
       message: 'Missing Stripe signature.',
     });
-
     return;
   }
 
@@ -374,7 +694,6 @@ export const stripeInitiationWebhook = async (
       success: false,
       message: 'Stripe membership webhook secret is not configured.',
     });
-
     return;
   }
 
@@ -393,15 +712,10 @@ export const stripeInitiationWebhook = async (
       success: false,
       message: 'Invalid Stripe webhook signature.',
     });
-
     return;
   }
 
   console.log(`🔔 Membership Stripe event received: ${event.type}`);
-
-  // ==================================================
-  // CHECKOUT COMPLETED
-  // ==================================================
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
@@ -419,7 +733,6 @@ export const stripeInitiationWebhook = async (
         success: false,
         message: 'Payment metadata is missing.',
       });
-
       return;
     }
 
@@ -432,7 +745,6 @@ export const stripeInitiationWebhook = async (
         success: false,
         message: 'Membership application not found.',
       });
-
       return;
     }
 
@@ -443,7 +755,7 @@ export const stripeInitiationWebhook = async (
       : session.id;
 
     // ==================================================
-    // APPLICATION FEE PAYMENT
+    // APPLICATION FEE
     // ==================================================
 
     if (paymentType === 'application_fee') {
@@ -458,8 +770,8 @@ export const stripeInitiationWebhook = async (
 
         application.applicationFeeDate = new Date();
 
-        // Application fee is complete.
-        // The application can now move to the admin approval queue.
+        application.applicationFeePaymentMethod = 'stripe';
+
         application.status = 'Pending';
 
         await application.save();
@@ -467,7 +779,6 @@ export const stripeInitiationWebhook = async (
         console.log('======================================');
         console.log('✅ APPLICATION FEE PAYMENT CONFIRMED');
         console.log(`Application ID: ${applicationId}`);
-        console.log(`Stripe Session: ${session.id}`);
         console.log(`Amount Paid: $${amountPaid.toFixed(2)}`);
         console.log(`Email: ${application.email}`);
         console.log('======================================');
@@ -483,6 +794,8 @@ export const stripeInitiationWebhook = async (
         console.log('⚠️ Initiation payment already processed:', applicationId);
       } else {
         application.paymentStatus = 'Paid';
+
+        application.paymentMethod = 'stripe';
 
         application.paymentReference = paymentReference;
 
@@ -505,7 +818,6 @@ export const stripeInitiationWebhook = async (
         console.log('======================================');
         console.log('✅ INITIATION PAYMENT CONFIRMED');
         console.log(`Application ID: ${applicationId}`);
-        console.log(`Stripe Session: ${session.id}`);
         console.log(`Package: ${packageName}`);
         console.log(`Amount Paid: $${amountPaid.toFixed(2)}`);
         console.log(`Email: ${application.email}`);
@@ -514,9 +826,9 @@ export const stripeInitiationWebhook = async (
     }
   }
 
-  // ==================================================
+  // ======================================================
   // PAYMENT FAILED
-  // ==================================================
+  // ======================================================
 
   if (event.type === 'payment_intent.payment_failed') {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -531,12 +843,7 @@ export const stripeInitiationWebhook = async (
 };
 
 // ======================================================
-// VERIFY PAYMENT
-//
-// This supports both application fee and initiation
-// payments.
-//
-// The Stripe webhook remains the primary source of truth.
+// VERIFY STRIPE PAYMENT
 // ======================================================
 
 export const verifyPayment = async (
@@ -549,30 +856,28 @@ export const verifyPayment = async (
         success: false,
         message: 'Stripe is not configured.',
       });
-
       return;
     }
 
-    const sessionId =
-      (req.query.session_id as string) || (req.query.sessionId as string);
+    const sessionId = req.query.session_id || req.query.sessionId;
 
     if (!sessionId) {
       res.status(400).json({
         success: false,
         message: 'Stripe session ID missing.',
       });
-
       return;
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(
+      sessionId as string,
+    );
 
     if (session.payment_status !== 'paid') {
       res.status(400).json({
         success: false,
         message: 'Payment has not been completed.',
       });
-
       return;
     }
 
@@ -585,7 +890,6 @@ export const verifyPayment = async (
         success: false,
         message: 'Payment metadata is missing.',
       });
-
       return;
     }
 
@@ -596,7 +900,6 @@ export const verifyPayment = async (
         success: false,
         message: 'Membership application not found.',
       });
-
       return;
     }
 
@@ -607,7 +910,7 @@ export const verifyPayment = async (
       : session.id;
 
     // ==================================================
-    // VERIFY APPLICATION FEE
+    // APPLICATION FEE
     // ==================================================
 
     if (
@@ -622,11 +925,15 @@ export const verifyPayment = async (
 
       application.applicationFeeDate = new Date();
 
+      application.applicationFeePaymentMethod = 'stripe';
+
+      application.status = 'Pending';
+
       await application.save();
     }
 
     // ==================================================
-    // VERIFY INITIATION PAYMENT
+    // INITIATION PAYMENT
     // ==================================================
 
     if (
@@ -634,6 +941,8 @@ export const verifyPayment = async (
       application.paymentStatus !== 'Paid'
     ) {
       application.paymentStatus = 'Paid';
+
+      application.paymentMethod = 'stripe';
 
       application.paymentReference = paymentReference;
 
@@ -659,11 +968,47 @@ export const verifyPayment = async (
     res.redirect(`${process.env.CLIENT_URL}/payment-success`);
   } catch (error: any) {
     console.error('❌ Stripe payment verification error:');
+
     console.error(error);
 
     res.status(500).json({
       success: false,
       message: error?.message || 'Unable to verify payment.',
+    });
+  }
+};
+
+// ======================================================
+// UPLOAD INITIATION BANK TRANSFER RECEIPT
+// ======================================================
+
+export const uploadInitiationBankTransferReceipt = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const images = req.body.images as string[] | undefined;
+
+    if (!images || !images.length) {
+      res.status(400).json({
+        success: false,
+        message: 'Please upload a payment receipt.',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment receipt uploaded successfully.',
+      receiptUrl: images[0],
+    });
+  } catch (error: any) {
+    console.error('❌ Receipt upload error:');
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error?.message || 'Unable to upload payment receipt.',
     });
   }
 };

@@ -1,4 +1,5 @@
 import { Model, Schema, model, models } from 'mongoose';
+
 import { IOrder } from '../types';
 
 const orderSchema = new Schema<IOrder>(
@@ -6,6 +7,7 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // SHIPPING INFORMATION
     // ==========================================
+
     shippingInfo: {
       firstName: {
         type: String,
@@ -31,16 +33,14 @@ const orderSchema = new Schema<IOrder>(
         required: [true, 'Phone number is required'],
         trim: true,
 
-        // Supports international phone numbers.
-        // Examples:
-        // +2348012345678
-        // +447911123456
-        // +14155552671
-        // 08012345678
         validate: {
           validator: function (v: string) {
             const phone = v.replace(/[\s\-().]/g, '');
 
+            // Accept international phone numbers such as:
+            // +2348012345678
+            // +447911123456
+            // +14155552671
             return /^\+?[1-9]\d{7,14}$/.test(phone);
           },
 
@@ -101,14 +101,17 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // ADDITIONAL INFORMATION
     // ==========================================
+
     additionalInfo: {
       type: String,
       default: '',
+      trim: true,
     },
 
     // ==========================================
     // ORDER ITEMS
     // ==========================================
+
     orderItems: [
       {
         productName: {
@@ -153,6 +156,7 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // PAYMENT INFORMATION
     // ==========================================
+
     paymentInfo: {
       reference: {
         type: String,
@@ -179,8 +183,43 @@ const orderSchema = new Schema<IOrder>(
     },
 
     // ==========================================
+    // BANK TRANSFER PAYMENT
+    // ==========================================
+
+    bankTransferReceipt: {
+      type: String,
+      default: '',
+    },
+
+    bankTransferReference: {
+      type: String,
+      default: '',
+      index: true,
+    },
+
+    bankTransferStatus: {
+      type: String,
+      enum: ['Pending', 'Verified', 'Rejected'],
+      default: undefined,
+    },
+
+    bankTransferDate: {
+      type: Date,
+    },
+
+    bankTransferVerifiedAt: {
+      type: Date,
+    },
+
+    bankTransferVerifiedBy: {
+      type: String,
+      default: '',
+    },
+
+    // ==========================================
     // PAYMENT DATE
     // ==========================================
+
     paidAt: {
       type: Date,
     },
@@ -188,6 +227,7 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // TAX
     // ==========================================
+
     taxPrice: {
       type: Number,
       required: true,
@@ -198,6 +238,7 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // ORDER TOTALS
     // ==========================================
+
     total_items: {
       type: Number,
       required: true,
@@ -219,6 +260,7 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // ORDER STATUS
     // ==========================================
+
     orderStatus: {
       type: String,
       required: true,
@@ -229,6 +271,7 @@ const orderSchema = new Schema<IOrder>(
     // ==========================================
     // DELIVERY
     // ==========================================
+
     deliveredAt: {
       type: Date,
     },
@@ -247,6 +290,7 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ 'paymentInfo.status': 1 });
 orderSchema.index({ 'paymentInfo.gateway': 1 });
+orderSchema.index({ bankTransferStatus: 1 });
 
 // ==========================================
 // MODEL

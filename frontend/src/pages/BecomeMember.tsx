@@ -93,7 +93,6 @@ const countries = [
   "Kenya",
   "Kiribati",
   "Kuwait",
-  "Kyrgyzstan",
   "Laos",
   "Latvia",
   "Lebanon",
@@ -208,6 +207,25 @@ const BecomeMember = () => {
   const [photo, setPhoto] = useState<File | null>(null);
   const [signature, setSignature] = useState<File | null>(null);
 
+  // ======================================================
+  // APPLICATION PAYMENT
+  // ======================================================
+
+  const [paymentMethod, setPaymentMethod] = useState<
+    "stripe" | "bank_transfer"
+  >("stripe");
+
+  const [bankTransferReference, setBankTransferReference] = useState("");
+  const [bankTransferReceipt, setBankTransferReceipt] = useState<File | null>(
+    null,
+  );
+
+  const [bankTransferSubmitting, setBankTransferSubmitting] = useState(false);
+
+  // ======================================================
+  // INITIAL FORM
+  // ======================================================
+
   const initialForm = {
     fullName: "",
     gender: "",
@@ -264,7 +282,7 @@ const BecomeMember = () => {
   };
 
   // ======================================================
-  // HANDLE FILE
+  // HANDLE APPLICATION FILES
   // ======================================================
 
   const handleFile = (
@@ -280,12 +298,57 @@ const BecomeMember = () => {
       return;
     }
 
+    // 10MB maximum
+    if (file.size > 10 * 1024 * 1024) {
+      setError("The uploaded image must be smaller than 10MB.");
+      return;
+    }
+
     if (type === "photo") {
       setPhoto(file);
     } else {
       setSignature(file);
     }
 
+    setError("");
+  };
+
+  // ======================================================
+  // HANDLE BANK TRANSFER RECEIPT
+  // ======================================================
+
+  const handleBankTransferReceipt = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Please upload your payment receipt as a JPG, PNG, WEBP image or PDF.",
+      );
+
+      e.target.value = "";
+      return;
+    }
+
+    // 10MB maximum
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Payment receipt must be smaller than 10MB.");
+
+      e.target.value = "";
+      return;
+    }
+
+    setBankTransferReceipt(file);
     setError("");
   };
 
@@ -297,6 +360,10 @@ const BecomeMember = () => {
     e.preventDefault();
 
     setError("");
+
+    // ====================================================
+    // BASIC VALIDATION
+    // ====================================================
 
     if (!photo) {
       setError("Please upload your passport photograph.");
@@ -318,8 +385,28 @@ const BecomeMember = () => {
       return;
     }
 
+    // ====================================================
+    // BANK TRANSFER VALIDATION
+    // ====================================================
+
+    if (paymentMethod === "bank_transfer") {
+      if (!bankTransferReference.trim()) {
+        setError("Please enter your bank transfer reference.");
+        return;
+      }
+
+      if (!bankTransferReceipt) {
+        setError("Please upload your bank transfer payment receipt.");
+        return;
+      }
+    }
+
     try {
       setLoading(true);
+
+      // ==================================================
+      // CREATE APPLICATION
+      // ==================================================
 
       const formData = new FormData();
 
@@ -349,13 +436,17 @@ const BecomeMember = () => {
         return;
       }
 
-      const applicationId = data.application?._id;
+      // ==================================================
+      // GET APPLICATION ID
+      // ==================================================
+
+      const applicationId = data.application?._id || data.applicationId;
 
       if (!applicationId) {
         console.error("Application ID missing:", data);
 
         setError(
-          "Your application was created, but we could not start the payment process. Please contact support.",
+          "Your application was created, but we could not continue with payment.",
         );
 
         setLoading(false);
@@ -363,12 +454,95 @@ const BecomeMember = () => {
       }
 
       // ==================================================
-      // SEND APPLICANT TO STRIPE
+      // STRIPE PAYMENT
       // ==================================================
 
-      window.location.href =
-        `${import.meta.env.VITE_SERVER_URL}/api/payments/application-fee` +
-        `?applicationId=${encodeURIComponent(applicationId)}`;
+      if (paymentMethod === "stripe") {
+        window.location.href =
+          `${import.meta.env.VITE_SERVER_URL}/api/payments/application-fee` +
+          `?applicationId=${encodeURIComponent(applicationId)}`;
+
+        return;
+      }
+
+      // ==================================================
+      // BANK TRANSFER PAYMENT
+      // ==================================================
+
+      try {
+        setBankTransferSubmitting(true);
+
+        const transferFormData = new FormData();
+
+        // Backend expects:
+        // applicationId
+        // reference
+        // receipt
+
+        transferFormData.append("applicationId", applicationId);
+
+        transferFormData.append("reference", bankTransferReference.trim());
+
+        if (!bankTransferReceipt) {
+          setError("Please upload your bank transfer payment receipt.");
+          setBankTransferSubmitting(false);
+          setLoading(false);
+          return;
+        }
+
+        transferFormData.append("applicationFeeReceipt", bankTransferReceipt);
+
+        const transferResponse = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/application-fee/bank-transfer`,
+          {
+            method: "POST",
+            body: transferFormData,
+          },
+        );
+
+        const transferData = await transferResponse.json();
+
+        if (!transferResponse.ok || !transferData.success) {
+          setError(
+            transferData.message ||
+              "Unable to submit your bank transfer details.",
+          );
+
+          setBankTransferSubmitting(false);
+          setLoading(false);
+          return;
+        }
+
+        // ==================================================
+        // SUCCESS
+        // ==================================================
+
+        alert(
+          "Your application has been submitted successfully. Your bank transfer receipt is now awaiting verification by the Membership Committee.",
+        );
+
+        setForm(initialForm);
+
+        setPhoto(null);
+        setSignature(null);
+
+        setBankTransferReference("");
+        setBankTransferReceipt(null);
+
+        setPaymentMethod("stripe");
+
+        setBankTransferSubmitting(false);
+        setLoading(false);
+      } catch (err) {
+        console.error("Bank transfer submission error:", err);
+
+        setError(
+          "Your application was created, but we could not submit the bank transfer details. Please contact support.",
+        );
+
+        setBankTransferSubmitting(false);
+        setLoading(false);
+      }
     } catch (err) {
       console.error("Membership application error:", err);
 
@@ -379,6 +553,10 @@ const BecomeMember = () => {
       setLoading(false);
     }
   };
+
+  // ======================================================
+  // RENDER
+  // ======================================================
 
   return (
     <section className="min-h-screen bg-gray-100 py-16 px-6">
@@ -730,7 +908,7 @@ const BecomeMember = () => {
           </div>
 
           {/* ==================================================
-              APPLICATION FEE NOTICE
+              APPLICATION FEE
           ================================================== */}
 
           <div className="bg-yellow-50 border border-yellow-300 rounded-2xl p-6">
@@ -745,14 +923,188 @@ const BecomeMember = () => {
             </p>
 
             <p className="mt-3 text-gray-700 leading-7">
-              After clicking the button below, you will be securely redirected
-              to Stripe to complete the $12.00 payment.
+              Please select your preferred payment method below.
             </p>
+          </div>
 
-            <p className="mt-3 font-semibold text-[#4b0082]">
-              Your application will not be considered complete until the payment
-              has been successfully confirmed.
-            </p>
+          {/* ==================================================
+              PAYMENT METHOD
+          ================================================== */}
+
+          <div className="space-y-5">
+            <h2 className="text-2xl font-bold text-[#4b0082]">
+              Choose Payment Method
+            </h2>
+
+            {/* ==================================================
+                STRIPE
+            ================================================== */}
+
+            <label
+              className={`block cursor-pointer rounded-2xl border-2 p-6 transition ${
+                paymentMethod === "stripe"
+                  ? "border-[#4b0082] bg-purple-50"
+                  : "border-gray-200 bg-white"
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="stripe"
+                  checked={paymentMethod === "stripe"}
+                  onChange={() => setPaymentMethod("stripe")}
+                  className="mt-1 w-5 h-5"
+                />
+
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Pay Online with Stripe
+                  </h3>
+
+                  <p className="mt-2 text-gray-600">
+                    Securely pay the $12.00 application processing fee using
+                    your debit or credit card.
+                  </p>
+                </div>
+              </div>
+            </label>
+
+            {/* ==================================================
+                BANK TRANSFER
+            ================================================== */}
+
+            <label
+              className={`block cursor-pointer rounded-2xl border-2 p-6 transition ${
+                paymentMethod === "bank_transfer"
+                  ? "border-[#4b0082] bg-purple-50"
+                  : "border-gray-200 bg-white"
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="bank_transfer"
+                  checked={paymentMethod === "bank_transfer"}
+                  onChange={() => setPaymentMethod("bank_transfer")}
+                  className="mt-1 w-5 h-5"
+                />
+
+                <div className="w-full">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Pay by Bank Transfer
+                  </h3>
+
+                  <p className="mt-2 text-gray-600">
+                    Transfer the $12.00 application fee to the account below and
+                    upload your payment receipt.
+                  </p>
+
+                  {paymentMethod === "bank_transfer" && (
+                    <div className="mt-5 rounded-xl border border-purple-200 bg-white p-5">
+                      <h4 className="text-lg font-bold text-[#4b0082] mb-4">
+                        Bank Transfer Details
+                      </h4>
+
+                      <div className="space-y-3 text-gray-800">
+                        <div>
+                          <span className="font-semibold">Bank:</span> Zenith
+                          Bank
+                        </div>
+
+                        <div>
+                          <span className="font-semibold">Account Name:</span>{" "}
+                          ARUN-UN-TAN LIMITED
+                        </div>
+
+                        <div>
+                          <span className="font-semibold">Account Number:</span>{" "}
+                          1229796653
+                        </div>
+
+                        <div>
+                          <span className="font-semibold">Amount:</span> $12.00
+                        </div>
+                      </div>
+
+                      {/* ==================================================
+                          TRANSFER NOTICE
+                      ================================================== */}
+
+                      <div className="mt-5 rounded-lg bg-yellow-50 border border-yellow-300 p-4">
+                        <p className="text-sm text-gray-700 leading-6">
+                          After completing the transfer, enter your transfer
+                          reference and upload the payment receipt. Your payment
+                          will be manually verified by the Membership Committee.
+                        </p>
+                      </div>
+
+                      {/* ==================================================
+                          TRANSFER REFERENCE
+                      ================================================== */}
+
+                      <div className="mt-5">
+                        <label className="block mb-2 font-semibold text-gray-700">
+                          Bank Transfer Reference
+                        </label>
+
+                        <input
+                          type="text"
+                          value={bankTransferReference}
+                          onChange={(e) =>
+                            setBankTransferReference(e.target.value)
+                          }
+                          placeholder="Enter your transfer reference"
+                          className="border rounded-xl p-4 w-full"
+                        />
+                      </div>
+
+                      {/* ==================================================
+                          RECEIPT UPLOAD
+                      ================================================== */}
+
+                      <div className="mt-6">
+                        <label className="block mb-2 font-semibold text-gray-700">
+                          Payment Receipt
+                        </label>
+
+                        <p className="text-sm text-gray-600 mb-3">
+                          Upload a screenshot, image or PDF showing your $12.00
+                          bank transfer.
+                        </p>
+
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          onChange={handleBankTransferReceipt}
+                          className="border rounded-xl p-3 w-full bg-white"
+                        />
+
+                        {bankTransferReceipt && (
+                          <div className="mt-3 rounded-lg border border-green-300 bg-green-50 p-4">
+                            <p className="text-green-700 font-semibold">
+                              ✓ Receipt selected
+                            </p>
+
+                            <p className="text-sm text-green-700 mt-1 break-all">
+                              {bankTransferReceipt.name}
+                            </p>
+
+                            <p className="text-xs text-green-600 mt-1">
+                              {(bankTransferReceipt.size / 1024 / 1024).toFixed(
+                                2,
+                              )}{" "}
+                              MB
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </label>
           </div>
 
           {/* ==================================================
@@ -769,17 +1121,21 @@ const BecomeMember = () => {
           </div>
 
           {/* ==================================================
-              SUBMIT / PAY BUTTON
+              SUBMIT BUTTON
           ================================================== */}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || bankTransferSubmitting}
             className="w-full bg-[#4b0082] hover:bg-[#360061] text-white py-5 rounded-xl text-xl font-bold transition disabled:opacity-50"
           >
-            {loading
-              ? "Preparing Secure Payment..."
-              : "Continue to $12.00 Application Payment"}
+            {paymentMethod === "stripe"
+              ? loading
+                ? "Preparing Secure Payment..."
+                : "Continue to $12.00 Application Payment"
+              : bankTransferSubmitting
+                ? "Submitting Transfer & Receipt..."
+                : "Submit Bank Transfer & Receipt"}
           </button>
         </form>
       </div>

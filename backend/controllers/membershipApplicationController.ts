@@ -123,7 +123,7 @@ export const createApplication = async (
 
       applicationFeeStatus: 'Pending',
 
-      applicationFeeAmount: 5,
+      applicationFeeAmount: 12,
 
       applicationFeeReference: '',
 
@@ -143,6 +143,199 @@ export const createApplication = async (
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to submit application.',
+    });
+  }
+};
+
+// ======================================================
+// SUBMIT APPLICATION FEE BY BANK TRANSFER
+// ======================================================
+
+export const submitApplicationFeeBankTransfer = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { applicationId, reference } = req.body;
+
+    if (!applicationId) {
+      res.status(400).json({
+        success: false,
+        message: 'Application ID is required.',
+      });
+
+      return;
+    }
+
+    if (!reference || !reference.trim()) {
+      res.status(400).json({
+        success: false,
+        message: 'Bank transfer reference is required.',
+      });
+
+      return;
+    }
+
+    const files = req.files as {
+      applicationFeeReceipt?: Express.Multer.File[];
+    };
+
+    const receiptFile = files?.applicationFeeReceipt?.[0];
+
+    if (!receiptFile) {
+      res.status(400).json({
+        success: false,
+        message: 'Please upload your bank transfer receipt.',
+      });
+
+      return;
+    }
+
+    const application = await MembershipApplication.findById(applicationId);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Membership application not found.',
+      });
+
+      return;
+    }
+
+    if (application.applicationFeeStatus === 'Paid') {
+      res.status(400).json({
+        success: false,
+        message: 'The application fee has already been paid.',
+      });
+
+      return;
+    }
+
+    const receipt = await uploadToCloudinary(
+      receiptFile,
+      'membership/application-fee-receipts',
+    );
+
+    application.applicationFeePaymentMethod = 'bank_transfer';
+
+    application.applicationFeeBankTransferStatus = 'Pending';
+
+    application.applicationFeeBankTransferReference = reference.trim();
+
+    application.applicationFeeBankTransferDate = new Date();
+
+    application.applicationFeeBankTransferReceipt = receipt;
+
+    application.applicationFeeBankTransferReceiptPublicId = '';
+
+    application.applicationFeeStatus = 'Pending';
+
+    application.applicationFeeAmount = 12;
+
+    application.status = 'Payment Pending';
+
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message:
+        'Bank transfer receipt submitted successfully. Your payment is awaiting verification.',
+      application,
+    });
+  } catch (error: any) {
+    console.error('❌ Bank transfer submission error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Unable to submit bank transfer details.',
+    });
+  }
+};
+
+// ======================================================
+// VERIFY APPLICATION FEE BY BANK TRANSFER
+// ======================================================
+
+export const verifyBankTransfer = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const application = await MembershipApplication.findById(req.params.id);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Membership application not found.',
+      });
+
+      return;
+    }
+
+    if (application.applicationFeePaymentMethod !== 'bank_transfer') {
+      res.status(400).json({
+        success: false,
+        message: 'This application does not have a bank transfer payment.',
+      });
+
+      return;
+    }
+
+    if (application.applicationFeeStatus === 'Paid') {
+      res.status(400).json({
+        success: false,
+        message: 'The application fee has already been verified.',
+      });
+
+      return;
+    }
+
+    if (application.applicationFeeBankTransferStatus !== 'Pending') {
+      res.status(400).json({
+        success: false,
+        message: 'This bank transfer is not awaiting verification.',
+      });
+
+      return;
+    }
+
+    application.applicationFeeBankTransferStatus = 'Verified';
+
+    application.applicationFeeStatus = 'Paid';
+
+    application.applicationFeeAmount = 12;
+
+    application.applicationFeeDate = new Date();
+
+    application.applicationFeeReference =
+      application.applicationFeeBankTransferReference;
+
+    application.status = 'Pending';
+
+    await application.save();
+
+    console.log('======================================');
+    console.log('✅ BANK TRANSFER VERIFIED');
+    console.log(`Application ID: ${application._id}`);
+    console.log(`Name: ${application.fullName}`);
+    console.log(
+      `Reference: ${application.applicationFeeBankTransferReference}`,
+    );
+    console.log('Amount: $12.00');
+    console.log('======================================');
+
+    res.status(200).json({
+      success: true,
+      message: 'Bank transfer verified successfully.',
+      application,
+    });
+  } catch (error: any) {
+    console.error('❌ Bank transfer verification error:');
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to verify bank transfer.',
     });
   }
 };
@@ -278,7 +471,7 @@ export const approveApplication = async (
       res.status(400).json({
         success: false,
         message:
-          'This application cannot be approved because the $5 application fee has not been paid.',
+          'This application cannot be approved because the $12 application fee has not been paid.',
       });
 
       return;
@@ -358,6 +551,68 @@ export const approveApplication = async (
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// RESEND APPROVAL EMAIL
+// ======================================================
+
+export const resendApprovalEmail = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const application = await MembershipApplication.findById(req.params.id);
+
+    if (!application) {
+      res.status(404).json({
+        success: false,
+        message: 'Application not found.',
+      });
+
+      return;
+    }
+
+    // Only accepted applicants should receive
+    // the membership approval email.
+    if (application.status !== 'Accepted') {
+      res.status(400).json({
+        success: false,
+        message: 'Approval email can only be resent to an accepted applicant.',
+      });
+
+      return;
+    }
+
+    // The application fee must already be paid.
+    if (application.applicationFeeStatus !== 'Paid') {
+      res.status(400).json({
+        success: false,
+        message:
+          'The approval email cannot be resent because the application fee has not been paid.',
+      });
+
+      return;
+    }
+
+    await sendMembershipApprovalEmail({
+      fullName: application.fullName,
+      email: application.email,
+      applicationId: application.id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Approval email resent successfully.',
+    });
+  } catch (error: any) {
+    console.error('❌ Resend approval email error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Unable to resend approval email.',
     });
   }
 };
@@ -455,7 +710,7 @@ export const getPendingApplications = async (
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to fetch pending applications.',
     });
   }
 };
@@ -485,7 +740,7 @@ export const getApprovedApplications = async (
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to fetch approved applications.',
     });
   }
 };
@@ -514,7 +769,7 @@ export const getRejectedApplications = async (
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to fetch rejected applications.',
     });
   }
 };
@@ -559,7 +814,7 @@ export const deleteApplication = async (
 // MARK MEMBER AS PAID
 // =======================================================
 // This is for the INITIATION payment stage.
-// The $5 application fee must already have been paid.
+// The $12 application fee must already have been paid.
 
 export const markAsPaid = catchAsync(
   async (req: Request, res: Response, next) => {
@@ -569,11 +824,11 @@ export const markAsPaid = catchAsync(
       return next(new AppError('Application not found.', 404));
     }
 
-    // The $5 application fee must be paid first
+    // The $12 application fee must be paid first
     if (application.applicationFeeStatus !== 'Paid') {
       return next(
         new AppError(
-          'The $5 application fee must be paid before this member can be marked as Paid.',
+          'The $12 application fee must be paid before this member can be marked as Paid.',
           400,
         ),
       );
@@ -744,6 +999,7 @@ export const resendInitiationEmail = async (
         success: false,
         message: 'Application not found.',
       });
+
       return;
     }
 

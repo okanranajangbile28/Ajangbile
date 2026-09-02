@@ -3,6 +3,10 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const CREST_URL = 'https://www.ajangbileheritage.com/images/crest.png';
+
+const BANK_TRANSFER_PAGE =
+  'https://www.ajangbileheritage.com/bank-transfer-payment';
+
 // =====================================================
 // OGBONI ACCOUNT APPROVAL EMAIL
 // =====================================================
@@ -204,6 +208,7 @@ Iledi Ajangbile
     throw err;
   }
 };
+
 // =====================================================
 // MEMBERSHIP APPLICATION APPROVAL EMAIL
 // =====================================================
@@ -331,7 +336,7 @@ color:#444444;
 Once your payment has been confirmed, the administration will contact you with your initiation date, time, venue and further instructions.
 </p>
 
-<!-- PACKAGES START -->
+<!-- PACKAGES -->
 
 <div style="margin-top:35px;">
 
@@ -344,7 +349,7 @@ margin-bottom:30px;
 Select Your Preferred Initiation Package
 </h2>
 
-<!-- ================= BASIC ================= -->
+<!-- BASIC PACKAGE -->
 
 <div style="
 margin-bottom:28px;
@@ -406,12 +411,28 @@ text-decoration:none;
 font-weight:bold;
 font-size:16px;
 line-height:1.4;
-white-space:normal;
-word-break:keep-all;
-text-align:center;
-box-sizing:border-box;
-">
-Pay with<br>Stripe
+margin:5px;
+"
+>
+Pay with Card / Stripe
+</a>
+
+<a
+href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Basic&amount=224.00"
+style="
+display:inline-block;
+background:#b8860b;
+color:#ffffff;
+padding:14px 28px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+font-size:16px;
+line-height:1.4;
+margin:5px;
+"
+>
+Pay with Bank Transfer
 </a>
 
 </div>
@@ -420,7 +441,7 @@ Pay with<br>Stripe
 
 </div>
 
-<!-- ================= STANDARD ================= -->
+<!-- STANDARD PACKAGE -->
 
 <div style="
 margin-bottom:28px;
@@ -466,7 +487,7 @@ color:#444;
 
 <li>Ikojẹ (7th Day Ritual)</li>
 
-<li>Ibori (Appeasing of One's Head)</li>
+<li>Ibori (Appeasing of One's Inner Spirit)</li>
 
 </ul>
 
@@ -484,12 +505,28 @@ text-decoration:none;
 font-weight:bold;
 font-size:16px;
 line-height:1.4;
-white-space:normal;
-word-break:keep-all;
-text-align:center;
-box-sizing:border-box;
-">
-Pay with<br>Stripe
+margin:5px;
+"
+>
+Pay with Card / Stripe
+</a>
+
+<a
+href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Standard&amount=450.00"
+style="
+display:inline-block;
+background:#b8860b;
+color:#ffffff;
+padding:14px 28px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+font-size:16px;
+line-height:1.4;
+margin:5px;
+"
+>
+Pay with Bank Transfer
 </a>
 
 </div>
@@ -498,7 +535,7 @@ Pay with<br>Stripe
 
 </div>
 
-<!-- ================= PREMIUM ================= -->
+<!-- PREMIUM PACKAGE -->
 
 <div style="
 margin-bottom:28px;
@@ -544,7 +581,7 @@ color:#444;
 
 <li>Ikojẹ (7th Day Ritual)</li>
 
-<li>Ibori (Appeasing of One's Head)</li>
+<li>Ibori (Appeasing of One's Inner Spirit)</li>
 
 <li>Eran Oro (Sacrifice of a Lamb/Sheep)</li>
 
@@ -566,17 +603,40 @@ text-decoration:none;
 font-weight:bold;
 font-size:16px;
 line-height:1.4;
-white-space:normal;
-word-break:keep-all;
-text-align:center;
-box-sizing:border-box;
-">
-Pay with<br>Stripe
+margin:5px;
+"
+>
+Pay with Card / Stripe
+</a>
+
+<a
+href="${BANK_TRANSFER_PAGE}?applicationId=${applicationId}&packageName=Premium&amount=750.00"
+style="
+display:inline-block;
+background:#b8860b;
+color:#ffffff;
+padding:14px 28px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+font-size:16px;
+line-height:1.4;
+margin:5px;
+"
+>
+Pay with Bank Transfer
 </a>
 
 </div>
 
 </div>
+
+</div>
+
+</div>
+
+<!-- FINAL INFORMATION -->
+
 <div style="
 margin-top:35px;
 padding:20px;
@@ -591,6 +651,10 @@ font-size:15px;
 line-height:1.9;
 color:#444;
 ">
+Please ensure that you select the package you wish to complete.
+</p>
+
+</div>
 
 <hr style="
 margin:45px 0;
@@ -603,7 +667,7 @@ line-height:1.9;
 font-size:15px;
 color:#444;
 ">
-After payment has been verified, your initiation schedule will be sent to you by email and SMS.
+After payment has been verified, your initiation schedule will be sent to you.
 </p>
 
 <p style="
@@ -643,8 +707,8 @@ Iledi Ajangbile
 </span>
 
 </div>
-</div>
 
+</div>
 
 `,
     });
@@ -657,6 +721,7 @@ Iledi Ajangbile
     throw err;
   }
 };
+
 // =====================================================
 // PASSWORD RESET EMAIL
 // =====================================================
@@ -896,14 +961,14 @@ export const sendOrderReceiptEmail = async ({
   email,
   fullName,
   orderId,
-  stripeReference,
+  paymentReference,
   orderItems,
   totalAmount,
 }: {
   email: string;
   fullName: string;
   orderId: string;
-  stripeReference: string;
+  paymentReference: string;
   orderItems: Array<{
     productName: string;
     price: number;
@@ -1045,7 +1110,7 @@ export const sendOrderReceiptEmail = async ({
 
         <p style="margin:8px 0;color:#444;">
           <strong>Payment Reference:</strong>
-          ${stripeReference}
+          ${paymentReference}
         </p>
 
         <p style="margin:8px 0;color:#444;">

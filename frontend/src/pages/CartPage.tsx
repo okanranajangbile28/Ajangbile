@@ -1,14 +1,10 @@
-import { KeyboardEvent, MouseEvent, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, ArrowRight } from "lucide-react";
-import { PulseLoader } from "react-spinners";
 
 import { useAppDispatch, useAppSelector } from "../App/hooks";
 
-import {
-  countCartTotal,
-  handleStripe,
-} from "../features/cartFeature/cartSlice";
+import { countCartTotal } from "../features/cartFeature/cartSlice";
 
 import { CartItem } from "../features/cartFeature/cart";
 
@@ -18,15 +14,13 @@ import { priceFormat } from "../utils/constants";
 
 const CartPage = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const {
-    cart,
-    subtotal,
-    checkout_loading,
-    shippingInfo,
-    total_items,
-    total_amount,
-  } = useAppSelector((state) => state.cart);
+  const { cart, subtotal } = useAppSelector((state) => state.cart);
+
+  // ======================================================
+  // CART TOTAL
+  // ======================================================
 
   useEffect(() => {
     dispatch(countCartTotal());
@@ -34,27 +28,43 @@ const CartPage = () => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart, dispatch]);
 
+  // ======================================================
+  // PAGE TITLE
+  // ======================================================
+
   useEffect(() => {
     document.title = "Ajangbile Heritage | Shopping Cart";
   }, []);
 
-  const handleCheckout = (
-    e: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLButtonElement>,
-  ) => {
-    e.preventDefault();
+  // ======================================================
+  // PROCEED TO CHECKOUT
+  // ======================================================
 
+  const handleCheckout = () => {
     const validCart = cart.filter((item) => item.amount > 0);
 
-    dispatch(
-      handleStripe({
-        cart: validCart,
-        shippingInfo,
-        subtotal,
-        total_items,
-        total_amount: total_amount || subtotal,
-      }),
-    );
+    if (!validCart.length) {
+      return;
+    }
+
+    /*
+     * IMPORTANT:
+     *
+     * Do NOT call handleStripe() here.
+     *
+     * The user must first go to the Checkout page
+     * where they can choose:
+     *
+     * 1. Card / Stripe
+     * 2. Bank Transfer
+     */
+
+    navigate("/checkout");
   };
+
+  // ======================================================
+  // EMPTY CART
+  // ======================================================
 
   if (cart.length === 0) {
     return (
@@ -83,9 +93,15 @@ const CartPage = () => {
     );
   }
 
+  // ======================================================
+  // PAGE
+  // ======================================================
+
   return (
     <div className="bg-gray-50">
-      {/* Hero */}
+      {/* ==================================================
+          HERO
+      ================================================== */}
 
       <section className="bg-gradient-to-r from-purple-950 via-purple-900 to-purple-800 py-20">
         <div className="max-w-7xl mx-auto px-6 text-center text-white">
@@ -97,9 +113,15 @@ const CartPage = () => {
         </div>
       </section>
 
+      {/* ==================================================
+          CONTENT
+      ================================================== */}
+
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid xl:grid-cols-3 gap-10">
-          {/* Cart */}
+          {/* ==================================================
+              CART ITEMS
+          ================================================== */}
 
           <div className="xl:col-span-2 bg-white rounded-3xl shadow-lg p-8">
             <h2 className="text-3xl font-black text-purple-950 mb-8">
@@ -113,7 +135,9 @@ const CartPage = () => {
             </div>
           </div>
 
-          {/* Summary */}
+          {/* ==================================================
+              ORDER SUMMARY
+          ================================================== */}
 
           <div>
             <div className="bg-white rounded-3xl shadow-lg p-8 sticky top-8">
@@ -121,21 +145,27 @@ const CartPage = () => {
                 Order Summary
               </h2>
 
+              {/* SUBTOTAL */}
+
               <div className="flex justify-between mt-10 text-lg">
                 <span>Subtotal</span>
 
                 <span className="font-bold">{priceFormat(subtotal)}</span>
               </div>
 
+              {/* DELIVERY */}
+
               <div className="flex justify-between mt-5 text-lg">
                 <span>Delivery</span>
 
-                <span className="text-green-600 font-bold">
+                <span className="text-green-600 font-bold text-right">
                   Calculated at Checkout
                 </span>
               </div>
 
               <hr className="my-8" />
+
+              {/* TOTAL */}
 
               <div className="flex justify-between text-2xl font-black text-purple-950">
                 <span>Total</span>
@@ -143,28 +173,29 @@ const CartPage = () => {
                 <span>{priceFormat(subtotal)}</span>
               </div>
 
+              {/* ==================================================
+                  PROCEED TO CHECKOUT
+              ================================================== */}
+
               <button
+                type="button"
                 onClick={handleCheckout}
-                disabled={checkout_loading}
                 className="mt-10 w-full bg-yellow-500 hover:bg-yellow-400 text-purple-950 font-bold rounded-2xl py-5 transition"
               >
-                {checkout_loading ? (
-                  <div className="flex justify-center items-center gap-3">
-                    Processing
-                    <PulseLoader size={6} color="#4b0082" />
-                  </div>
-                ) : (
-                  "Proceed to Checkout"
-                )}
+                Proceed to Checkout
               </button>
 
               <p className="text-gray-500 text-sm text-center mt-6">
-                Secure payment powered by Stripe.
+                Choose your preferred payment method on the next page.
               </p>
             </div>
           </div>
         </div>
       </section>
+
+      {/* ==================================================
+          SUGGESTED PRODUCTS
+      ================================================== */}
 
       <SuggestedProducts />
     </div>

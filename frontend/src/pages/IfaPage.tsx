@@ -197,16 +197,7 @@ function IfaPage() {
             concerning your destiny and future.
           </p>
 
-          <div className="flex flex-col md:flex-row justify-center gap-6">
-            <a
-              href="https://wa.me/2349023323697"
-              target="_blank"
-              rel="noreferrer"
-              className="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-full font-bold transition duration-300"
-            >
-              Consult via WhatsApp
-            </a>
-
+          <div className="flex justify-center">
             <Link
               to="/consultation"
               className="bg-white text-purple-900 px-8 py-4 rounded-full font-bold hover:bg-yellow-300 transition duration-300"

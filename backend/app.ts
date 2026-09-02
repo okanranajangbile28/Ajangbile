@@ -25,6 +25,11 @@ import orderRouter from './routes/orderRoute';
 import ogboniRouter from './routes/ogboniRoutes';
 import contactRouter from './routes/contactRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import consultationPaymentRoutes from './routes/consultationPaymentRoutes';
+import pricingRoutes from './routes/pricingRoutes';
+
+import adminConsultationRoutes from './routes/adminConsultationRoutes';
+import adminInitiationPaymentRoutes from './routes/adminInitiationPaymentRoutes';
 
 import announcementRouter from './routes/announcementRoutes';
 
@@ -114,7 +119,7 @@ if (process.env.NODE_ENV === 'development') {
 // Stripe requires the ORIGINAL RAW request body
 // to verify the webhook signature.
 //
-// This MUST come BEFORE express.json().
+// These MUST come BEFORE express.json().
 // ======================================================
 
 // SHOP STRIPE WEBHOOK
@@ -133,12 +138,16 @@ app.use(
   }),
 );
 
+// CONSULTATION STRIPE WEBHOOK
+app.use(
+  '/api/consultations/stripe/webhook',
+  express.raw({
+    type: 'application/json',
+  }),
+);
+
 // ======================================================
 // BODY PARSERS
-//
-// These apply to all normal API requests.
-// The Stripe webhook above has already been handled
-// with express.raw().
 // ======================================================
 
 app.use(
@@ -211,7 +220,7 @@ app.use((req, res, next) => {
 // ROOT TEST ROUTE
 // ======================================================
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   console.log('Root route hit');
 
   res.status(200).send('Backend server is running successfully!');
@@ -245,16 +254,58 @@ app.use('/api/membership-applications', membershipApplicationRouter);
 // Announcements
 app.use('/api/announcements', announcementRouter);
 
-// Payments
+// ======================================================
+// PUBLIC PAYMENT ROUTES
+// ======================================================
+
 app.use('/api/payments', paymentRoutes);
 
-// Blog CMS
+// ======================================================
+// CONSULTATION PAYMENT ROUTES
+// ======================================================
+
+app.use('/api/consultations', consultationPaymentRoutes);
+
+// ======================================================
+// PRICING
+// ======================================================
+
+app.use('/api/pricing', pricingRoutes);
+
+// ======================================================
+// ADMIN CONSULTATIONS
+//
+// Protected inside adminConsultationRoutes.ts
+// Only admin and developer can access these routes.
+// ======================================================
+
+app.use('/api/admin/consultations', adminConsultationRoutes);
+
+// ======================================================
+// ADMIN INITIATION PAYMENTS
+//
+// Protected inside adminInitiationPaymentRoutes.ts
+// Only admin and developer can access these routes.
+// ======================================================
+
+app.use('/api/admin/initiation-payments', adminInitiationPaymentRoutes);
+
+// ======================================================
+// BLOG CMS
+// ======================================================
+
 app.use('/api/blog-v2', blogV2Router);
 
-// Ogboni Blog CMS
+// ======================================================
+// OGBONI BLOG CMS
+// ======================================================
+
 app.use('/api/ogboni-blog', ogboniBlogRouter);
 
-// Member Signup
+// ======================================================
+// MEMBER SIGNUP
+// ======================================================
+
 app.use('/api/member-signup', memberSignupRouter);
 
 // ======================================================

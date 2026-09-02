@@ -96,16 +96,55 @@ interface IPaymentInfo {
 
 export interface IOrder extends Document {
   shippingInfo: IShippingInfo;
+
   additionalInfo?: string;
+
   orderItems: IOrderItem[];
+
   paymentInfo: IPaymentInfo;
+
+  // ==============================
+  // BANK TRANSFER PAYMENT
+  // ==============================
+
+  bankTransferReceipt?: string;
+
+  bankTransferReference?: string;
+
+  bankTransferStatus?: 'Pending' | 'Verified' | 'Rejected';
+
+  bankTransferDate?: Date;
+
+  bankTransferVerifiedAt?: Date;
+
+  bankTransferVerifiedBy?: string;
+
+  // ==============================
+  // PAYMENT DATE
+  // ==============================
+
   createdAt?: Date;
+
   paidAt?: Date;
+
+  // ==============================
+  // TOTALS
+  // ==============================
+
   taxPrice: number;
+
   total_items: number;
+
   subtotal: number;
+
   total_amount: number;
+
+  // ==============================
+  // ORDER STATUS
+  // ==============================
+
   orderStatus: 'pending' | 'shipped' | 'completed' | 'failed';
+
   deliveredAt?: Date;
 }
 

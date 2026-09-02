@@ -16,6 +16,10 @@ import RejectedMembers from "./RejectedMembers";
 import AdminProductsPage from "../AdminProductsPage";
 import AdminOrdersPage from "../AdminOrdersPage";
 
+import Consultations from "./Consultations";
+import InitiationPayments from "./InitiationPayments";
+import AllPricing from "./AllPricing";
+
 import EmailCenter from "./EmailCenter";
 import Announcements from "./Announcements";
 import Settings from "./Settings";
@@ -56,6 +60,15 @@ const AdminDashboard = () => {
 
       case "Orders":
         return <AdminOrdersPage />;
+
+      case "Consultations":
+        return <Consultations />;
+
+      case "Initiation Payments":
+        return <InitiationPayments />;
+
+      case "All Pricing":
+        return <AllPricing />;
 
       case "Blog CMS":
         return <BlogCMS />;

@@ -575,7 +575,7 @@ const processCompletedCheckout = async (
 
       orderId: String(order._id),
 
-      stripeReference: session.id,
+      paymentReference: session.id,
 
       orderItems: lineItems.data
         .filter((item) => item.description)
