@@ -3,6 +3,7 @@ import axios from "axios";
 
 interface Application {
   _id: string;
+
   fullName: string;
   email: string;
   phone: string;
@@ -33,6 +34,7 @@ interface Application {
   applicationFeeAmount?: number;
   applicationFeePaymentMethod?: string;
   applicationFeeReference?: string;
+  applicationFeeDate?: string;
 
   paymentStatus?: string;
   paymentAmount?: number;
@@ -70,11 +72,26 @@ const ApprovedMembers = () => {
 
       const res = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/approved`,
+        {
+          withCredentials: true,
+        },
       );
 
-      setApplications(res.data.applications || []);
-    } catch (err) {
+      setApplications(res.data?.applications || []);
+    } catch (err: unknown) {
       console.error("Failed to fetch approved members:", err);
+
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 401) {
+          console.error(
+            "Admin authentication required. The JWT cookie was not sent or has expired.",
+          );
+        }
+
+        if (err.response?.status === 403) {
+          console.error("This account does not have admin access.");
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -102,6 +119,10 @@ const ApprovedMembers = () => {
 
       const res = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/resend-approval-email/${id}`,
+        {},
+        {
+          withCredentials: true,
+        },
       );
 
       alert(res.data?.message || "Approval email resent successfully.");
@@ -109,9 +130,15 @@ const ApprovedMembers = () => {
       console.error("Resend approval email error:", err);
 
       if (axios.isAxiosError(err)) {
-        alert(
-          err.response?.data?.message || "Unable to resend approval email.",
-        );
+        if (err.response?.status === 401) {
+          alert("Your admin session has expired. Please log in again.");
+        } else if (err.response?.status === 403) {
+          alert("You do not have permission to perform this action.");
+        } else {
+          alert(
+            err.response?.data?.message || "Unable to resend approval email.",
+          );
+        }
       } else {
         alert("Unable to resend approval email.");
       }
@@ -192,8 +219,8 @@ const ApprovedMembers = () => {
           </h1>
 
           <p className="text-gray-600 mt-2">
-            Applicants who have paid the $12 application fee and have been
-            approved for membership.
+            Applicants whose application fee has been paid and whose membership
+            application has been approved.
           </p>
         </div>
 
@@ -217,7 +244,7 @@ const ApprovedMembers = () => {
       ) : applications.length === 0 ? (
         /* ==================================================
            EMPTY STATE
-           ================================================== */
+        ================================================== */
 
         <div className="bg-white rounded-xl shadow p-8">
           <p className="text-gray-500">No approved members found.</p>
@@ -225,7 +252,7 @@ const ApprovedMembers = () => {
       ) : (
         /* ==================================================
            MEMBERS
-           ================================================== */
+        ================================================== */
 
         <div className="space-y-6">
           {applications.map((app) => {
@@ -245,7 +272,7 @@ const ApprovedMembers = () => {
                 <div className="flex flex-col lg:flex-row gap-6">
                   {/* ==================================================
                       PHOTO
-                      ================================================== */}
+                  ================================================== */}
 
                   <div>
                     {app.photo ? (
@@ -263,7 +290,7 @@ const ApprovedMembers = () => {
 
                   {/* ==================================================
                       MEMBER INFORMATION
-                      ================================================== */}
+                  ================================================== */}
 
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -278,7 +305,7 @@ const ApprovedMembers = () => {
 
                     {/* ==================================================
                         BASIC DETAILS
-                        ================================================== */}
+                    ================================================== */}
 
                     <div className="grid md:grid-cols-2 gap-3 mt-5">
                       <p>
@@ -304,15 +331,33 @@ const ApprovedMembers = () => {
                       <p>
                         <strong>Application Fee:</strong>{" "}
                         <span className="text-green-700 font-semibold">
-                          ${(app.applicationFeeAmount || 12).toLocaleString()}{" "}
+                          {app.applicationFeeAmount !== undefined
+                            ? `$${app.applicationFeeAmount.toFixed(2)}`
+                            : "Amount Not Available"}{" "}
                           Paid
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>Application Fee Method:</strong>{" "}
+                        {app.applicationFeePaymentMethod === "bank_transfer"
+                          ? "Bank Transfer"
+                          : app.applicationFeePaymentMethod === "stripe"
+                            ? "Stripe"
+                            : "Not Available"}
+                      </p>
+
+                      <p>
+                        <strong>Application Fee Status:</strong>{" "}
+                        <span className="text-green-700 font-semibold">
+                          {app.applicationFeeStatus || "Paid"}
                         </span>
                       </p>
                     </div>
 
                     {/* ==================================================
                         INITIATION PAYMENT STATUS
-                        ================================================== */}
+                    ================================================== */}
 
                     <div className="mt-6 bg-purple-50 border border-purple-200 rounded-xl p-5">
                       <h3 className="text-lg font-bold text-purple-900 mb-4">
@@ -366,7 +411,7 @@ const ApprovedMembers = () => {
 
                     {/* ==================================================
                         INITIATION STATUS
-                        ================================================== */}
+                    ================================================== */}
 
                     <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
                       <div className="grid md:grid-cols-3 gap-4">
@@ -406,7 +451,7 @@ const ApprovedMembers = () => {
 
                     {/* ==================================================
                         ACTIONS
-                        ================================================== */}
+                    ================================================== */}
 
                     <div className="flex flex-wrap gap-4 mt-8">
                       <button
@@ -439,16 +484,16 @@ const ApprovedMembers = () => {
 
       {/* ======================================================
           FULL APPLICATION MODAL
-          ====================================================== */}
+      ====================================================== */}
 
       {showDetailsModal && selectedMember && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-5">
           <div className="bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
             {/* ==================================================
                 MODAL HEADER
-                ================================================== */}
+            ================================================== */}
 
-            <div className="bg-purple-900 text-white p-6 flex justify-between items-center sticky top-0">
+            <div className="bg-purple-900 text-white p-6 flex justify-between items-center sticky top-0 z-10">
               <h2 className="text-2xl font-bold">
                 Full Membership Application
               </h2>
@@ -466,12 +511,12 @@ const ApprovedMembers = () => {
 
             {/* ==================================================
                 MODAL CONTENT
-                ================================================== */}
+            ================================================== */}
 
             <div className="p-8 space-y-8">
               {/* ==================================================
                   PHOTOS
-                  ================================================== */}
+              ================================================== */}
 
               <div className="flex flex-col md:flex-row gap-8">
                 {selectedMember.photo && (
@@ -501,7 +546,7 @@ const ApprovedMembers = () => {
 
               {/* ==================================================
                   PERSONAL INFORMATION
-                  ================================================== */}
+              ================================================== */}
 
               <div>
                 <h3 className="text-xl font-bold text-purple-900 mb-4">
@@ -563,7 +608,7 @@ const ApprovedMembers = () => {
 
               {/* ==================================================
                   NEXT OF KIN
-                  ================================================== */}
+              ================================================== */}
 
               <div>
                 <h3 className="text-xl font-bold text-purple-900 mb-4">
@@ -584,7 +629,7 @@ const ApprovedMembers = () => {
 
               {/* ==================================================
                   MEMBERSHIP INFORMATION
-                  ================================================== */}
+              ================================================== */}
 
               <div>
                 <h3 className="text-xl font-bold text-purple-900 mb-4">
@@ -612,19 +657,42 @@ const ApprovedMembers = () => {
                   <p>
                     <strong>Application Fee:</strong>{" "}
                     <span className="text-green-700 font-bold">
-                      $
-                      {(
-                        selectedMember.applicationFeeAmount || 12
-                      ).toLocaleString()}{" "}
+                      {selectedMember.applicationFeeAmount !== undefined
+                        ? `$${selectedMember.applicationFeeAmount.toFixed(2)}`
+                        : "Amount Not Available"}{" "}
                       Paid
                     </span>
+                  </p>
+
+                  <p>
+                    <strong>Application Fee Method:</strong>{" "}
+                    {selectedMember.applicationFeePaymentMethod ===
+                    "bank_transfer"
+                      ? "Bank Transfer"
+                      : selectedMember.applicationFeePaymentMethod === "stripe"
+                        ? "Stripe"
+                        : "Not Available"}
+                  </p>
+
+                  <p>
+                    <strong>Application Fee Reference:</strong>{" "}
+                    {selectedMember.applicationFeeReference || "Not Available"}
+                  </p>
+
+                  <p>
+                    <strong>Application Fee Date:</strong>{" "}
+                    {selectedMember.applicationFeeDate
+                      ? new Date(
+                          selectedMember.applicationFeeDate,
+                        ).toLocaleString()
+                      : "Not Available"}
                   </p>
                 </div>
               </div>
 
               {/* ==================================================
                   INITIATION PAYMENT
-                  ================================================== */}
+              ================================================== */}
 
               <div className="bg-purple-50 border border-purple-200 p-6 rounded-xl">
                 <h3 className="text-xl font-bold text-purple-900 mb-4">
@@ -680,7 +748,7 @@ const ApprovedMembers = () => {
 
               {/* ==================================================
                   INITIATION SCHEDULE
-                  ================================================== */}
+              ================================================== */}
 
               <div className="bg-green-50 border border-green-200 p-6 rounded-xl">
                 <h3 className="text-xl font-bold text-green-800 mb-4">

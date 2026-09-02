@@ -91,9 +91,26 @@ const MembershipApplications = () => {
 
       const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications`,
+        {
+          credentials: "include",
+        },
       );
 
       const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Fetch applications failed:", data);
+
+        if (response.status === 401) {
+          alert("Your admin session has expired. Please log in again.");
+        } else if (response.status === 403) {
+          alert("You do not have permission to view membership applications.");
+        } else {
+          alert(data.message || "Failed to load membership applications.");
+        }
+
+        return;
+      }
 
       if (data.success) {
         const fetchedApplications: Application[] = data.applications || [];
@@ -115,9 +132,11 @@ const MembershipApplications = () => {
 
           return updatedApplication || currentSelected;
         });
+      } else {
+        alert(data.message || "Failed to load membership applications.");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Fetch applications error:", error);
 
       alert("Failed to load membership applications.");
     } finally {
@@ -155,6 +174,7 @@ const MembershipApplications = () => {
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/verify-application-fee-transfer/${id}`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -164,7 +184,14 @@ const MembershipApplications = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.message || "Unable to verify bank transfer.");
+        if (response.status === 401) {
+          alert("Your admin session has expired. Please log in again.");
+        } else if (response.status === 403) {
+          alert("You do not have permission to verify this payment.");
+        } else {
+          alert(data.message || "Unable to verify bank transfer.");
+        }
+
         return;
       }
 
@@ -190,11 +217,10 @@ const MembershipApplications = () => {
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/${id}`,
         {
           method: "PATCH",
-
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             status,
           }),
@@ -203,13 +229,23 @@ const MembershipApplications = () => {
 
       const data = await response.json();
 
-      if (data.success) {
-        alert("Application status updated.");
+      if (!response.ok || !data.success) {
+        if (response.status === 401) {
+          alert("Your admin session has expired. Please log in again.");
+        } else if (response.status === 403) {
+          alert("You do not have permission to update this application.");
+        } else {
+          alert(data.message || "Could not update status.");
+        }
 
-        await fetchApplications();
+        return;
       }
+
+      alert("Application status updated.");
+
+      await fetchApplications();
     } catch (error) {
-      console.error(error);
+      console.error("Update status error:", error);
 
       alert("Could not update status.");
     }
@@ -231,20 +267,31 @@ const MembershipApplications = () => {
         `${import.meta.env.VITE_SERVER_URL}/api/membership-applications/${id}`,
         {
           method: "DELETE",
+          credentials: "include",
         },
       );
 
       const data = await response.json();
 
-      if (data.success) {
-        alert("Application deleted.");
+      if (!response.ok || !data.success) {
+        if (response.status === 401) {
+          alert("Your admin session has expired. Please log in again.");
+        } else if (response.status === 403) {
+          alert("You do not have permission to delete this application.");
+        } else {
+          alert(data.message || "Delete failed.");
+        }
 
-        setSelected(null);
-
-        await fetchApplications();
+        return;
       }
+
+      alert("Application deleted.");
+
+      setSelected(null);
+
+      await fetchApplications();
     } catch (error) {
-      console.error(error);
+      console.error("Delete application error:", error);
 
       alert("Delete failed.");
     }
