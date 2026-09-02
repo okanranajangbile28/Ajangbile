@@ -429,7 +429,7 @@ Thank you.`,
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12 justify-items-center">
               {consultations.map((consultation) => {
                 const isSelected = selectedConsultation === consultation.type;
 
@@ -438,7 +438,7 @@ Thank you.`,
                     key={consultation.type}
                     type="button"
                     onClick={() => handleSelectConsultation(consultation.type)}
-                    className={`text-left rounded-3xl p-8 border-2 transition duration-300 ${
+                    className={`w-full max-w-md md:max-w-none text-left rounded-3xl p-8 border-2 transition duration-300 ${
                       isSelected
                         ? "border-yellow-400 bg-purple-800 shadow-2xl scale-[1.02]"
                         : "border-purple-600 bg-purple-950 hover:border-yellow-500 hover:bg-purple-900"
