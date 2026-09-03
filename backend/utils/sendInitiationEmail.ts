@@ -175,15 +175,19 @@ export const sendInitiationEmail = async ({
         Initiation Ceremony
       </h1>
 
+      <!-- PURPLE DIVIDER LINE -->
+
       <div style="
         width:80px;
         height:3px;
-        background:#FFD700;
+        background:#b48cff;
         margin:22px auto;
       "></div>
 
+      <!-- ORGANIZATION NAME -->
+
       <div style="
-        color:#FFD700;
+        color:#b48cff;
         font-size:17px;
         font-weight:bold;
         line-height:1.6;
@@ -487,6 +491,7 @@ ${initiationInstructions || 'Please follow all instructions provided by the admi
 
     if (error) {
       console.error('❌ Resend initiation email error:', error);
+
       throw new Error(error.message);
     }
 
@@ -500,6 +505,7 @@ ${initiationInstructions || 'Please follow all instructions provided by the admi
     return data;
   } catch (err) {
     console.error('❌ Failed to send initiation ceremony email:');
+
     console.error(err);
 
     throw err;
