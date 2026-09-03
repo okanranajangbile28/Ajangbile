@@ -11,6 +11,11 @@ import {
   ShieldCheck,
   Mail,
   Phone,
+  MapPin,
+  BriefcaseBusiness,
+  ChevronRight,
+  Pin,
+  Clock3,
 } from "lucide-react";
 
 interface Member {
@@ -46,7 +51,6 @@ const OgboniDashboard = () => {
   const navigate = useNavigate();
 
   const [member, setMember] = useState<Member | null>(null);
-
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   const memberTitle =
@@ -77,7 +81,15 @@ const OgboniDashboard = () => {
       return;
     }
 
-    setMember(JSON.parse(storedMember));
+    try {
+      setMember(JSON.parse(storedMember));
+    } catch (error) {
+      console.error("Unable to load member information:", error);
+      localStorage.removeItem("ogboniMember");
+      localStorage.removeItem("ogboniToken");
+      navigate("/login", { replace: true });
+      return;
+    }
 
     fetchAnnouncements();
   }, [navigate, fetchAnnouncements]);
@@ -90,450 +102,775 @@ const OgboniDashboard = () => {
       replace: true,
     });
   };
+
+  const activeAnnouncements = announcements.filter(
+    (item) => item.category === "Announcement" && item.active !== false,
+  );
+
+  const weeklyUpdates = announcements.filter(
+    (item) => item.category === "Weekly Update" && item.active !== false,
+  );
+
+  const upcomingEvents = announcements.filter(
+    (item) => item.category === "Event" && item.active !== false,
+  );
+
+  const formatDate = (date?: string) => {
+    if (!date) return "";
+
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const displayName = member?.fullName || "Member";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-purple-900 to-black text-white">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* HERO */}
+    <div className="min-h-screen bg-[#f6f7f9] text-gray-900">
+      {/* =====================================================
+          TOP HEADER
+      ===================================================== */}
 
-        <div className="bg-gradient-to-r from-purple-900 to-purple-700 rounded-3xl p-8 shadow-2xl">
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <img
-                src={
-                  member?.photo ||
-                  `https://ui-avatars.com/api/?background=4c1d95&color=fff&size=256&name=${encodeURIComponent(
-                    member?.fullName || "Member",
-                  )}`
-                }
-                alt={member?.fullName}
-                className="w-40 h-40 rounded-full border-4 border-yellow-400 object-cover shadow-xl"
-              />
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold tracking-[0.18em] text-[#4b0082] uppercase">
+                Member Portal
+              </p>
 
-              <div>
-                <h1 className="text-4xl font-bold text-yellow-400">Welcome,</h1>
-
-                <h2 className="text-3xl font-bold mt-2">
-                  Chief {member?.fullName}
-                </h2>
-
-                <p className="text-purple-100 mt-3">
-                  Confederation of Ogboni Aborigine Fraternity
-                </p>
-
-                <div className="flex flex-wrap gap-3 mt-6">
-                  <span className="bg-green-600 px-4 py-2 rounded-full text-sm font-bold">
-                    Active Member
-                  </span>
-
-                  <span className="bg-yellow-500 text-black px-4 py-2 rounded-full text-sm font-bold">
-                    {memberTitle}
-                  </span>
-                </div>
-              </div>
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-1">
+                Confederation of Ogboni Aborigine Fraternity
+              </h1>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <button
+              onClick={logout}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-base font-medium hover:bg-gray-50 transition"
+            >
+              <LogOut size={18} strokeWidth={1.8} />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-5 md:px-8 py-8">
+        {/* =====================================================
+            MEMBER HEADER
+        ===================================================== */}
+
+        <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+          <div className="p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <img
+                  src={
+                    member?.photo ||
+                    `https://ui-avatars.com/api/?background=4b0082&color=fff&size=256&name=${encodeURIComponent(
+                      displayName,
+                    )}`
+                  }
+                  alt={displayName}
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border border-gray-200"
+                />
+
+                <div>
+                  <p className="text-base text-gray-500 mb-1">Welcome back</p>
+
+                  <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">
+                    {displayName}
+                  </h2>
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
+                    <span className="text-lg md:text-xl font-bold text-[#4b0082]">
+                      {memberTitle}
+                    </span>
+
+                    <span className="hidden sm:block text-gray-300">•</span>
+
+                    <span className="text-base text-gray-500">
+                      Member Account
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <button
                 onClick={() => navigate("/ogboni-edit-profile")}
-                className="bg-yellow-500 hover:bg-yellow-600 transition text-black px-6 py-3 rounded-xl font-bold flex items-center gap-2"
+                className="inline-flex items-center justify-center gap-2 bg-[#4b0082] hover:bg-[#3b0068] text-white px-5 py-2.5 rounded-lg text-base font-medium transition"
               >
-                <Pencil size={18} />
+                <Pencil size={17} strokeWidth={1.8} />
                 Edit Profile
               </button>
-
-              <button
-                onClick={logout}
-                className="bg-red-600 hover:bg-red-700 transition px-6 py-3 rounded-xl font-bold flex items-center gap-2"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* SUMMARY CARDS */}
+        {/* =====================================================
+            ACCOUNT SUMMARY
+        ===================================================== */}
 
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 mt-8">
-          <div className="bg-purple-900 rounded-3xl p-6 shadow-xl hover:scale-[1.02] transition">
-            <ShieldCheck className="text-green-400 mb-3" size={35} />
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          {/* Membership */}
 
-            <h3 className="text-yellow-400 font-bold text-lg">Membership</h3>
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                <ShieldCheck
+                  size={19}
+                  className="text-[#4b0082]"
+                  strokeWidth={1.8}
+                />
+              </div>
 
-            <p className="mt-3 text-xl font-bold">Active</p>
-          </div>
-
-          <div className="bg-purple-900 rounded-3xl p-6 shadow-xl hover:scale-[1.02] transition">
-            <Mail className="text-blue-400 mb-3" size={35} />
-
-            <h3 className="text-yellow-400 font-bold text-lg">Email</h3>
-
-            <p className="mt-3 break-all">{member?.email}</p>
-          </div>
-
-          <div className="bg-purple-900 rounded-3xl p-6 shadow-xl hover:scale-[1.02] transition">
-            <Phone className="text-yellow-400 mb-3" size={35} />
-
-            <h3 className="text-yellow-400 font-bold text-lg">Phone</h3>
-
-            <p className="mt-3">{member?.phoneNumber}</p>
-          </div>
-
-          <div className="bg-purple-900 rounded-3xl p-6 shadow-xl hover:scale-[1.02] transition">
-            <User className="text-pink-400 mb-3" size={35} />
-
-            <h3 className="text-yellow-400 font-bold text-lg">Chief Title</h3>
-
-            <p className="mt-3">{memberTitle}</p>
-          </div>
-        </div>
-
-        {/* MAIN CONTENT */}
-
-        <div className="grid lg:grid-cols-3 gap-8 mt-10"></div>
-        {/* LEFT COLUMN */}
-
-        <div className="lg:col-span-2 space-y-8">
-          {/* QUICK ACTIONS */}
-
-          <div className="bg-purple-900 rounded-3xl p-8 shadow-xl">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Quick Actions
-            </h2>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              <button
-                onClick={() => navigate("/ogboni-edit-profile")}
-                className="bg-purple-800 hover:bg-purple-700 rounded-2xl p-6 text-left transition"
-              >
-                <Pencil size={35} className="text-yellow-400 mb-3" />
-
-                <h3 className="font-bold text-xl">Edit Profile</h3>
-
-                <p className="text-gray-300 mt-2">
-                  Update your personal information.
-                </p>
-              </button>
-
-              <button className="bg-purple-800 hover:bg-purple-700 rounded-2xl p-6 text-left transition">
-                <Bell size={35} className="text-yellow-400 mb-3" />
-
-                <h3 className="font-bold text-xl">Weekly Updates</h3>
-
-                <p className="text-gray-300 mt-2">
-                  View official weekly updates.
-                </p>
-              </button>
-
-              <button className="bg-purple-800 hover:bg-purple-700 rounded-2xl p-6 text-left transition">
-                <CalendarDays size={35} className="text-yellow-400 mb-3" />
-
-                <h3 className="font-bold text-xl">Events</h3>
-
-                <p className="text-gray-300 mt-2">
-                  Upcoming meetings and ceremonies.
-                </p>
-              </button>
-
-              <button className="bg-purple-800 hover:bg-purple-700 rounded-2xl p-6 text-left transition">
-                <User size={35} className="text-yellow-400 mb-3" />
-
-                <h3 className="font-bold text-xl">Member Directory</h3>
-
-                <p className="text-gray-300 mt-2">Coming Soon.</p>
-              </button>
+              <span className="text-sm font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-md">
+                Active
+              </span>
             </div>
+
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Membership
+            </p>
+
+            <p className="text-lg font-semibold text-gray-900 mt-1">
+              Active Member
+            </p>
           </div>
 
-          {/* ANNOUNCEMENTS */}
+          {/* Email */}
 
-          <div className="bg-purple-900 rounded-3xl p-8 shadow-xl">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Announcements
-            </h2>
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
+              <Mail size={19} className="text-gray-600" strokeWidth={1.8} />
+            </div>
 
-            {announcements
-              .filter(
-                (item) =>
-                  item.category === "Announcement" && item.active !== false,
-              )
-              .map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-purple-800 rounded-2xl overflow-hidden mb-6"
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Email
+            </p>
+
+            <p className="text-base font-medium text-gray-900 mt-1 break-all">
+              {member?.email || "-"}
+            </p>
+          </div>
+
+          {/* Phone */}
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
+              <Phone size={19} className="text-gray-600" strokeWidth={1.8} />
+            </div>
+
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Phone
+            </p>
+
+            <p className="text-base font-medium text-gray-900 mt-1">
+              {member?.phoneNumber || "-"}
+            </p>
+          </div>
+
+          {/* Title */}
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mb-4">
+              <User size={19} className="text-gray-600" strokeWidth={1.8} />
+            </div>
+
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Title
+            </p>
+
+            <p className="text-base font-medium text-gray-900 mt-1">
+              {memberTitle}
+            </p>
+          </div>
+        </section>
+
+        {/* =====================================================
+            MAIN DASHBOARD
+        ===================================================== */}
+
+        <div className="grid lg:grid-cols-3 gap-6 mt-6">
+          {/* ===================================================
+              LEFT / MAIN COLUMN
+          =================================================== */}
+
+          <div className="lg:col-span-2 space-y-6">
+            {/* QUICK ACTIONS */}
+
+            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Quick Actions
+                </h2>
+
+                <p className="text-base text-gray-500 mt-1">
+                  Access your member services and information.
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-px bg-gray-100">
+                {/* Edit Profile */}
+
+                <button
+                  onClick={() => navigate("/ogboni-edit-profile")}
+                  className="bg-white p-6 text-left hover:bg-gray-50 transition group"
                 >
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-64 object-cover"
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                      <Pencil
+                        size={18}
+                        className="text-[#4b0082]"
+                        strokeWidth={1.8}
+                      />
+                    </div>
+
+                    <ChevronRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-gray-500 transition"
                     />
-                  )}
+                  </div>
 
-                  <div className="p-6">
-                    {item.pinned && (
-                      <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
-                        📌 PINNED
-                      </span>
-                    )}
+                  <h3 className="text-base font-semibold text-gray-900 mt-5">
+                    Edit Profile
+                  </h3>
 
-                    <h3 className="text-2xl font-bold mt-4">{item.title}</h3>
+                  <p className="text-base text-gray-500 mt-1">
+                    Update your personal information.
+                  </p>
+                </button>
 
-                    <p className="mt-4 whitespace-pre-wrap leading-7">
-                      {item.message}
+                {/* Weekly Updates */}
+
+                <button className="bg-white p-6 text-left hover:bg-gray-50 transition group">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <Bell
+                        size={18}
+                        className="text-gray-600"
+                        strokeWidth={1.8}
+                      />
+                    </div>
+
+                    <ChevronRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-gray-500 transition"
+                    />
+                  </div>
+
+                  <h3 className="text-base font-semibold text-gray-900 mt-5">
+                    Weekly Updates
+                  </h3>
+
+                  <p className="text-base text-gray-500 mt-1">
+                    View official weekly updates.
+                  </p>
+                </button>
+
+                {/* Events */}
+
+                <button className="bg-white p-6 text-left hover:bg-gray-50 transition group">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <CalendarDays
+                        size={18}
+                        className="text-gray-600"
+                        strokeWidth={1.8}
+                      />
+                    </div>
+
+                    <ChevronRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-gray-500 transition"
+                    />
+                  </div>
+
+                  <h3 className="text-base font-semibold text-gray-900 mt-5">
+                    Events
+                  </h3>
+
+                  <p className="text-base text-gray-500 mt-1">
+                    View upcoming meetings and ceremonies.
+                  </p>
+                </button>
+
+                {/* Directory */}
+
+                <button className="bg-white p-6 text-left hover:bg-gray-50 transition group">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <User
+                        size={18}
+                        className="text-gray-600"
+                        strokeWidth={1.8}
+                      />
+                    </div>
+
+                    <ChevronRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-gray-500 transition"
+                    />
+                  </div>
+
+                  <h3 className="text-base font-semibold text-gray-900 mt-5">
+                    Member Directory
+                  </h3>
+
+                  <p className="text-base text-gray-500 mt-1">
+                    Member directory access coming soon.
+                  </p>
+                </button>
+              </div>
+            </section>
+
+            {/* =================================================
+                ANNOUNCEMENTS
+            ================================================= */}
+
+            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Announcements
+                  </h2>
+
+                  <p className="text-base text-gray-500 mt-1">
+                    Official communications from the fraternity.
+                  </p>
+                </div>
+
+                <Bell size={19} className="text-gray-400" strokeWidth={1.8} />
+              </div>
+
+              <div className="p-6">
+                {activeAnnouncements.length > 0 ? (
+                  <div className="space-y-5">
+                    {activeAnnouncements.map((item) => (
+                      <article
+                        key={item._id}
+                        className="border border-gray-200 rounded-xl overflow-hidden"
+                      >
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-56 object-cover"
+                          />
+                        )}
+
+                        <div className="p-5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {item.pinned && (
+                              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4b0082] bg-purple-50 px-2.5 py-1 rounded-md">
+                                <Pin size={13} strokeWidth={2} />
+                                Pinned
+                              </span>
+                            )}
+
+                            {item.createdAt && (
+                              <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
+                                <Clock3 size={13} strokeWidth={1.8} />
+                                {formatDate(item.createdAt)}
+                              </span>
+                            )}
+                          </div>
+
+                          <h3 className="text-xl font-semibold text-gray-900 mt-3">
+                            {item.title}
+                          </h3>
+
+                          <p className="text-base text-gray-600 mt-3 whitespace-pre-wrap leading-7">
+                            {item.message}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-gray-300 rounded-xl p-8 text-center">
+                    <Bell
+                      size={24}
+                      className="mx-auto text-gray-400"
+                      strokeWidth={1.6}
+                    />
+
+                    <p className="text-base font-medium text-gray-900 mt-3">
+                      No announcements yet
                     </p>
 
-                    {item.createdAt && (
-                      <p className="text-sm text-gray-300 mt-4">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                    )}
+                    <p className="text-base text-gray-500 mt-1">
+                      Official announcements will appear here.
+                    </p>
                   </div>
-                </div>
-              ))}
-
-            {announcements.filter(
-              (item) =>
-                item.category === "Announcement" && item.active !== false,
-            ).length === 0 && (
-              <div className="bg-purple-800 rounded-2xl p-6">
-                <p className="text-xl font-bold">No Announcements Yet</p>
-
-                <p className="text-gray-300 mt-3">
-                  Official announcements from Ajangbile Heritage will appear
-                  here.
-                </p>
+                )}
               </div>
-            )}
-          </div>
-          {/* WEEKLY UPDATES */}
+            </section>
 
-          <div className="bg-purple-900 rounded-3xl p-8 shadow-xl">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Weekly Updates
-            </h2>
+            {/* =================================================
+                WEEKLY UPDATES
+            ================================================= */}
 
-            {announcements
-              .filter(
-                (item) =>
-                  item.category === "Weekly Update" && item.active !== false,
-              )
-              .map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-purple-800 rounded-2xl overflow-hidden mb-6"
-                >
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-64 object-cover"
+            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Weekly Updates
+                  </h2>
+
+                  <p className="text-base text-gray-500 mt-1">
+                    Regular communications from the Grand Council.
+                  </p>
+                </div>
+
+                <Bell size={19} className="text-gray-400" strokeWidth={1.8} />
+              </div>
+
+              <div className="p-6">
+                {weeklyUpdates.length > 0 ? (
+                  <div className="space-y-5">
+                    {weeklyUpdates.map((item) => (
+                      <article
+                        key={item._id}
+                        className="border border-gray-200 rounded-xl overflow-hidden"
+                      >
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-56 object-cover"
+                          />
+                        )}
+
+                        <div className="p-5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {item.pinned && (
+                              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4b0082] bg-purple-50 px-2.5 py-1 rounded-md">
+                                <Pin size={13} strokeWidth={2} />
+                                Pinned
+                              </span>
+                            )}
+
+                            {item.createdAt && (
+                              <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
+                                <Clock3 size={13} strokeWidth={1.8} />
+                                {formatDate(item.createdAt)}
+                              </span>
+                            )}
+                          </div>
+
+                          <h3 className="text-xl font-semibold text-gray-900 mt-3">
+                            {item.title}
+                          </h3>
+
+                          <p className="text-base text-gray-600 mt-3 whitespace-pre-wrap leading-7">
+                            {item.message}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-gray-300 rounded-xl p-8 text-center">
+                    <Bell
+                      size={24}
+                      className="mx-auto text-gray-400"
+                      strokeWidth={1.6}
                     />
-                  )}
 
-                  <div className="p-6">
-                    {item.pinned && (
-                      <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
-                        📌 PINNED
-                      </span>
-                    )}
-
-                    <h3 className="text-2xl font-bold mt-4">{item.title}</h3>
-
-                    <p className="mt-4 whitespace-pre-wrap leading-7">
-                      {item.message}
+                    <p className="text-base font-medium text-gray-900 mt-3">
+                      No weekly updates yet
                     </p>
 
-                    {item.createdAt && (
-                      <p className="text-sm text-gray-300 mt-4">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                    )}
+                    <p className="text-base text-gray-500 mt-1">
+                      Weekly updates from the Grand Council will appear here.
+                    </p>
                   </div>
-                </div>
-              ))}
-
-            {announcements.filter(
-              (item) =>
-                item.category === "Weekly Update" && item.active !== false,
-            ).length === 0 && (
-              <div className="bg-purple-800 rounded-2xl p-6">
-                <p className="text-xl font-bold">No Weekly Updates Yet</p>
-
-                <p className="text-gray-300 mt-3">
-                  Weekly updates from the Grand Council will appear here
-                  automatically.
-                </p>
+                )}
               </div>
-            )}
+            </section>
           </div>
-        </div>
-        {/* RIGHT COLUMN */}
 
-        <div className="space-y-8">
-          {/* UPCOMING EVENTS */}
+          {/* ===================================================
+              RIGHT COLUMN
+          =================================================== */}
 
-          <div className="bg-purple-900 rounded-3xl p-8 shadow-xl">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Upcoming Events
-            </h2>
+          <div className="space-y-6">
+            {/* UPCOMING EVENTS */}
 
-            {announcements
-              .filter(
-                (item) => item.category === "Event" && item.active !== false,
-              )
-              .map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-purple-800 rounded-2xl overflow-hidden mb-6"
-                >
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-56 object-cover"
+            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      Upcoming Events
+                    </h2>
+
+                    <p className="text-base text-gray-500 mt-1">
+                      Meetings and official gatherings.
+                    </p>
+                  </div>
+
+                  <CalendarDays
+                    size={19}
+                    className="text-gray-400"
+                    strokeWidth={1.8}
+                  />
+                </div>
+              </div>
+
+              <div className="p-6">
+                {upcomingEvents.length > 0 ? (
+                  <div className="space-y-5">
+                    {upcomingEvents.map((item) => (
+                      <article
+                        key={item._id}
+                        className="border border-gray-200 rounded-xl overflow-hidden"
+                      >
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-44 object-cover"
+                          />
+                        )}
+
+                        <div className="p-5">
+                          {item.pinned && (
+                            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4b0082] bg-purple-50 px-2.5 py-1 rounded-md">
+                              <Pin size={13} strokeWidth={2} />
+                              Pinned
+                            </span>
+                          )}
+
+                          <h3 className="text-lg font-semibold text-gray-900 mt-3">
+                            {item.title}
+                          </h3>
+
+                          <p className="text-base text-gray-600 mt-2 whitespace-pre-wrap leading-7">
+                            {item.message}
+                          </p>
+
+                          {item.createdAt && (
+                            <p className="inline-flex items-center gap-1.5 text-sm text-gray-500 mt-4">
+                              <Clock3 size={13} strokeWidth={1.8} />
+                              {formatDate(item.createdAt)}
+                            </p>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-gray-300 rounded-xl p-6 text-center">
+                    <CalendarDays
+                      size={24}
+                      className="mx-auto text-gray-400"
+                      strokeWidth={1.6}
                     />
-                  )}
 
-                  <div className="p-6">
-                    {item.pinned && (
-                      <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
-                        📌 PINNED
-                      </span>
-                    )}
-
-                    <h3 className="text-2xl font-bold mt-4">{item.title}</h3>
-
-                    <p className="mt-4 whitespace-pre-wrap leading-7">
-                      {item.message}
+                    <p className="text-base font-medium text-gray-900 mt-3">
+                      No events scheduled
                     </p>
 
-                    {item.createdAt && (
-                      <p className="text-sm text-gray-300 mt-4">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                    )}
+                    <p className="text-base text-gray-500 mt-1">
+                      Upcoming events will appear here.
+                    </p>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
+            </section>
 
-            {announcements.filter(
-              (item) => item.category === "Event" && item.active !== false,
-            ).length === 0 && (
-              <div className="bg-purple-800 rounded-2xl p-6">
-                <p className="text-xl font-bold">No Events Scheduled</p>
+            {/* MEMBER INFORMATION */}
 
-                <p className="text-gray-300 mt-3">
-                  Meetings, festivals, ceremonies and official gatherings will
-                  appear here.
+            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Member Information
+                </h2>
+
+                <p className="text-base text-gray-500 mt-1">
+                  Your registered member details.
                 </p>
               </div>
-            )}
-          </div>
 
-          {/* MEMBER INFORMATION */}
-          {/* MEMBER INFORMATION */}
+              <div className="p-6 space-y-5">
+                <div className="flex items-start gap-3">
+                  <User
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-          <div className="bg-purple-900 rounded-3xl p-8 shadow-xl">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Member Information
-            </h2>
+                  <div>
+                    <p className="text-sm text-gray-500">Full Name</p>
+                    <p className="text-base font-medium text-gray-900 mt-1">
+                      {member?.fullName || "-"}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="space-y-4">
-              <p>
-                <strong>Name:</strong> {member?.fullName}
-              </p>
+                <div className="flex items-start gap-3">
+                  <User
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-              <p>
-                <strong>Username:</strong> {member?.username}
-              </p>
+                  <div>
+                    <p className="text-sm text-gray-500">Username</p>
+                    <p className="text-base font-medium text-gray-900 mt-1">
+                      {member?.username || "-"}
+                    </p>
+                  </div>
+                </div>
 
-              <p>
-                <strong>Email:</strong> {member?.email}
-              </p>
+                <div className="flex items-start gap-3">
+                  <Mail
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-              <p>
-                <strong>Phone:</strong> {member?.phoneNumber}
-              </p>
+                  <div className="min-w-0">
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="text-base font-medium text-gray-900 mt-1 break-all">
+                      {member?.email || "-"}
+                    </p>
+                  </div>
+                </div>
 
-              <p>
-                <strong>Gender:</strong> {member?.gender}
-              </p>
+                <div className="flex items-start gap-3">
+                  <Phone
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-              <p>
-                <strong>Occupation:</strong> {member?.occupation}
-              </p>
+                  <div>
+                    <p className="text-sm text-gray-500">Phone</p>
+                    <p className="text-base font-medium text-gray-900 mt-1">
+                      {member?.phoneNumber || "-"}
+                    </p>
+                  </div>
+                </div>
 
-              <p>
-                <strong>Chief Title:</strong> {memberTitle}
-              </p>
+                <div className="flex items-start gap-3">
+                  <BriefcaseBusiness
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-              <p>
-                <strong>State:</strong> {member?.state}
-              </p>
+                  <div>
+                    <p className="text-sm text-gray-500">Occupation</p>
+                    <p className="text-base font-medium text-gray-900 mt-1">
+                      {member?.occupation || "-"}
+                    </p>
+                  </div>
+                </div>
 
-              <p>
-                <strong>L.G.A:</strong> {member?.lga}
-              </p>
+                <div className="flex items-start gap-3">
+                  <ShieldCheck
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-              <p>
-                <strong>City:</strong> {member?.city}
-              </p>
+                  <div>
+                    <p className="text-sm text-gray-500">Chief Title</p>
+                    <p className="text-base font-medium text-gray-900 mt-1">
+                      {memberTitle}
+                    </p>
+                  </div>
+                </div>
 
-              <div>
-                <strong>Address</strong>
+                <div className="flex items-start gap-3">
+                  <MapPin
+                    size={18}
+                    className="text-gray-400 mt-0.5"
+                    strokeWidth={1.8}
+                  />
 
-                <div className="mt-2 bg-purple-800 rounded-xl p-4">
-                  {member?.address || "-"}
+                  <div>
+                    <p className="text-sm text-gray-500">Location</p>
+                    <p className="text-base font-medium text-gray-900 mt-1">
+                      {[member?.city, member?.lga, member?.state]
+                        .filter(Boolean)
+                        .join(", ") || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-sm text-gray-500">Address</p>
+
+                  <p className="text-base text-gray-700 leading-7 mt-1">
+                    {member?.address || "-"}
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          {/* MEMBER STATUS */}
-          {/* MEMBER STATUS */}
+            {/* MEMBERSHIP STATUS */}
 
-          <div className="bg-purple-900 rounded-3xl p-8 shadow-xl">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-6">
-              Membership Status
-            </h2>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b border-purple-700 pb-3">
-                <span>Status</span>
-
-                <span className="bg-green-600 px-4 py-1 rounded-full font-bold">
-                  Active
-                </span>
+            <section className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Membership Status
+                </h2>
               </div>
 
-              <div className="flex justify-between items-center border-b border-purple-700 pb-3">
-                <span>Rank</span>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                    <span className="text-base text-gray-500">Status</span>
 
-                <span>{memberTitle}</span>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-md">
+                      <ShieldCheck size={14} strokeWidth={1.8} />
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                    <span className="text-base text-gray-500">Rank</span>
+
+                    <span className="text-base font-medium text-gray-900 text-right">
+                      {memberTitle}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                    <span className="text-base text-gray-500">Username</span>
+
+                    <span className="text-base font-medium text-gray-900 text-right">
+                      {member?.username || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-100">
+                    <span className="text-base text-gray-500">Email</span>
+
+                    <span className="text-base font-medium text-gray-900 text-right break-all">
+                      {member?.email || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-base text-gray-500">Phone</span>
+
+                    <span className="text-base font-medium text-gray-900 text-right">
+                      {member?.phoneNumber || "-"}
+                    </span>
+                  </div>
+                </div>
               </div>
-
-              <div className="flex justify-between items-center border-b border-purple-700 pb-3">
-                <span>Username</span>
-
-                <span>{member?.username}</span>
-              </div>
-
-              <div className="flex justify-between items-center border-b border-purple-700 pb-3">
-                <span>Email</span>
-
-                <span className="text-right break-all">{member?.email}</span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span>Phone</span>
-
-                <span>{member?.phoneNumber}</span>
-              </div>
-            </div>
+            </section>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

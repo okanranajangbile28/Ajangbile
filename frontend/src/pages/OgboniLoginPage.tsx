@@ -67,7 +67,7 @@ const OgboniLoginPage = () => {
             errorMessage.includes("pending approval") ||
             errorMessage.includes("pending"))
         ) {
-          navigate("/membership-pending", {
+          navigate("/member-account-approval", {
             replace: true,
             state: {
               email: formData.email,
