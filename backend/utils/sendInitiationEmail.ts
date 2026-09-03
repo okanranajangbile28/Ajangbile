@@ -165,17 +165,6 @@ export const sendInitiationEmail = async ({
         "
       />
 
-      <div style="
-        color:#FFD700;
-        font-size:13px;
-        letter-spacing:3px;
-        text-transform:uppercase;
-        font-weight:bold;
-        margin-bottom:18px;
-      ">
-        Official Initiation Notification
-      </div>
-
       <h1 style="
         margin:0;
         color:#ffffff;
