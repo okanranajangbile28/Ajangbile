@@ -1065,13 +1065,14 @@ export const sendOrderReceiptEmail = async ({
     <!-- ================================================= -->
 
     <div style="
-      background:linear-gradient(180deg,#4b0082 0%,#32005c 100%);
+      background:#ffffff;
       padding:40px 25px;
       text-align:center;
+      border-bottom:1px solid #eeeeee;
     ">
 
       <div style="
-        color:#FFD700;
+        color:#4b0082;
         font-size:28px;
         font-weight:bold;
         letter-spacing:1px;
@@ -1082,7 +1083,7 @@ export const sendOrderReceiptEmail = async ({
 
       <h1 style="
         margin:0;
-        color:#ffffff;
+        color:#4b0082;
         font-size:30px;
         line-height:1.3;
       ">
@@ -1090,7 +1091,7 @@ export const sendOrderReceiptEmail = async ({
       </h1>
 
       <p style="
-        color:#FFD700;
+        color:#4b0082;
         margin:15px 0 0;
         font-size:16px;
         font-weight:bold;
