@@ -345,65 +345,77 @@ Thank you.`,
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-950 via-purple-900 to-black text-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* ======================================================
-            HERO
-        ====================================================== */}
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-purple-100 text-gray-900">
+      {/* ======================================================
+          HERO SECTION
+      ====================================================== */}
 
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-5 py-2 rounded-full mb-6">
-            <ShieldCheck size={20} />
+      <section className="bg-gradient-to-r from-purple-900 via-purple-700 to-yellow-700 text-white py-20 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 mb-6">
+            <ShieldCheck size={22} className="text-yellow-300" />
 
-            <span className="font-semibold">
+            <span className="font-semibold text-yellow-200">
               Confidential Spiritual Guidance
             </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-yellow-400 mb-8">
+          <h1 className="text-5xl md:text-7xl font-bold text-yellow-300 mb-8">
             Spiritual Consultation
           </h1>
 
-          <p className="max-w-4xl mx-auto text-xl text-gray-300 leading-9">
+          <p className="text-xl md:text-2xl max-w-4xl mx-auto leading-10">
             Seek wisdom, clarity, guidance and spiritual solutions through
             authentic Yoruba traditional consultation and sacred teachings.
           </p>
         </div>
+      </section>
 
-        {/* ======================================================
-            SERVICES
-        ====================================================== */}
+      {/* ======================================================
+          SERVICES
+      ====================================================== */}
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-          {services.map((service) => (
-            <div
-              key={service.title}
-              className="bg-purple-900/80 border border-yellow-500/70 rounded-3xl p-8 shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition duration-300"
-            >
-              <h2 className="text-2xl font-bold text-yellow-400 mb-4">
-                {service.title}
-              </h2>
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-purple-900 mb-12">
+            Consultation Services
+          </h2>
 
-              <p className="text-gray-300 leading-8">{service.description}</p>
-            </div>
-          ))}
-        </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <div
+                key={index}
+                className="bg-white border border-purple-200 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition duration-300"
+              >
+                <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center mb-5">
+                  <ShieldCheck size={21} className="text-purple-900" />
+                </div>
 
-        {/* ======================================================
-            CONSULTATION BOOKING
-        ====================================================== */}
+                <h3 className="text-2xl font-bold text-purple-900 mb-4">
+                  {service.title}
+                </h3>
 
-        <div className="bg-purple-900 border border-yellow-500 rounded-3xl p-8 md:p-12 shadow-2xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-yellow-400 mb-6">
-              Book A Consultation
-            </h2>
-
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-8">
-              Choose the consultation that best suits your needs, then select
-              your preferred payment method.
-            </p>
+                <p className="text-gray-700 leading-8">{service.description}</p>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* ======================================================
+          BOOKING SECTION
+      ====================================================== */}
+
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl text-center font-bold text-purple-900 mb-8">
+            Book A Consultation
+          </h2>
+
+          <p className="text-lg leading-8 text-center text-gray-700 max-w-3xl mx-auto mb-12">
+            Choose the consultation that best suits your needs, then select your
+            preferred payment method.
+          </p>
 
           {/* ====================================================
               CONSULTATION TYPES
@@ -411,25 +423,25 @@ Thank you.`,
 
           {pricingLoading ? (
             <div className="text-center py-12">
-              <div className="inline-flex items-center gap-3 text-yellow-400 text-lg font-semibold">
-                <div className="w-6 h-6 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
+              <div className="inline-flex items-center gap-3 text-purple-900 text-lg font-semibold">
+                <div className="w-6 h-6 border-4 border-purple-200 border-t-purple-900 rounded-full animate-spin" />
                 Loading current consultation prices...
               </div>
             </div>
           ) : consultations.length === 0 ? (
-            <div className="max-w-2xl mx-auto mb-12 bg-red-900/40 border border-red-500 text-red-200 rounded-2xl p-6 text-center">
+            <div className="max-w-2xl mx-auto mb-12 bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center">
               {message || "Unable to load current consultation prices."}
 
               <button
                 type="button"
                 onClick={() => void loadPricing()}
-                className="block mx-auto mt-4 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-xl font-bold transition"
+                className="block mx-auto mt-4 bg-purple-900 hover:bg-purple-800 text-white px-6 py-3 rounded-full font-bold transition"
               >
                 Try Again
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12 justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {consultations.map((consultation) => {
                 const isSelected = selectedConsultation === consultation.type;
 
@@ -438,32 +450,32 @@ Thank you.`,
                     key={consultation.type}
                     type="button"
                     onClick={() => handleSelectConsultation(consultation.type)}
-                    className={`w-full max-w-md md:max-w-none text-left rounded-3xl p-8 border-2 transition duration-300 ${
+                    className={`w-full text-left rounded-3xl p-8 border transition duration-300 ${
                       isSelected
-                        ? "border-yellow-400 bg-purple-800 shadow-2xl scale-[1.02]"
-                        : "border-purple-600 bg-purple-950 hover:border-yellow-500 hover:bg-purple-900"
+                        ? "bg-purple-100 border-purple-400 shadow-2xl"
+                        : "bg-purple-50 border-purple-200 hover:shadow-2xl hover:border-purple-300"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4 mb-5">
                       <div>
-                        <h3 className="text-2xl font-bold text-yellow-400">
+                        <h3 className="text-2xl font-bold text-purple-900">
                           {consultation.name}
                         </h3>
 
                         {isSelected && (
-                          <div className="flex items-center gap-2 text-green-400 font-semibold mt-3">
+                          <div className="flex items-center gap-2 text-green-700 font-semibold mt-3">
                             <CheckCircle size={20} />
                             Selected
                           </div>
                         )}
                       </div>
 
-                      <span className="text-3xl font-bold text-white whitespace-nowrap relative right-4">
+                      <span className="text-3xl font-bold text-yellow-700 whitespace-nowrap">
                         ${consultation.amount.toFixed(2)}
                       </span>
                     </div>
 
-                    <p className="text-gray-300 leading-7">
+                    <p className="text-gray-700 leading-8">
                       {consultation.description}
                     </p>
                   </button>
@@ -477,16 +489,16 @@ Thank you.`,
           ==================================================== */}
 
           {selectedDetails && (
-            <div className="max-w-4xl mx-auto mb-10 bg-yellow-500/10 border border-yellow-500/40 rounded-2xl p-6 text-center">
-              <p className="text-yellow-300 font-semibold mb-2">
+            <div className="max-w-4xl mx-auto mb-10 bg-purple-50 border border-purple-200 rounded-2xl p-6 text-center">
+              <p className="text-purple-700 font-semibold mb-2">
                 Selected Consultation
               </p>
 
-              <h3 className="text-2xl font-bold text-white">
+              <h3 className="text-2xl font-bold text-purple-900">
                 {selectedDetails.name}
               </h3>
 
-              <p className="text-yellow-400 text-xl font-bold mt-2">
+              <p className="text-yellow-700 text-xl font-bold mt-2">
                 ${selectedDetails.amount.toFixed(2)}
               </p>
             </div>
@@ -497,7 +509,7 @@ Thank you.`,
           ==================================================== */}
 
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-center text-yellow-400 mb-6">
+            <h3 className="text-2xl font-bold text-center text-purple-900 mb-6">
               Choose Payment Method
             </h3>
 
@@ -510,7 +522,7 @@ Thank you.`,
                 disabled={
                   loading || pricingLoading || consultations.length === 0
                 }
-                className="group flex items-center justify-center gap-3 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-60 disabled:cursor-not-allowed text-black px-8 py-5 rounded-2xl font-bold text-lg transition duration-300 shadow-lg hover:shadow-yellow-500/30"
+                className="group flex items-center justify-center gap-3 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-60 disabled:cursor-not-allowed text-black px-8 py-5 rounded-full font-bold text-lg transition duration-300 shadow-lg"
               >
                 <CreditCard
                   size={26}
@@ -528,13 +540,13 @@ Thank you.`,
                 disabled={
                   loading || pricingLoading || consultations.length === 0
                 }
-                className="group flex items-center justify-center gap-3 border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black disabled:opacity-60 disabled:cursor-not-allowed px-8 py-5 rounded-2xl font-bold text-lg transition duration-300"
+                className="group flex items-center justify-center gap-3 border-2 border-purple-900 text-purple-900 hover:bg-purple-100 disabled:opacity-60 disabled:cursor-not-allowed px-8 py-5 rounded-full font-bold text-lg transition duration-300"
               >
                 <Landmark
                   size={26}
                   className="group-hover:scale-110 transition"
                 />
-                Pay by Bank Transfer
+                Pay with Bank Transfer
               </button>
             </div>
 
@@ -547,22 +559,26 @@ Thank you.`,
                 className={`mt-6 rounded-xl p-4 text-center ${
                   message.toLowerCase().includes("successfully") ||
                   message.toLowerCase().includes("pending")
-                    ? "bg-green-900/40 border border-green-500 text-green-200"
-                    : "bg-red-900/40 border border-red-500 text-red-200"
+                    ? "bg-green-50 border border-green-300 text-green-800"
+                    : "bg-red-50 border border-red-300 text-red-700"
                 }`}
               >
                 {message}
               </div>
             )}
           </div>
+        </div>
+      </section>
 
-          {/* ====================================================
-              BANK TRANSFER DETAILS
-          ==================================================== */}
+      {/* ======================================================
+          BANK TRANSFER DETAILS
+      ====================================================== */}
 
-          {showBankDetails && selectedDetails && (
-            <div className="max-w-3xl mx-auto mt-10 bg-white text-gray-900 rounded-3xl p-8 md:p-10 shadow-2xl border-4 border-yellow-500">
-              <div className="text-center mb-8">
+      {showBankDetails && selectedDetails && (
+        <section className="py-20 px-6 bg-purple-50">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-purple-200">
+              <div className="text-center mb-10">
                 <div className="inline-flex items-center justify-center bg-purple-100 rounded-full p-4 mb-4">
                   <Landmark className="text-purple-900" size={40} />
                 </div>
@@ -579,10 +595,10 @@ Thank you.`,
 
               {/* CONSULTATION SUMMARY */}
 
-              <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6 mb-8">
+              <div className="bg-purple-100 border border-purple-300 rounded-2xl p-6 mb-8">
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                   <div>
-                    <p className="text-sm text-purple-600 font-semibold uppercase tracking-wide">
+                    <p className="text-sm text-purple-700 font-semibold uppercase tracking-wide">
                       Consultation
                     </p>
 
@@ -592,7 +608,7 @@ Thank you.`,
                   </div>
 
                   <div className="md:text-right">
-                    <p className="text-sm text-purple-600 font-semibold uppercase tracking-wide">
+                    <p className="text-sm text-purple-700 font-semibold uppercase tracking-wide">
                       Consultation Fee
                     </p>
 
@@ -605,7 +621,7 @@ Thank you.`,
 
               {/* BANK DETAILS */}
 
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-8 space-y-5">
+              <div className="bg-white border border-purple-200 rounded-2xl p-6 mb-8 shadow-lg space-y-5">
                 <div>
                   <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">
                     Bank
@@ -639,7 +655,7 @@ Thank you.`,
 
               {/* NAIRA PAYMENT NOTE */}
 
-              <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-6 mb-8">
+              <div className="bg-white border-l-4 border-yellow-500 rounded-2xl p-6 mb-8 shadow-lg">
                 <h4 className="font-bold text-lg text-purple-900 mb-3">
                   Naira Payment Note
                 </h4>
@@ -661,7 +677,7 @@ Thank you.`,
                   RECEIPT UPLOAD
               ================================================== */}
 
-              <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-6 mb-8">
+              <div className="bg-purple-100 border border-purple-300 rounded-2xl p-6 mb-8">
                 <div className="flex items-center gap-3 mb-3">
                   <Upload className="text-purple-900" size={25} />
 
@@ -686,7 +702,7 @@ Thank you.`,
                     file:mr-4
                     file:py-3
                     file:px-5
-                    file:rounded-xl
+                    file:rounded-full
                     file:border-0
                     file:bg-purple-900
                     file:text-white
@@ -710,7 +726,7 @@ Thank you.`,
 
               {/* IMPORTANT */}
 
-              <div className="bg-yellow-100 border-2 border-yellow-500 rounded-2xl p-6 mb-8">
+              <div className="bg-white border-l-4 border-yellow-500 rounded-2xl p-6 mb-8 shadow-lg">
                 <h4 className="font-bold text-xl text-purple-900 mb-3">
                   Important
                 </h4>
@@ -740,7 +756,7 @@ Thank you.`,
                 type="button"
                 onClick={handleWhatsAppTransferConfirmation}
                 disabled={loading || !bankTransferReceipt}
-                className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-5 rounded-2xl font-bold text-lg transition duration-300 shadow-lg"
+                className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-5 rounded-full font-bold text-lg transition duration-300 shadow-lg"
               >
                 <MessageCircle size={26} />
 
@@ -765,14 +781,29 @@ Thank you.`,
                   setMessage("");
                 }}
                 disabled={loading}
-                className="w-full mt-4 border-2 border-gray-300 hover:bg-gray-100 disabled:opacity-60 text-gray-700 px-8 py-4 rounded-2xl font-semibold transition duration-300"
+                className="w-full mt-4 border-2 border-gray-300 hover:bg-gray-100 disabled:opacity-60 text-gray-700 px-8 py-4 rounded-full font-semibold transition duration-300"
               >
                 Back to Payment Options
               </button>
             </div>
-          )}
+          </div>
+        </section>
+      )}
+
+      {/* ======================================================
+          CTA
+      ====================================================== */}
+
+      <section className="py-20 px-6 bg-gradient-to-r from-purple-800 to-yellow-700 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">Spiritual Consultation</h2>
+
+          <p className="text-lg leading-8">
+            Seek wisdom, clarity, guidance and spiritual solutions through
+            authentic Yoruba traditional consultation and sacred teachings.
+          </p>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
