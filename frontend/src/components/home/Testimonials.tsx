@@ -15,49 +15,150 @@ const Testimonials = () => {
         </div>
 
         <div className="hidden md:flex gap-6 text-5xl">
-          <button>
+          <button type="button">
             <FaCircleArrowLeft color="white" />
           </button>
 
-          <button>
+          <button type="button">
             <FaCircleArrowRight color="white" />
           </button>
         </div>
       </div>
 
-      {/* Cards */}
-      <div
-        className="
-          grid
-          gap-6
-          sm:grid-cols-2
-          xl:grid-cols-4
-        "
-      >
-        <TestimonialsBlock
-          name="Firstname Lastname"
-          position="Position"
-          quote="Things started to work for me when I bought some totems."
-        />
+      {/* Testimonials Carousel */}
+      <div className="relative w-full overflow-hidden">
+        <div className="testimonial-track">
+          {/* FIRST SET */}
+          <div className="testimonial-group">
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="Things started to work for me when I bought some totems."
+              />
+            </div>
 
-        <TestimonialsBlock
-          name="Firstname Lastname"
-          position="Position"
-          quote="The fabric I bought stood out so much that everyone kept asking where I got it."
-        />
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="The fabric I bought stood out so much that everyone kept asking where I got it."
+              />
+            </div>
 
-        <TestimonialsBlock
-          name="Firstname Lastname"
-          position="Position"
-          quote="After using the herbal remedy I purchased, I felt much better."
-        />
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="After using the herbal remedy I purchased, I felt much better."
+              />
+            </div>
 
-        <TestimonialsBlock
-          name="Firstname Lastname"
-          position="Position"
-          quote="Things started to work for me when I bought some totems."
-        />
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="My children love the Ifa book i bought and now they are encouraged to learn more about Ifa."
+              />
+            </div>
+          </div>
+
+          {/* DUPLICATE SET FOR SEAMLESS LOOP */}
+          <div
+            className="testimonial-group testimonial-group-duplicate"
+            aria-hidden="true"
+          >
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="Things started to work for me when I bought some totems."
+              />
+            </div>
+
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="The fabric I bought stood out so much that everyone kept asking where I got it."
+              />
+            </div>
+
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="After using the herbal remedy I purchased, I felt much better."
+              />
+            </div>
+
+            <div className="testimonial-card">
+              <TestimonialsBlock
+                name="Firstname Lastname"
+                position="Position"
+                quote="My children love the Ifa book i bought and now they are encouraged to learn more about Ifa."
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Carousel Animation */}
+      <style>{`
+        .testimonial-track {
+          display: flex;
+          width: max-content;
+          animation: testimonialMove 30s linear infinite;
+        }
+
+        .testimonial-group {
+          display: flex;
+          gap: 40px;
+          flex-shrink: 0;
+        }
+
+        /* Space between the end of one set and the beginning of the next set */
+        .testimonial-group-duplicate {
+          margin-left: 40px;
+        }
+
+        .testimonial-card {
+          width: 320px;
+          flex-shrink: 0;
+        }
+
+        .testimonial-track:hover {
+          animation-play-state: paused;
+        }
+
+        @keyframes testimonialMove {
+          from {
+            transform: translateX(-50%);
+          }
+
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .testimonial-card {
+            width: 280px;
+          }
+
+          .testimonial-group {
+            gap: 28px;
+          }
+
+          .testimonial-group-duplicate {
+            margin-left: 28px;
+          }
+
+          .testimonial-track {
+            animation-duration: 24s;
+          }
+        }
+      `}</style>
     </section>
   );
 };
