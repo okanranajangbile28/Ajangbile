@@ -1060,7 +1060,9 @@ export const sendOrderReceiptEmail = async ({
     box-shadow:0 8px 30px rgba(0,0,0,.10);
   ">
 
+    <!-- ================================================= -->
     <!-- HEADER -->
+    <!-- ================================================= -->
 
     <div style="
       background:linear-gradient(180deg,#4b0082 0%,#32005c 100%);
@@ -1068,15 +1070,15 @@ export const sendOrderReceiptEmail = async ({
       text-align:center;
     ">
 
-      <img
-        src="${CREST_URL}"
-        alt="Ajangbile Heritage Crest"
-        style="
-          width:90px;
-          height:auto;
-          margin-bottom:18px;
-        "
-      />
+      <div style="
+        color:#FFD700;
+        font-size:28px;
+        font-weight:bold;
+        letter-spacing:1px;
+        margin-bottom:20px;
+      ">
+        Ajangbile Heritage
+      </div>
 
       <h1 style="
         margin:0;
@@ -1095,9 +1097,12 @@ export const sendOrderReceiptEmail = async ({
       ">
         Your Order Receipt
       </p>
+
     </div>
 
+    <!-- ================================================= -->
     <!-- BODY -->
+    <!-- ================================================= -->
 
     <div style="padding:40px 30px;">
 
@@ -1116,7 +1121,9 @@ export const sendOrderReceiptEmail = async ({
         Your payment has been successfully received and your order has been confirmed.
       </p>
 
+      <!-- ================================================= -->
       <!-- ORDER INFORMATION -->
+      <!-- ================================================= -->
 
       <div style="
         background:#f8f6fb;
@@ -1145,7 +1152,9 @@ export const sendOrderReceiptEmail = async ({
 
       </div>
 
+      <!-- ================================================= -->
       <!-- ORDER ITEMS -->
+      <!-- ================================================= -->
 
       <h2 style="
         color:#4b0082;
@@ -1162,7 +1171,10 @@ export const sendOrderReceiptEmail = async ({
 
         <thead>
 
-          <tr style="background:#4b0082;color:#ffffff;">
+          <tr style="
+            background:#4b0082;
+            color:#ffffff;
+          ">
 
             <th style="
               padding:14px;
@@ -1197,7 +1209,9 @@ export const sendOrderReceiptEmail = async ({
 
       </table>
 
+      <!-- ================================================= -->
       <!-- TOTAL -->
+      <!-- ================================================= -->
 
       <div style="
         margin-top:30px;
@@ -1224,7 +1238,9 @@ export const sendOrderReceiptEmail = async ({
 
       </div>
 
+      <!-- ================================================= -->
       <!-- NEXT STEP -->
+      <!-- ================================================= -->
 
       <div style="
         margin-top:35px;
@@ -1250,6 +1266,10 @@ export const sendOrderReceiptEmail = async ({
 
       </div>
 
+      <!-- ================================================= -->
+      <!-- WEBSITE BUTTON -->
+      <!-- ================================================= -->
+
       <div style="
         text-align:center;
         margin:40px 0 20px;
@@ -1272,6 +1292,10 @@ export const sendOrderReceiptEmail = async ({
 
       </div>
 
+      <!-- ================================================= -->
+      <!-- FOOTER -->
+      <!-- ================================================= -->
+
       <hr style="
         border:none;
         border-top:1px solid #ddd;
@@ -1291,11 +1315,11 @@ export const sendOrderReceiptEmail = async ({
         color:#4b0082;
         text-align:center;
         font-weight:bold;
+        font-size:18px;
         line-height:1.7;
+        margin-bottom:0;
       ">
         Ajangbile Heritage
-        <br />
-        Confederation of Ogboni Aborigine Fraternity of Nigeria
       </p>
 
     </div>
