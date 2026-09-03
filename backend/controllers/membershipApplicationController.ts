@@ -1001,21 +1001,6 @@ export const scheduleAndSendInitiation = async (
     application.initiationInstructions = req.body.initiationInstructions;
 
     // ==================================================
-    // CONVERT 24-HOUR TIME TO 12-HOUR AM/PM
-    // ==================================================
-
-    const formattedTime = application.initiationTime
-      ? new Date(`1970-01-01T${application.initiationTime}`).toLocaleTimeString(
-          'en-US',
-          {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          },
-        )
-      : '';
-
-    // ==================================================
     // SEND INITIATION EMAIL
     // ==================================================
 
@@ -1023,7 +1008,7 @@ export const scheduleAndSendInitiation = async (
       fullName: application.fullName,
       email: application.email,
       initiationDate: application.initiationDate,
-      initiationTime: formattedTime,
+      initiationTime: application.initiationTime || '',
       initiationVenue: application.initiationVenue || '',
       initiationInstructions: application.initiationInstructions || '',
     });
