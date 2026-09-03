@@ -502,12 +502,6 @@ const ShopBankTransferPayment = () => {
           ================================================== */}
 
           <div className="bg-purple-900 text-white text-center px-6 py-10">
-            <img
-              src="/images/crest.png"
-              alt="Ajangbile Heritage Crest"
-              className="w-24 mx-auto mb-5"
-            />
-
             <h1 className="text-3xl md:text-4xl font-black">
               Bank Transfer Payment
             </h1>
