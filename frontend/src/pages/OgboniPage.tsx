@@ -79,38 +79,61 @@ function OgboniPage() {
     loadOgboniBlogs();
   }, []);
 
-  const scrollToPortalOptions = () => {
-    document.getElementById("portal-options")?.scrollIntoView({
+  /* =====================================================
+      TOP LOGIN BUTTON
+      Scrolls to Iledi Ajangbile section
+  ===================================================== */
+
+  const scrollToIledi = () => {
+    document.getElementById("iledi-card")?.scrollIntoView({
       behavior: "smooth",
-      block: "start",
+      block: "center",
+    });
+  };
+
+  /* =====================================================
+      TOP APPLY NOW BUTTON
+      Scrolls to Become a Member section
+  ===================================================== */
+
+  const scrollToBecomeMember = () => {
+    document.getElementById("become-member-card")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
     });
   };
 
   return (
-    <div className="min-h-screen bg-purple-950 text-white py-16 px-6">
+    <div className="min-h-screen bg-purple-950 text-white pt-4 pb-16 px-4 sm:pt-10 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* =====================================================
             HEADER
         ===================================================== */}
 
         {/* TOP RIGHT ACTION BUTTONS */}
-        <div className="flex justify-end gap-3 mb-6">
+        <div className="flex justify-end gap-2 mb-2 sm:gap-3 sm:mb-6">
+          {/* LOGIN */}
           <button
             type="button"
-            onClick={scrollToPortalOptions}
-            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full border-2 border-yellow-500 text-yellow-300 font-bold hover:bg-yellow-500 hover:text-purple-950 transition duration-300 shadow-lg"
+            onClick={scrollToIledi}
+            className="inline-flex items-center justify-center px-2.5 py-1 text-xs sm:px-6 sm:py-2.5 sm:text-base rounded-full border-2 border-yellow-500 text-yellow-300 font-bold hover:bg-yellow-500 hover:text-purple-950 transition duration-300 shadow-lg"
           >
             Login
           </button>
 
+          {/* APPLY NOW */}
           <button
             type="button"
-            onClick={scrollToPortalOptions}
-            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-yellow-500 text-purple-950 font-bold hover:bg-yellow-400 transition duration-300 shadow-lg"
+            onClick={scrollToBecomeMember}
+            className="inline-flex items-center justify-center px-2.5 py-1 text-xs sm:px-6 sm:py-2.5 sm:text-base rounded-full bg-yellow-500 text-purple-950 font-bold hover:bg-yellow-400 transition duration-300 shadow-lg"
           >
             Apply Now
           </button>
         </div>
+
+        {/* =====================================================
+            MAIN HEADER / LOGO
+        ===================================================== */}
 
         <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
           <img
@@ -310,9 +333,12 @@ function OgboniPage() {
           {/* ORIGINAL PORTAL BUTTONS */}
 
           <div className="grid md:grid-cols-2 gap-10">
-            {/* Iledi */}
+            {/* =================================================
+                ILEDI AJANGBILE
+            ================================================= */}
 
             <Link
+              id="iledi-card"
               to="/iledi-ajangbile"
               className="group bg-purple-900 border border-yellow-500 rounded-3xl p-10 text-center shadow-xl hover:scale-105 hover:bg-purple-800 transition duration-300"
             >
@@ -338,9 +364,12 @@ function OgboniPage() {
               </span>
             </Link>
 
-            {/* Become Member */}
+            {/* =================================================
+                BECOME A MEMBER
+            ================================================= */}
 
             <Link
+              id="become-member-card"
               to="/become-member"
               className="group bg-purple-900 border border-yellow-500 rounded-3xl p-10 text-center shadow-xl hover:scale-105 hover:bg-purple-800 transition duration-300"
             >
