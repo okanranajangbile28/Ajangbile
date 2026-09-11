@@ -45,7 +45,7 @@ const TourismPage = () => {
           </p>
 
           <h1 className="text-5xl md:text-7xl font-bold text-yellow-300 mb-8">
-            Discover Yoruba Heritage visiting remarkable places
+            Discover Yoruba Heritage by visiting remarkable places
           </h1>
 
           <p className="text-xl md:text-2xl max-w-4xl mx-auto leading-10">
