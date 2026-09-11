@@ -34,6 +34,7 @@ const CreateProductPage = lazy(() => import("../pages/CreateProductPage"));
 
 const IfaPage = lazy(() => import("../pages/IfaPage"));
 const OgboniPage = lazy(() => import("../pages/OgboniPage"));
+const TourismPage = lazy(() => import("../pages/TourismPage"));
 const ConsultationPage = lazy(() => import("../pages/ConsultationPage"));
 
 const IlediAjangbile = lazy(() => import("../pages/IlediAjangbile"));
@@ -188,6 +189,8 @@ const App = () => {
             <Route path="/ifa" element={<IfaPage />} />
 
             <Route path="/ogboni" element={<OgboniPage />} />
+
+            <Route path="/tourism" element={<TourismPage />} />
 
             <Route path="/consultation" element={<ConsultationPage />} />
 

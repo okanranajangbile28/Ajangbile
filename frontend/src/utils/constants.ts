@@ -48,6 +48,11 @@ export const links = [
   },
   {
     id: 7,
+    text: "Tourism",
+    url: "/tourism",
+  },
+  {
+    id: 8,
     text: "About",
     url: "/about",
   },
