@@ -345,7 +345,10 @@ const OgboniDashboard = () => {
 
                 {/* Weekly Updates */}
 
-                <button className="bg-white p-6 text-left hover:bg-gray-50 transition group">
+                <button
+                  onClick={() => navigate("/weekly-updates")}
+                  className="bg-white p-6 text-left hover:bg-gray-50 transition group"
+                >
                   <div className="flex items-start justify-between">
                     <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
                       <Bell
@@ -372,7 +375,10 @@ const OgboniDashboard = () => {
 
                 {/* Events */}
 
-                <button className="bg-white p-6 text-left hover:bg-gray-50 transition group">
+                <button
+                  onClick={() => navigate("/events")}
+                  className="bg-white p-6 text-left hover:bg-gray-50 transition group"
+                >
                   <div className="flex items-start justify-between">
                     <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
                       <CalendarDays

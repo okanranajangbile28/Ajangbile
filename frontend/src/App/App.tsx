@@ -101,6 +101,24 @@ const OgboniAdminDashboard = lazy(
 
 const OgboniEditProfile = lazy(() => import("../pages/OgboniEditProfile"));
 
+const MemberProfile = lazy(() => import("../pages/MemberProfile"));
+
+const MemberDirectory = lazy(() => import("../pages/MemberDirectory"));
+
+const HeritageLearning = lazy(() => import("../pages/HeritageLearning"));
+
+const Gallery = lazy(() => import("../pages/Gallery"));
+
+const Notifications = lazy(() => import("../pages/Notifications"));
+
+const MemberSettings = lazy(() => import("../pages/MemberSettings"));
+
+const Announcements = lazy(() => import("../pages/Announcements"));
+
+const WeeklyUpdates = lazy(() => import("../pages/WeeklyUpdates"));
+
+const Events = lazy(() => import("../pages/Events"));
+
 // ======================================================
 // BLOG
 // ======================================================
@@ -222,10 +240,28 @@ const App = () => {
 
             <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 
+            <Route path="/member-profile" element={<MemberProfile />} />
+
             <Route
               path="/ogboni-edit-profile"
               element={<OgboniEditProfile />}
             />
+
+            <Route path="/member-directory" element={<MemberDirectory />} />
+
+            <Route path="/heritage-learning" element={<HeritageLearning />} />
+
+            <Route path="/gallery" element={<Gallery />} />
+
+            <Route path="/notifications" element={<Notifications />} />
+
+            <Route path="/member-settings" element={<MemberSettings />} />
+
+            <Route path="/announcements" element={<Announcements />} />
+
+            <Route path="/weekly-updates" element={<WeeklyUpdates />} />
+
+            <Route path="/events" element={<Events />} />
 
             <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
 

@@ -178,6 +178,43 @@ export const getAllMembers = async (
   }
 };
 
+// ================= MEMBER DIRECTORY =================
+export const getMemberDirectory = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const members = await OgboniMember.find(
+      { approved: true },
+      {
+        fullName: 1,
+        username: 1,
+        occupation: 1,
+        chiefTitle: 1,
+        chieftaincyTitle: 1,
+        city: 1,
+        state: 1,
+        lga: 1,
+        photo: 1,
+      },
+    ).sort({
+      fullName: 1,
+    });
+
+    res.status(200).json({
+      success: true,
+      members,
+    });
+  } catch (error: any) {
+    console.error('Member directory error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // ================= APPROVE MEMBER =================
 export const approveMember = async (
   req: Request,

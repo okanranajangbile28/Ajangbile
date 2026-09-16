@@ -4,6 +4,7 @@ import {
   registerMember,
   loginMember,
   getAllMembers,
+  getMemberDirectory,
   approveMember,
   rejectMember,
   forgotPassword,
@@ -40,6 +41,14 @@ router.patch(
 router.post('/forgot-password', forgotPassword);
 
 router.patch('/reset-password/:token', resetPassword);
+
+// ================= Member Directory =================
+
+router.get('/directory', getMemberDirectory);
+
+// ================= Admin =================
+
+router.get('/members', getAllMembers);
 
 // ================= Admin =================
 
