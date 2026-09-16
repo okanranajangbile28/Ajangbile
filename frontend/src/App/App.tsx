@@ -81,6 +81,7 @@ const ApplicationSuccess = lazy(() => import("../pages/ApplicationSuccess"));
 // ======================================================
 
 const OgboniSignupPage = lazy(() => import("../pages/OgboniSignupPage"));
+
 const OgboniLoginPage = lazy(() => import("../pages/OgboniLoginPage"));
 
 const OgboniForgotPassword = lazy(
@@ -149,6 +150,9 @@ const App = () => {
         <Routes>
           {/* ==================================================
               PUBLIC / USER ROUTES
+
+              These routes use the normal website layout:
+              Navbar + Sidebar + Footer
           ================================================== */}
 
           <Route element={<UserRoutes />}>
@@ -217,55 +221,6 @@ const App = () => {
             <Route path="/become-member" element={<BecomeMember />} />
 
             {/* ==================================================
-                OGBONI MEMBER PORTAL
-            ================================================== */}
-
-            <Route path="/signup" element={<OgboniSignupPage />} />
-
-            <Route path="/login" element={<OgboniLoginPage />} />
-
-            <Route path="/ogboni-login" element={<OgboniLoginPage />} />
-
-            <Route path="/forgot-password" element={<OgboniForgotPassword />} />
-
-            <Route
-              path="/ogboni-reset-password/:token"
-              element={<OgboniResetPassword />}
-            />
-
-            <Route
-              path="/member-account-approval"
-              element={<MemberAccountPending />}
-            />
-
-            <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
-
-            <Route path="/member-profile" element={<MemberProfile />} />
-
-            <Route
-              path="/ogboni-edit-profile"
-              element={<OgboniEditProfile />}
-            />
-
-            <Route path="/member-directory" element={<MemberDirectory />} />
-
-            <Route path="/heritage-learning" element={<HeritageLearning />} />
-
-            <Route path="/gallery" element={<Gallery />} />
-
-            <Route path="/notifications" element={<Notifications />} />
-
-            <Route path="/member-settings" element={<MemberSettings />} />
-
-            <Route path="/announcements" element={<Announcements />} />
-
-            <Route path="/weekly-updates" element={<WeeklyUpdates />} />
-
-            <Route path="/events" element={<Events />} />
-
-            <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
-
-            {/* ==================================================
                 SHOPPING / CHECKOUT
             ================================================== */}
 
@@ -275,11 +230,6 @@ const App = () => {
 
             {/* ==================================================
                 SHOP BANK TRANSFER PAYMENT
-            ==================================================
-            
-                This is for SHOP ORDERS only.
-
-                Flow:
 
                 Cart
                   ↓
@@ -318,9 +268,6 @@ const App = () => {
 
             {/* ==================================================
                 MEMBERSHIP BANK TRANSFER PAYMENT
-            ==================================================
-            
-                This remains separate from the shop payment.
 
                 Membership flow uses:
 
@@ -372,6 +319,63 @@ const App = () => {
 
             <Route path="/terms-of-use" element={<TermsAndCondition />} />
           </Route>
+
+          {/* ==================================================
+              OGBONI MEMBER PORTAL
+
+              IMPORTANT:
+              These routes are OUTSIDE UserRoutes.
+
+              Therefore they do NOT receive:
+              - Main website Navbar
+              - Main website Sidebar
+              - Main website Footer
+
+              MemberPortalLayout controls the member portal
+              navigation and mobile hamburger menu.
+          ================================================== */}
+
+          <Route path="/signup" element={<OgboniSignupPage />} />
+
+          <Route path="/login" element={<OgboniLoginPage />} />
+
+          <Route path="/ogboni-login" element={<OgboniLoginPage />} />
+
+          <Route path="/forgot-password" element={<OgboniForgotPassword />} />
+
+          <Route
+            path="/ogboni-reset-password/:token"
+            element={<OgboniResetPassword />}
+          />
+
+          <Route
+            path="/member-account-approval"
+            element={<MemberAccountPending />}
+          />
+
+          <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
+
+          <Route path="/member-profile" element={<MemberProfile />} />
+
+          <Route path="/ogboni-edit-profile" element={<OgboniEditProfile />} />
+
+          <Route path="/member-directory" element={<MemberDirectory />} />
+
+          <Route path="/heritage-learning" element={<HeritageLearning />} />
+
+          <Route path="/gallery" element={<Gallery />} />
+
+          <Route path="/notifications" element={<Notifications />} />
+
+          <Route path="/member-settings" element={<MemberSettings />} />
+
+          <Route path="/announcements" element={<Announcements />} />
+
+          <Route path="/weekly-updates" element={<WeeklyUpdates />} />
+
+          <Route path="/events" element={<Events />} />
+
+          <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
 
           {/* ==================================================
               ADMIN ROUTES

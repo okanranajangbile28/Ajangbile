@@ -7,7 +7,6 @@ import {
   Bell,
   CalendarDays,
   Pencil,
-  LogOut,
   ShieldCheck,
   Mail,
   Phone,
@@ -17,6 +16,8 @@ import {
   Pin,
   Clock3,
 } from "lucide-react";
+
+import MemberPortalLayout from "../components/member/MemberPortalLayout";
 
 interface Member {
   _id?: string;
@@ -85,23 +86,16 @@ const OgboniDashboard = () => {
       setMember(JSON.parse(storedMember));
     } catch (error) {
       console.error("Unable to load member information:", error);
+
       localStorage.removeItem("ogboniMember");
       localStorage.removeItem("ogboniToken");
+
       navigate("/login", { replace: true });
       return;
     }
 
     fetchAnnouncements();
   }, [navigate, fetchAnnouncements]);
-
-  const logout = () => {
-    localStorage.removeItem("ogboniMember");
-    localStorage.removeItem("ogboniToken");
-
-    navigate("/login", {
-      replace: true,
-    });
-  };
 
   const activeAnnouncements = announcements.filter(
     (item) => item.category === "Announcement" && item.active !== false,
@@ -128,36 +122,8 @@ const OgboniDashboard = () => {
   const displayName = member?.fullName || "Member";
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] text-gray-900">
-      {/* =====================================================
-          TOP HEADER
-      ===================================================== */}
-
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-5 md:px-8 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold tracking-[0.18em] text-[#4b0082] uppercase">
-                Member Portal
-              </p>
-
-              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-1">
-                Confederation of Ogboni Aborigine Fraternity
-              </h1>
-            </div>
-
-            <button
-              onClick={logout}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-base font-medium hover:bg-gray-50 transition"
-            >
-              <LogOut size={18} strokeWidth={1.8} />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-5 md:px-8 py-8">
+    <MemberPortalLayout>
+      <div className="mx-auto max-w-7xl">
         {/* =====================================================
             MEMBER HEADER
         ===================================================== */}
@@ -405,7 +371,10 @@ const OgboniDashboard = () => {
 
                 {/* Directory */}
 
-                <button className="bg-white p-6 text-left hover:bg-gray-50 transition group">
+                <button
+                  onClick={() => navigate("/member-directory")}
+                  className="bg-white p-6 text-left hover:bg-gray-50 transition group"
+                >
                   <div className="flex items-start justify-between">
                     <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
                       <User
@@ -426,7 +395,7 @@ const OgboniDashboard = () => {
                   </h3>
 
                   <p className="text-base text-gray-500 mt-1">
-                    Member directory access coming soon.
+                    Find and connect with fellow members.
                   </p>
                 </button>
               </div>
@@ -712,6 +681,7 @@ const OgboniDashboard = () => {
 
                   <div>
                     <p className="text-sm text-gray-500">Full Name</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1">
                       {member?.fullName || "-"}
                     </p>
@@ -727,6 +697,7 @@ const OgboniDashboard = () => {
 
                   <div>
                     <p className="text-sm text-gray-500">Username</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1">
                       {member?.username || "-"}
                     </p>
@@ -742,6 +713,7 @@ const OgboniDashboard = () => {
 
                   <div className="min-w-0">
                     <p className="text-sm text-gray-500">Email</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1 break-all">
                       {member?.email || "-"}
                     </p>
@@ -757,6 +729,7 @@ const OgboniDashboard = () => {
 
                   <div>
                     <p className="text-sm text-gray-500">Phone</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1">
                       {member?.phoneNumber || "-"}
                     </p>
@@ -772,6 +745,7 @@ const OgboniDashboard = () => {
 
                   <div>
                     <p className="text-sm text-gray-500">Occupation</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1">
                       {member?.occupation || "-"}
                     </p>
@@ -787,6 +761,7 @@ const OgboniDashboard = () => {
 
                   <div>
                     <p className="text-sm text-gray-500">Chief Title</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1">
                       {memberTitle}
                     </p>
@@ -802,6 +777,7 @@ const OgboniDashboard = () => {
 
                   <div>
                     <p className="text-sm text-gray-500">Location</p>
+
                     <p className="text-base font-medium text-gray-900 mt-1">
                       {[member?.city, member?.lga, member?.state]
                         .filter(Boolean)
@@ -876,8 +852,8 @@ const OgboniDashboard = () => {
             </section>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </MemberPortalLayout>
   );
 };
 
