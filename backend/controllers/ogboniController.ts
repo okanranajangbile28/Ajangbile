@@ -136,7 +136,6 @@ export const loginMember = async (
       return;
     }
 
-    // Convert mongoose document to plain object
     const member = user.toObject();
 
     delete (member as any).password;
@@ -280,6 +279,38 @@ export const rejectMember = async (
   }
 };
 
+// ================= DELETE MEMBER =================
+export const deleteMember = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const member = await OgboniMember.findById(req.params.id);
+
+    if (!member) {
+      res.status(404).json({
+        success: false,
+        message: 'Member not found',
+      });
+      return;
+    }
+
+    await member.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Member deleted successfully.',
+    });
+  } catch (error: any) {
+    console.error('Delete member error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // ================= UPDATE MEMBER PROFILE =================
 export const updateMemberProfile = async (
   req: Request,
@@ -307,7 +338,6 @@ export const updateMemberProfile = async (
     if (city !== undefined) member.city = city;
     if (address !== undefined) member.address = address;
 
-    // Update passport photo if a new one was uploaded
     if (req.body.images?.length) {
       member.photo = req.body.images[0];
     }

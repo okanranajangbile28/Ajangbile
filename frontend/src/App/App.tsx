@@ -221,6 +221,32 @@ const App = () => {
             <Route path="/become-member" element={<BecomeMember />} />
 
             {/* ==================================================
+                MEMBER AUTHENTICATION / ENTRY
+
+                These stay inside UserRoutes so that when a
+                member logs out, the login page shows the
+                normal website Navbar, Sidebar and Footer.
+            ================================================== */}
+
+            <Route path="/signup" element={<OgboniSignupPage />} />
+
+            <Route path="/login" element={<OgboniLoginPage />} />
+
+            <Route path="/ogboni-login" element={<OgboniLoginPage />} />
+
+            <Route path="/forgot-password" element={<OgboniForgotPassword />} />
+
+            <Route
+              path="/ogboni-reset-password/:token"
+              element={<OgboniResetPassword />}
+            />
+
+            <Route
+              path="/member-account-approval"
+              element={<MemberAccountPending />}
+            />
+
+            {/* ==================================================
                 SHOPPING / CHECKOUT
             ================================================== */}
 
@@ -268,10 +294,6 @@ const App = () => {
 
             {/* ==================================================
                 MEMBERSHIP BANK TRANSFER PAYMENT
-
-                Membership flow uses:
-
-                /bank-transfer-payment
             ================================================== */}
 
             <Route
@@ -323,35 +345,17 @@ const App = () => {
           {/* ==================================================
               OGBONI MEMBER PORTAL
 
-              IMPORTANT:
-              These routes are OUTSIDE UserRoutes.
+              These routes intentionally stay OUTSIDE
+              UserRoutes.
 
-              Therefore they do NOT receive:
-              - Main website Navbar
-              - Main website Sidebar
-              - Main website Footer
+              They therefore do NOT receive the main website:
+              - Navbar
+              - Sidebar
+              - Footer
 
-              MemberPortalLayout controls the member portal
-              navigation and mobile hamburger menu.
+              MemberPortalLayout controls the entire member
+              portal experience.
           ================================================== */}
-
-          <Route path="/signup" element={<OgboniSignupPage />} />
-
-          <Route path="/login" element={<OgboniLoginPage />} />
-
-          <Route path="/ogboni-login" element={<OgboniLoginPage />} />
-
-          <Route path="/forgot-password" element={<OgboniForgotPassword />} />
-
-          <Route
-            path="/ogboni-reset-password/:token"
-            element={<OgboniResetPassword />}
-          />
-
-          <Route
-            path="/member-account-approval"
-            element={<MemberAccountPending />}
-          />
 
           <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 
@@ -374,6 +378,10 @@ const App = () => {
           <Route path="/weekly-updates" element={<WeeklyUpdates />} />
 
           <Route path="/events" element={<Events />} />
+
+          {/* ==================================================
+              OGBONI ADMIN
+          ================================================== */}
 
           <Route path="/ogboni-admin" element={<OgboniAdminDashboard />} />
 

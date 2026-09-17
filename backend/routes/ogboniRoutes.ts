@@ -7,6 +7,7 @@ import {
   getMemberDirectory,
   approveMember,
   rejectMember,
+  deleteMember,
   forgotPassword,
   resetPassword,
   updateMemberProfile,
@@ -50,12 +51,10 @@ router.get('/directory', getMemberDirectory);
 
 router.get('/members', getAllMembers);
 
-// ================= Admin =================
-
-router.get('/members', getAllMembers);
-
 router.patch('/approve/:id', approveMember);
 
 router.delete('/reject/:id', rejectMember);
+
+router.delete('/members/:id', deleteMember);
 
 export default router;
