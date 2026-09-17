@@ -14,6 +14,8 @@ import AdminRoutes from "../features/adminFeature/admin/AdminRoutes";
 
 import ScrollToTop from "../components/global_components/ScrollToTop";
 
+import FAQ from "../components/home/FAQ";
+
 import AdminForgotPassword from "../pages/AdminForgotPassword";
 import AdminResetPassword from "../pages/AdminResetPassword";
 
@@ -207,6 +209,8 @@ const App = () => {
             <Route path="/about" element={<AboutPage />} />
 
             <Route path="/contact" element={<ContactPage />} />
+
+            <Route path="/FAQ" element={<FAQ />} />
 
             <Route path="/ifa" element={<IfaPage />} />
 
