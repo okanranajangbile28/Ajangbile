@@ -5,19 +5,23 @@ import { FaCartShopping } from "react-icons/fa6";
 import { useAppDispatch, useAppSelector } from "../../../App/hooks";
 import { openSidebar } from "../../../features/productFeature/productSlice";
 
+import { useTranslation } from "../../../translation/TranslationContext";
+
 const Navbar = () => {
   const location = useLocation();
   const { total_items } = useAppSelector((state) => state.cart);
   const isAdmin = location.pathname.startsWith("/admin");
   const dispatch = useAppDispatch();
 
+  const { language, languages, setLanguage } = useTranslation();
+
   const navlinks = navlinksData.map((data) => (
     <Link
       key={data.id}
       to={data.url}
-      className={`font-semibold font-Open text-[14px] lg:text-[15px] leading-[28px] transition-all duration-200 whitespace-nowrap ${
+      className={`font-semibold font-Open text-[12px] lg:text-[13px] xl:text-[14px] leading-[24px] transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
         data.text.toLowerCase() === "contact"
-          ? "py-2 px-6 lg:px-8 rounded-full border-2 border-[#4b0082] text-[#4b0082] hover:bg-[#4b0082] hover:text-white"
+          ? "py-1.5 px-3 lg:px-4 rounded-full border-2 border-[#4b0082] text-[#4b0082] hover:bg-[#4b0082] hover:text-white"
           : "text-[#4b0082] hover:border-b-2 hover:border-[#4b0082]"
       }`}
     >
@@ -27,10 +31,11 @@ const Navbar = () => {
 
   return (
     <header className="w-full bg-white z-[100]">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-        {/* Logo */}
+      <div className="max-w-7xl mx-auto flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-4">
+        {/* ==================== LOGO ==================== */}
         <Link
           to={isAdmin ? "/admin" : "/"}
+          data-no-translate="true"
           className="flex items-center gap-0 flex-shrink-0"
         >
           <img
@@ -52,13 +57,37 @@ const Navbar = () => {
 
         {!isAdmin && (
           <>
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex flex-1 justify-end items-center gap-3 lg:gap-4 xl:gap-5 min-w-0">
-              {navlinks}
+            {/* ==================== DESKTOP NAVBAR ==================== */}
+            <nav className="hidden md:flex flex-1 min-w-0 items-center gap-3">
+              {/* Navigation Links */}
+              <div className="flex-1 min-w-0 overflow-x-auto overflow-y-hidden">
+                <div className="flex items-center justify-end gap-2 lg:gap-3 xl:gap-4 w-max min-w-full pr-1">
+                  {navlinks}
+                </div>
+              </div>
 
+              {/* ==================== LANGUAGE ==================== */}
+              <div data-no-translate="true" className="flex-shrink-0">
+                <select
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                  aria-label="Select language"
+                  className="w-[82px] bg-white border border-[#4b0082] text-[#4b0082] rounded-full px-2 py-2 text-[12px] font-semibold font-Open outline-none cursor-pointer hover:bg-[#4b0082] hover:text-white transition-all duration-200"
+                >
+                  {languages.map((item) => (
+                    <option key={item.code} value={item.code}>
+                      {item.nativeName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ==================== CART ==================== */}
               <Link
                 to="/cart"
-                className="relative text-[#4b0082] text-[22px] hover:scale-110 transition-transform flex-shrink-0"
+                data-no-translate="true"
+                aria-label="Shopping cart"
+                className="relative flex-shrink-0 text-[#4b0082] text-[22px] hover:scale-110 transition-transform"
               >
                 <FaCartShopping />
 
@@ -68,9 +97,12 @@ const Navbar = () => {
               </Link>
             </nav>
 
-            {/* Mobile Menu */}
-            <div className="md:hidden text-[#4b0082] text-3xl">
-              <button onClick={() => dispatch(openSidebar())}>
+            {/* ==================== MOBILE MENU ==================== */}
+            <div className="md:hidden ml-auto text-[#4b0082] text-3xl">
+              <button
+                onClick={() => dispatch(openSidebar())}
+                aria-label="Open menu"
+              >
                 <FaBars />
               </button>
             </div>
