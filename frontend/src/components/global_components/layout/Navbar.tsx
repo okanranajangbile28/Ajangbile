@@ -17,7 +17,7 @@ const Navbar = () => {
 
   const navlinks = navlinksData.map((data) => (
     <Link
-      key={data.id}
+      key={`${data.id}-${data.url}`}
       to={data.url}
       className={`font-semibold font-Open text-[12px] lg:text-[13px] xl:text-[14px] leading-[24px] transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
         data.text.toLowerCase() === "contact"
@@ -66,7 +66,7 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* ==================== LANGUAGE ==================== */}
+              {/* ==================== DESKTOP LANGUAGE ==================== */}
               <div data-no-translate="true" className="flex-shrink-0">
                 <select
                   value={language}
@@ -82,7 +82,7 @@ const Navbar = () => {
                 </select>
               </div>
 
-              {/* ==================== CART ==================== */}
+              {/* ==================== DESKTOP CART ==================== */}
               <Link
                 to="/cart"
                 data-no-translate="true"
@@ -97,11 +97,29 @@ const Navbar = () => {
               </Link>
             </nav>
 
-            {/* ==================== MOBILE MENU ==================== */}
-            <div className="md:hidden ml-auto text-[#4b0082] text-3xl">
+            {/* ==================== MOBILE RIGHT SIDE ==================== */}
+            <div className="md:hidden ml-auto flex items-center gap-2">
+              {/* MOBILE LANGUAGE */}
+              <div data-no-translate="true" className="flex-shrink-0">
+                <select
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                  aria-label="Select language"
+                  className="w-[70px] h-[38px] bg-white border border-[#4b0082] text-[#4b0082] rounded-full px-2 text-[11px] font-semibold font-Open outline-none cursor-pointer"
+                >
+                  {languages.map((item) => (
+                    <option key={item.code} value={item.code}>
+                      {item.nativeName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* MOBILE MENU */}
               <button
                 onClick={() => dispatch(openSidebar())}
                 aria-label="Open menu"
+                className="flex items-center justify-center w-[38px] h-[38px] text-[#4b0082] text-[25px] flex-shrink-0"
               >
                 <FaBars />
               </button>
