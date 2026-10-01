@@ -99,13 +99,13 @@ const Navbar = () => {
 
             {/* ==================== MOBILE RIGHT SIDE ==================== */}
             <div className="md:hidden ml-auto flex items-center gap-2">
-              {/* MOBILE LANGUAGE */}
+              {/* ==================== MOBILE LANGUAGE ==================== */}
               <div data-no-translate="true" className="flex-shrink-0">
                 <select
                   value={language}
                   onChange={(event) => setLanguage(event.target.value)}
                   aria-label="Select language"
-                  className="w-[70px] h-[38px] bg-white border border-[#4b0082] text-[#4b0082] rounded-full px-2 text-[11px] font-semibold font-Open outline-none cursor-pointer"
+                  className="w-[110px] h-[34px] bg-white border border-[#4b0082] text-[#4b0082] rounded-full px-2.5 text-[11px] font-semibold font-Open outline-none cursor-pointer"
                 >
                   {languages.map((item) => (
                     <option key={item.code} value={item.code}>
@@ -115,7 +115,7 @@ const Navbar = () => {
                 </select>
               </div>
 
-              {/* MOBILE MENU */}
+              {/* ==================== MOBILE MENU ==================== */}
               <button
                 onClick={() => dispatch(openSidebar())}
                 aria-label="Open menu"
