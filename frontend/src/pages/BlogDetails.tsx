@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import styled from "styled-components";
 
 interface Blog {
   _id: string;
@@ -34,13 +35,15 @@ const BlogDetails = () => {
           document.title = `${data.blog.title} | Ajangbile Heritage`;
         }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to load blog:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadBlog();
+    if (slug) {
+      loadBlog();
+    }
   }, [slug]);
 
   if (loading) {
@@ -63,31 +66,44 @@ const BlogDetails = () => {
   }
 
   return (
-    <article className="max-w-4xl mx-auto py-16 px-6">
+    <article className="max-w-5xl mx-auto py-16 px-6">
+      {/* FEATURED IMAGE */}
       <div className="w-full bg-gray-100 rounded-2xl overflow-hidden mb-10">
         <img
           src={blog.coverImage}
           alt={blog.title}
-          className="w-full object-contain"
+          className="w-full max-h-[600px] object-contain"
         />
       </div>
 
+      {/* CATEGORY */}
       <span className="inline-block bg-purple-100 text-purple-700 px-4 py-2 rounded-full mb-6">
         {blog.category}
       </span>
 
-      <h1 className="text-5xl font-bold text-purple-950 mb-4">{blog.title}</h1>
+      {/* TITLE */}
+      <h1 className="text-4xl md:text-5xl font-bold text-purple-950 mb-4 leading-tight">
+        {blog.title}
+      </h1>
 
+      {/* DATE + AUTHOR */}
       <div className="text-gray-500 mb-10">
         {new Date(blog.createdAt).toLocaleDateString()} • {blog.author}
       </div>
 
-      <p className="text-xl text-gray-700 italic mb-10">{blog.excerpt}</p>
+      {/* EXCERPT */}
+      <p className="text-xl text-gray-700 italic mb-10 leading-8">
+        {blog.excerpt}
+      </p>
 
-      <div className="whitespace-pre-wrap leading-9 text-lg text-gray-800">
-        {blog.content}
-      </div>
+      {/* ARTICLE CONTENT */}
+      <ContentContainer
+        dangerouslySetInnerHTML={{
+          __html: blog.content || "",
+        }}
+      />
 
+      {/* BACK TO BLOG */}
       <div className="mt-14">
         <Link
           to="/blog"
@@ -99,5 +115,102 @@ const BlogDetails = () => {
     </article>
   );
 };
+
+const ContentContainer = styled.div`
+  font-family: "Open Sans", sans-serif;
+  color: #333;
+  font-size: 18px;
+  line-height: 1.8;
+
+  p {
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-family: "Manrope", sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 36px;
+    margin-bottom: 18px;
+    color: #4b0082;
+  }
+
+  h3 {
+    font-family: "Manrope", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-top: 30px;
+    margin-bottom: 16px;
+    color: #4b0082;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  a {
+    color: #6a1b9a;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  a:hover {
+    opacity: 0.75;
+  }
+
+  ol {
+    list-style-type: decimal;
+    margin-left: 24px;
+    padding-left: 24px;
+    margin-bottom: 20px;
+  }
+
+  ul {
+    list-style-type: disc;
+    margin-left: 24px;
+    padding-left: 24px;
+    margin-bottom: 20px;
+  }
+
+  li {
+    margin-bottom: 8px;
+  }
+
+  blockquote {
+    border-left: 4px solid #4b0082;
+    padding-left: 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: #555;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 24px 0;
+  }
+
+  hr {
+    margin: 32px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+
+    h2 {
+      font-size: 25px;
+    }
+
+    h3 {
+      font-size: 21px;
+    }
+  }
+`;
 
 export default BlogDetails;

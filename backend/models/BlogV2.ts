@@ -20,6 +20,10 @@ export interface IBlog extends Document {
 
   views: number;
 
+  // Source tracking
+  source: string;
+  soroGuid?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +90,21 @@ const BlogSchema = new Schema(
     views: {
       type: Number,
       default: 0,
+    },
+
+    // Identifies where the article came from.
+    // Manual articles use "manual".
+    // Soro articles use "soro".
+    source: {
+      type: String,
+      default: 'manual',
+    },
+
+    // Stable Soro RSS GUID used to prevent duplicate imports.
+    soroGuid: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
   },
   {
