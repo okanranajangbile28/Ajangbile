@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import slugify from 'slugify';
 import BlogV2 from '../models/BlogV2';
 
@@ -260,5 +260,24 @@ export const searchBlogs = async (
       success: false,
       message: error.message,
     });
+  }
+};
+
+// ADMIN - GET ALL BLOGS INCLUDING DRAFTS
+export const getAllBlogsAdmin = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const blogs = await BlogV2.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      status: 'success',
+      results: blogs.length,
+      blogs,
+    });
+  } catch (err) {
+    next(err);
   }
 };

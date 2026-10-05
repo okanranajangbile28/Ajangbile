@@ -32,6 +32,7 @@ import adminConsultationRoutes from './routes/adminConsultationRoutes';
 import adminInitiationPaymentRoutes from './routes/adminInitiationPaymentRoutes';
 
 import announcementRouter from './routes/announcementRoutes';
+import soroRouter from './routes/soroRoutes';
 
 console.log('Ogboni router imported');
 
@@ -289,6 +290,12 @@ app.use('/api/admin/consultations', adminConsultationRoutes);
 // ======================================================
 
 app.use('/api/admin/initiation-payments', adminInitiationPaymentRoutes);
+
+// ======================================================
+// SORO RSS
+// ======================================================
+
+app.use('/api/soro', soroRouter);
 
 // ======================================================
 // BLOG CMS

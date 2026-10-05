@@ -31,7 +31,7 @@ const BlogCMS = () => {
   const loadBlogs = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/api/blog-v2`,
+        `${import.meta.env.VITE_SERVER_URL}/api/blog-v2/admin`,
       );
 
       setBlogs(res.data.blogs);

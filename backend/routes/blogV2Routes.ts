@@ -5,6 +5,7 @@ import {
   getBlogs,
   getBlog,
   getBlogById,
+  getAllBlogsAdmin,
   updateBlog,
   deleteBlog,
   featuredBlogs,
@@ -28,9 +29,26 @@ router.get('/search', searchBlogs);
 
 // ================= ADMIN ROUTES =================
 
+// Get all blogs including drafts
+router.get('/admin', getAllBlogsAdmin);
+
 // Get one blog by Mongo ID (used for editing in CMS)
+
 // IMPORTANT: This MUST come before '/:slug'
+
 router.get('/admin/:id', getBlogById);
+
+// Create
+
+router.post('/', uploadPhoto(), cloudUpload('blog'), createBlog);
+
+// Update
+
+router.patch('/:id', uploadPhoto(), cloudUpload('blog'), updateBlog);
+
+// Delete
+
+router.delete('/:id', deleteBlog);
 
 // Create
 router.post('/', uploadPhoto(), cloudUpload('blog'), createBlog);
