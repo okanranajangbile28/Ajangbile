@@ -1,9 +1,24 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 
 import OgboniMember from '../models/OgboniMember';
 import { sendApprovalEmail, sendPasswordResetEmail } from '../utils/sendEmail';
+
+// ================= OGBONI JWT =================
+
+const signOgboniToken = (id: string) =>
+  jwt.sign(
+    {
+      id,
+      type: 'ogboni-member',
+    },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    },
+  );
 
 // ================= REGISTER =================
 export const registerMember = async (
@@ -140,9 +155,12 @@ export const loginMember = async (
 
     delete (member as any).password;
 
+    const token = signOgboniToken(user.id);
+
     res.status(200).json({
       success: true,
       message: 'Login successful',
+      token,
       user: member,
     });
   } catch (error: any) {

@@ -13,6 +13,7 @@ import {
   ClipboardList,
   CalendarDays,
   CreditCard,
+  MessageSquare,
 } from "lucide-react";
 
 import axios from "axios";
@@ -79,6 +80,10 @@ const menu = [
   {
     name: "Announcements & Updates",
     icon: Bell,
+  },
+  {
+    name: "Iledi Ogboni Post",
+    icon: MessageSquare,
   },
   {
     name: "Blog CMS",

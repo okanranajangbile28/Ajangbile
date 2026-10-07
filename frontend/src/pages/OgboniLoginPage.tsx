@@ -95,7 +95,7 @@ const OgboniLoginPage = () => {
         localStorage.setItem("ogboniMember", JSON.stringify(data.user));
       }
 
-      navigate("/ogboni-dashboard", {
+      navigate("/ogboni-community", {
         replace: true,
       });
     } catch (error) {

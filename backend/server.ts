@@ -11,6 +11,7 @@ process.on('uncaughtException', (err) => {
 dotenv.config({ path: './config.env' });
 
 import app from './app';
+import { startSoroScheduler } from './services/soroScheduler';
 
 const DB = process.env.DATABASE?.replace(
   '<PASSWORD>',
@@ -23,6 +24,9 @@ mongoose
     console.log('✅ connections established');
     console.log('📦 Database:', conn.connection.name);
     console.log('🌐 Host:', conn.connection.host);
+
+    // Start automatic Soro RSS synchronization
+    startSoroScheduler();
   })
   .catch((err) => {
     console.log('❌ MongoDB connection failed');

@@ -41,6 +41,11 @@ interface MemberPortalLayoutProps {
 
 const menuItems = [
   {
+    label: "Community Home",
+    path: "/ogboni-community",
+    icon: Users,
+  },
+  {
     label: "Dashboard",
     path: "/ogboni-dashboard",
     icon: LayoutDashboard,
@@ -180,7 +185,7 @@ const MemberPortalLayout = ({ children }: MemberPortalLayoutProps) => {
           MOBILE TOP BAR
       ========================================================= */}
       <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-purple-900/10 bg-white px-4 shadow-sm lg:hidden">
-        <Link to="/ogboni-dashboard" className="flex items-center gap-3">
+        <Link to="/ogboni-community" className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-900 text-sm font-bold text-yellow-400 shadow-sm">
             IA
           </div>
@@ -229,7 +234,7 @@ const MemberPortalLayout = ({ children }: MemberPortalLayoutProps) => {
       >
         {/* BRAND */}
         <div className="border-b border-white/10 px-6 py-6">
-          <Link to="/ogboni-dashboard" className="flex items-center gap-3">
+          <Link to="/ogboni-community" className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-yellow-400 font-bold text-purple-950 shadow-md">
               IA
             </div>

@@ -98,6 +98,8 @@ const MemberAccountPending = lazy(
 
 const OgboniDashboard = lazy(() => import("../pages/OgboniDashboard"));
 
+const OgboniCommunityHome = lazy(() => import("../pages/OgboniCommunityHome"));
+
 const OgboniAdminDashboard = lazy(
   () => import("../pages/OgboniAdminDashboard"),
 );
@@ -360,6 +362,8 @@ const App = () => {
               MemberPortalLayout controls the entire member
               portal experience.
           ================================================== */}
+
+          <Route path="/ogboni-community" element={<OgboniCommunityHome />} />
 
           <Route path="/ogboni-dashboard" element={<OgboniDashboard />} />
 

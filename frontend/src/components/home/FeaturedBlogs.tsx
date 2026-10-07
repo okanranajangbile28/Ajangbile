@@ -21,16 +21,16 @@ const FeaturedBlogs = () => {
     const loadBlogs = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/api/blog-v2`,
+          `${import.meta.env.VITE_SERVER_URL}/api/blog-v2/featured`,
         );
+
+        if (!res.ok) {
+          throw new Error(`Failed to load featured blogs: ${res.status}`);
+        }
 
         const data = await res.json();
 
-        const featuredBlogs = (data.blogs || [])
-          .filter((blog: Blog) => blog.featured)
-          .slice(0, 3);
-
-        setBlogs(featuredBlogs);
+        setBlogs(data.blogs || []);
       } catch (error) {
         console.error("Failed to load featured blogs:", error);
       } finally {

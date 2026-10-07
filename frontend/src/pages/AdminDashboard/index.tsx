@@ -25,6 +25,7 @@ import Announcements from "./Announcements";
 import Settings from "./Settings";
 import BlogCMS from "./BlogCMS";
 import OgboniBlogCMS from "./OgboniBlogCMS";
+import IlediOgboniPost from "./IlediOgboniPost";
 
 const AdminDashboard = () => {
   const [active, setActive] = useState("Dashboard");
@@ -81,6 +82,9 @@ const AdminDashboard = () => {
 
       case "Announcements & Updates":
         return <Announcements />;
+
+      case "Iledi Ogboni Post":
+        return <IlediOgboniPost />;
 
       case "Settings":
         return <Settings />;

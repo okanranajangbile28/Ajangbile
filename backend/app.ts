@@ -33,7 +33,7 @@ import adminInitiationPaymentRoutes from './routes/adminInitiationPaymentRoutes'
 
 import announcementRouter from './routes/announcementRoutes';
 import soroRouter from './routes/soroRoutes';
-
+import ilediOgboniPostRouter from './routes/ilediOgboniPostRoutes';
 console.log('Ogboni router imported');
 
 // ======================================================
@@ -245,6 +245,9 @@ app.use('/api/order', orderRouter);
 
 // Ogboni
 app.use('/api/ogboni', ogboniRouter);
+
+// Iledi Ogboni Post
+app.use('/api/ogboni/posts', ilediOgboniPostRouter);
 
 // Contact
 app.use('/api/contact', contactRouter);
